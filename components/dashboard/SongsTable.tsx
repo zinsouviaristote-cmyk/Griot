@@ -20,10 +20,10 @@ export function SongsTable({ songs }: { songs: Song[] }) {
   return (
     <div>
       {/* Desktop : tableau classique */}
-      <div className="hidden overflow-hidden rounded-card border border-line-800 bg-ink-900/70 lg:block">
+      <div className="hidden overflow-hidden rounded-card border border-border bg-surface shadow-card lg:block">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="border-b border-line-800 bg-ink-900 text-left text-xs font-medium uppercase tracking-wide text-paper-600">
+            <tr className="border-b border-border bg-page text-left text-xs font-medium uppercase tracking-wide text-ink-muted">
               <th className="py-3 pl-5 pr-3 font-medium">Destinataire</th>
               <th className="px-3 py-3 font-medium">Occasion</th>
               <th className="px-3 py-3 font-medium">Style</th>

@@ -3,16 +3,18 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 type Variant = "primary" | "secondary" | "ghost";
 
+// Violet plein, jamais en dégradé : le survol fonce vers `brand` (plus profond
+// que `brand-vivid`), pas d'effet de lueur colorée.
 const VARIANT_CLASSES: Record<Variant, string> = {
   primary:
-    "bg-gradient-signature text-ink-950 shadow-glow-brand hover:shadow-[0_14px_34px_-10px_rgba(232,68,122,0.65)] hover:scale-[1.02] active:scale-[0.98]",
+    "bg-brand-vivid text-white hover:bg-brand hover:scale-[1.02] hover:shadow-card active:scale-[0.98]",
   secondary:
-    "border border-line-700 bg-ink-800/60 text-paper-100 hover:border-line-600 hover:bg-ink-700 hover:scale-[1.01] active:scale-[0.98]",
-  ghost: "text-paper-400 hover:text-paper-100 hover:bg-ink-800",
+    "border border-border bg-surface text-ink hover:border-brand-vivid/40 hover:bg-brand-soft active:scale-[0.98]",
+  ghost: "text-ink-muted hover:text-ink hover:bg-brand-soft",
 };
 
 const BASE =
-  "inline-flex items-center justify-center gap-2 rounded-control px-5 py-2.5 text-sm font-semibold transition-all duration-200 ease-magnetic disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 focus-visible:outline-none focus-visible:shadow-ring-focus";
+  "inline-flex items-center justify-center gap-2 rounded-card px-5 py-2.5 text-sm font-semibold transition-all duration-200 ease-magnetic disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 focus-visible:outline-none focus-visible:shadow-ring-focus";
 
 interface CommonProps {
   variant?: Variant;

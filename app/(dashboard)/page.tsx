@@ -3,6 +3,7 @@ import { StatsGrid } from "@/components/dashboard/StatsGrid";
 import { OccasionCarousel } from "@/components/dashboard/OccasionCarousel";
 import { SongsTable } from "@/components/dashboard/SongsTable";
 import { Reveal } from "@/components/ui/Reveal";
+import { SectionTitle } from "@/components/ui/SectionTitle";
 import { dashboardStats, mockSongs } from "@/lib/data/mock-dashboard";
 
 // Ajoutez ?vide=1 à l'URL pour prévisualiser l'état d'un tout nouvel utilisateur,
@@ -34,9 +35,9 @@ export default function DashboardPage({
 
       <Reveal delayMs={160}>
         <section>
-          <h2 className="mb-3 font-display text-lg font-semibold text-paper-100">
-            Dernières chansons
-          </h2>
+          <div className="mb-3">
+            <SectionTitle>Dernières chansons</SectionTitle>
+          </div>
           <SongsTable songs={songs} />
         </section>
       </Reveal>

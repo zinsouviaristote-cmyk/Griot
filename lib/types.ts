@@ -1,3 +1,5 @@
+import type { LucideIcon } from "lucide-react";
+
 // Types partagés — dérivés de l'énumération songs.status du modèle de données (Phase 2 du plan).
 // Un composant qui affiche un statut importe toujours depuis ici, jamais une chaîne libre.
 
@@ -34,7 +36,7 @@ export interface OccasionMeta {
   id: Occasion;
   label: string;
   tagline: string;
-  gradientClass: string;
+  icon: LucideIcon;
 }
 
 export interface DashboardUser {

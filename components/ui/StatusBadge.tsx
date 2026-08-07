@@ -1,47 +1,50 @@
 import type { SongStatus } from "@/lib/types";
 
+// La palette du produit n'a qu'une seule couleur de marque : `brand` (profond) et
+// `brand-vivid` (vif) en donnent deux nuances distinctes pour les deux statuts
+// "en mouvement" (generating / preview_ready), sans inventer de teinte hors palette.
 const STATUS_CONFIG: Record<SongStatus, { label: string; text: string; bg: string; dot: string }> = {
   draft: {
     label: "Brouillon",
-    text: "text-paper-400",
-    bg: "bg-signal-neutral-bg",
-    dot: "bg-signal-neutral",
+    text: "text-ink-muted",
+    bg: "bg-border",
+    dot: "bg-ink-muted",
   },
   generating: {
     label: "En cours",
-    text: "text-signal-info",
-    bg: "bg-signal-info-bg",
-    dot: "bg-signal-info",
+    text: "text-brand-vivid",
+    bg: "bg-brand-vivid/10",
+    dot: "bg-brand-vivid",
   },
   preview_ready: {
     label: "Extrait prêt",
-    text: "text-signal-preview",
-    bg: "bg-signal-preview-bg",
-    dot: "bg-signal-preview",
+    text: "text-brand",
+    bg: "bg-brand/10",
+    dot: "bg-brand",
   },
   awaiting_payment: {
     label: "En attente de paiement",
-    text: "text-gold-400",
-    bg: "bg-signal-warn-bg",
-    dot: "bg-signal-warn",
+    text: "text-warning",
+    bg: "bg-warning/10",
+    dot: "bg-warning",
   },
   paid: {
     label: "Payée",
-    text: "text-signal-success",
-    bg: "bg-signal-success-bg",
-    dot: "bg-signal-success",
+    text: "text-success",
+    bg: "bg-success/10",
+    dot: "bg-success",
   },
   delivered: {
     label: "Payée",
-    text: "text-signal-success",
-    bg: "bg-signal-success-bg",
-    dot: "bg-signal-success",
+    text: "text-success",
+    bg: "bg-success/10",
+    dot: "bg-success",
   },
   failed: {
     label: "Échec",
-    text: "text-signal-error",
-    bg: "bg-signal-error-bg",
-    dot: "bg-signal-error",
+    text: "text-danger",
+    bg: "bg-danger/10",
+    dot: "bg-danger",
   },
 };
 

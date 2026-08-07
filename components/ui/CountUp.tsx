@@ -49,6 +49,12 @@ export function CountUp({
     const node = ref.current;
     if (!node) return;
 
+    // Le Strict Mode de React double-invoque cet effet en dev (mount → cleanup →
+    // remount) ; sans ce garde, le callback asynchrone de l'observateur "fantôme"
+    // peut encore arriver après son propre cleanup et relancer une seconde boucle
+    // d'animation concurrente — le compteur reste alors bloqué à 0.
+    let cancelled = false;
+
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       setDisplay(target);
       setPhase("animating");
@@ -58,11 +64,12 @@ export function CountUp({
     let frame: number;
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (!entry.isIntersecting) return;
+        if (cancelled || !entry.isIntersecting) return;
         observer.disconnect();
         setPhase("animating");
         const start = performance.now();
         const tick = (now: number) => {
+          if (cancelled) return;
           const progress = Math.min((now - start) / durationMs, 1);
           setDisplay(Math.round(target * easeOutCubic(progress)));
           if (progress < 1) frame = requestAnimationFrame(tick);
@@ -73,6 +80,7 @@ export function CountUp({
     );
     observer.observe(node);
     return () => {
+      cancelled = true;
       observer.disconnect();
       if (frame) cancelAnimationFrame(frame);
     };

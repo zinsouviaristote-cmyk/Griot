@@ -46,7 +46,7 @@ function NavSection({
 }) {
   return (
     <div>
-      <p className="px-3 text-xs font-medium uppercase tracking-wide text-paper-600">{title}</p>
+      <p className="px-3 text-xs font-medium uppercase tracking-wide text-ink-muted">{title}</p>
       <ul className="mt-2 space-y-1">
         {items.map((item) => {
           const isActive = pathname === item.href;
@@ -56,18 +56,18 @@ function NavSection({
                 href={item.href}
                 onClick={onNavigate}
                 aria-current={isActive ? "page" : undefined}
-                className={`group relative flex items-center gap-3 rounded-control px-3 py-2.5 text-sm font-medium transition-colors duration-150 ${
+                className={`group relative flex items-center gap-3 rounded-card px-3 py-2.5 text-sm font-medium transition-colors duration-150 ${
                   isActive
-                    ? "bg-brand-500/10 text-brand-300"
-                    : "text-paper-400 hover:bg-ink-800 hover:text-paper-100"
+                    ? "bg-brand-soft text-brand"
+                    : "text-ink-muted hover:bg-brand-soft/60 hover:text-ink"
                 }`}
               >
                 {isActive && (
-                  <span className="absolute -left-3 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-brand-500" />
+                  <span className="absolute -left-3 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-brand-vivid" />
                 )}
                 <item.icon
                   className={`h-[18px] w-[18px] shrink-0 transition-transform duration-200 group-hover:scale-110 ${
-                    isActive ? "text-brand-400" : ""
+                    isActive ? "text-brand" : ""
                   }`}
                   strokeWidth={1.75}
                   aria-hidden="true"
@@ -102,12 +102,12 @@ export function SidebarContent({
         <NavSection title="Créer" items={CREATE_ITEMS} pathname={pathname} onNavigate={onNavigate} />
       </nav>
 
-      <div className="space-y-3 border-t border-line-800 pt-4">
+      <div className="space-y-3 border-t border-border pt-4">
         <CreditCard balance={creditBalance} />
         <Link
           href="/aide"
           onClick={onNavigate}
-          className="flex items-center gap-2.5 px-3 py-1.5 text-xs font-medium text-paper-600 transition-colors hover:text-paper-300"
+          className="flex items-center gap-2.5 px-3 py-1.5 text-xs font-medium text-ink-muted transition-colors hover:text-ink"
         >
           <CircleHelp className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
           Besoin d&apos;aide ?

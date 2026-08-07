@@ -9,14 +9,14 @@ export function SongRow({ song }: { song: Song }) {
   const action = getSongAction(song);
 
   return (
-    <tr className="group border-b border-line-800 last:border-0 transition-colors hover:bg-ink-800/40">
-      <td className="py-3.5 pl-5 pr-3 text-sm font-medium text-paper-100">
+    <tr className="group border-b border-border last:border-0 transition-colors hover:bg-page">
+      <td className="py-3.5 pl-5 pr-3 text-sm font-medium text-ink">
         {song.recipientFirstName}
-        <span className="block text-xs font-normal text-paper-600">{song.relationship}</span>
+        <span className="block text-xs font-normal text-ink-muted">{song.relationship}</span>
       </td>
-      <td className="px-3 py-3.5 text-sm text-paper-400">{getOccasionLabel(song.occasion)}</td>
-      <td className="px-3 py-3.5 text-sm text-paper-400">{styleLabels[song.style]}</td>
-      <td className="px-3 py-3.5 font-mono text-xs text-paper-500">
+      <td className="px-3 py-3.5 text-sm text-ink-muted">{getOccasionLabel(song.occasion)}</td>
+      <td className="px-3 py-3.5 text-sm text-ink-muted">{styleLabels[song.style]}</td>
+      <td className="px-3 py-3.5 font-mono text-xs text-ink-muted">
         {formatDateFr(song.createdAt)}
       </td>
       <td className="px-3 py-3.5">
@@ -26,10 +26,10 @@ export function SongRow({ song }: { song: Song }) {
         <Link
           href={action.href}
           aria-disabled={action.disabled}
-          className={`inline-flex items-center gap-1.5 rounded-control px-3 py-1.5 text-xs font-semibold transition-colors ${
+          className={`inline-flex items-center gap-1.5 rounded-card px-3 py-1.5 text-xs font-semibold transition-colors ${
             action.disabled
-              ? "pointer-events-none text-paper-600"
-              : "text-paper-300 hover:bg-ink-800 hover:text-paper-100"
+              ? "pointer-events-none text-ink-muted/50"
+              : "text-brand-vivid hover:bg-brand-soft"
           }`}
         >
           <action.icon

@@ -1,3 +1,4 @@
+import { Cake, Feather, Gem, Heart, Trophy } from "lucide-react";
 import type { DashboardUser, OccasionMeta, Song } from "@/lib/types";
 
 // Module unique de données fictives pour le tableau de bord.
@@ -10,36 +11,38 @@ export const mockUser: DashboardUser = {
   creditBalance: 3,
 };
 
+// Une seule couleur de marque : les occasions se distinguent par leur icône et leur
+// texte, jamais par une teinte différente — pas de dégradés arc-en-ciel par carte.
 export const occasionCatalog: OccasionMeta[] = [
   {
     id: "anniversaire",
     label: "Anniversaire",
     tagline: "Surprenez avec une chanson rien que pour son grand jour.",
-    gradientClass: "bg-gradient-occasion-anniversaire",
+    icon: Cake,
   },
   {
     id: "amour",
     label: "Amour",
     tagline: "Dites-le en musique, une fois n'est pas coutume.",
-    gradientClass: "bg-gradient-occasion-amour",
+    icon: Heart,
   },
   {
     id: "mariage",
     label: "Mariage",
     tagline: "Un cadeau qui reste, longtemps après la fête.",
-    gradientClass: "bg-gradient-occasion-mariage",
+    icon: Gem,
   },
   {
     id: "reussite",
     label: "Réussite",
     tagline: "Célébrez un diplôme, une promotion, une victoire.",
-    gradientClass: "bg-gradient-occasion-reussite",
+    icon: Trophy,
   },
   {
     id: "hommage",
     label: "Hommage",
     tagline: "Une mélodie pour honorer un être cher.",
-    gradientClass: "bg-gradient-occasion-hommage",
+    icon: Feather,
   },
 ];
 

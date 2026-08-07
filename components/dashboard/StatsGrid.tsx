@@ -5,9 +5,9 @@ import type { dashboardStats } from "@/lib/data/mock-dashboard";
 
 export function StatsGrid({ stats }: { stats: typeof dashboardStats }) {
   const cards = [
-    { icon: Sparkles, label: "Crédits restants", value: stats.creditsRestants, tone: "brand" as const },
-    { icon: Disc3, label: "Chansons créées", value: stats.chansonsCreees, tone: "info" as const },
-    { icon: Gift, label: "Chansons offertes", value: stats.chansonsOffertes, tone: "gold" as const },
+    { icon: Sparkles, label: "Crédits restants", value: stats.creditsRestants, tone: "brand-vivid" as const },
+    { icon: Disc3, label: "Chansons créées", value: stats.chansonsCreees, tone: "brand" as const },
+    { icon: Gift, label: "Chansons offertes", value: stats.chansonsOffertes, tone: "warning" as const },
     {
       icon: Wallet,
       label: "Total dépensé",

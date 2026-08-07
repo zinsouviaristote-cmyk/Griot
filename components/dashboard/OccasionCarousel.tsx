@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { OccasionCard } from "@/components/dashboard/OccasionCard";
+import { SectionTitle } from "@/components/ui/SectionTitle";
 import { occasionCatalog } from "@/lib/data/mock-dashboard";
 
 export function OccasionCarousel() {
@@ -14,14 +15,14 @@ export function OccasionCarousel() {
 
   return (
     <div>
-      <div className="mb-3 flex items-center justify-between">
-        <h2 className="font-display text-lg font-semibold text-paper-100">Par occasion</h2>
+      <div className="mb-3 flex items-start justify-between">
+        <SectionTitle>Par occasion</SectionTitle>
         <div className="hidden gap-1.5 lg:flex">
           <button
             type="button"
             onClick={() => scrollBy(-1)}
             aria-label="Précédent"
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-line-700 text-paper-400 transition-colors hover:border-line-600 hover:text-paper-100"
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-border text-ink-muted transition-colors hover:border-brand-vivid/40 hover:text-brand-vivid"
           >
             <ChevronLeft className="h-4 w-4" strokeWidth={2} />
           </button>
@@ -29,7 +30,7 @@ export function OccasionCarousel() {
             type="button"
             onClick={() => scrollBy(1)}
             aria-label="Suivant"
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-line-700 text-paper-400 transition-colors hover:border-line-600 hover:text-paper-100"
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-border text-ink-muted transition-colors hover:border-brand-vivid/40 hover:text-brand-vivid"
           >
             <ChevronRight className="h-4 w-4" strokeWidth={2} />
           </button>

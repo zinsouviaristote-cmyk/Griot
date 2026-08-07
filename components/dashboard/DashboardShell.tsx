@@ -17,7 +17,7 @@ export function DashboardShell({
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-ink-950">
+    <div className="min-h-screen bg-page">
       <Sidebar creditBalance={creditBalance} />
       <MobileNav
         isOpen={isMobileNavOpen}

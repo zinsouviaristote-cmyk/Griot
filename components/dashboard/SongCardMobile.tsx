@@ -9,28 +9,28 @@ export function SongCardMobile({ song }: { song: Song }) {
   const action = getSongAction(song);
 
   return (
-    <div className="rounded-card border border-line-800 bg-ink-900/70 p-4">
+    <div className="rounded-card border border-border bg-surface p-4 shadow-card">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="font-display text-base font-semibold text-paper-100">
+          <p className="font-display text-base font-semibold text-ink">
             Pour {song.recipientFirstName}
           </p>
-          <p className="mt-0.5 text-xs text-paper-500">
+          <p className="mt-0.5 text-xs text-ink-muted">
             {getOccasionLabel(song.occasion)} · {styleLabels[song.style]}
           </p>
         </div>
         <StatusBadge status={song.status} />
       </div>
 
-      <div className="mt-4 flex items-center justify-between border-t border-line-800 pt-3">
-        <span className="font-mono text-xs text-paper-500">{formatDateFr(song.createdAt)}</span>
+      <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
+        <span className="font-mono text-xs text-ink-muted">{formatDateFr(song.createdAt)}</span>
         <Link
           href={action.href}
           aria-disabled={action.disabled}
-          className={`inline-flex items-center gap-1.5 rounded-control px-3 py-1.5 text-xs font-semibold transition-colors ${
+          className={`inline-flex items-center gap-1.5 rounded-card px-3 py-1.5 text-xs font-semibold transition-colors ${
             action.disabled
-              ? "pointer-events-none bg-ink-800 text-paper-600"
-              : "bg-ink-800 text-paper-100 hover:bg-line-700"
+              ? "pointer-events-none bg-page text-ink-muted/50"
+              : "bg-brand-soft text-brand-vivid hover:bg-brand-vivid hover:text-white"
           }`}
         >
           <action.icon
