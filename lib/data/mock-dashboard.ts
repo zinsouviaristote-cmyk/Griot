@@ -8,6 +8,7 @@ import type { DashboardUser, OccasionMeta, Song } from "@/lib/types";
 export const mockUser: DashboardUser = {
   firstName: "Aïcha",
   initials: "AK",
+  email: "aicha.k@example.com",
   creditBalance: 3,
 };
 

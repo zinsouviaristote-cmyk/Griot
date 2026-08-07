@@ -42,5 +42,6 @@ export interface OccasionMeta {
 export interface DashboardUser {
   firstName: string;
   initials: string;
+  email: string;
   creditBalance: number;
 }

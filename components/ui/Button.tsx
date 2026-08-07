@@ -13,8 +13,9 @@ const VARIANT_CLASSES: Record<Variant, string> = {
   ghost: "text-ink-muted hover:text-ink hover:bg-brand-soft",
 };
 
+// min-h-11 (44px) : zone tactile minimale, même quand py-3 + text-sm ne suffit pas à l'atteindre.
 const BASE =
-  "inline-flex items-center justify-center gap-2 rounded-card px-5 py-2.5 text-sm font-semibold transition-all duration-200 ease-magnetic disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 focus-visible:outline-none focus-visible:shadow-ring-focus";
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-card px-5 py-3 text-sm font-semibold transition-all duration-200 ease-magnetic disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 focus-visible:outline-none focus-visible:shadow-ring-focus";
 
 interface CommonProps {
   variant?: Variant;

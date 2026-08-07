@@ -1,38 +1,47 @@
-"use client";
-
-import { useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
-import { MobileNav } from "@/components/dashboard/MobileNav";
 import { TopBar } from "@/components/dashboard/TopBar";
+import { MobileTopBar } from "@/components/dashboard/mobile/MobileTopBar";
+import { BottomNav } from "@/components/dashboard/mobile/BottomNav";
 
+/**
+ * Deux shells de navigation distincts, jamais un seul redimensionné :
+ * sidebar + barre sticky sur desktop, barre haute + barre basse fixes sur mobile
+ * (la sidebar ne s'y affiche pas du tout — voir Sidebar.tsx, `hidden lg:flex`).
+ * Le choix se fait en CSS pur (`lg:` / `hidden`), jamais en JS, pour éviter tout
+ * flash d'hydratation lié à la détection de la taille d'écran.
+ */
 export function DashboardShell({
   creditBalance,
   userInitials,
+  userName,
+  userEmail,
   children,
 }: {
   creditBalance: number;
   userInitials: string;
+  userName: string;
+  userEmail: string;
   children: ReactNode;
 }) {
-  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
-
   return (
     <div className="min-h-screen bg-page">
       <Sidebar creditBalance={creditBalance} />
-      <MobileNav
-        isOpen={isMobileNavOpen}
-        onClose={() => setIsMobileNavOpen(false)}
+      <MobileTopBar
         creditBalance={creditBalance}
+        userInitials={userInitials}
+        userName={userName}
+        userEmail={userEmail}
       />
 
       <div className="lg:pl-[272px]">
-        <TopBar
-          creditBalance={creditBalance}
-          userInitials={userInitials}
-          onMenuClick={() => setIsMobileNavOpen(true)}
-        />
-        <main className="mx-auto max-w-shell px-4 py-6 lg:px-8 lg:py-8">{children}</main>
+        <TopBar creditBalance={creditBalance} userInitials={userInitials} />
+        <main className="mx-auto max-w-shell px-4 pb-28 pt-20 lg:px-8 lg:pb-8 lg:pt-8">
+          {children}
+        </main>
       </div>
+
+      <BottomNav />
     </div>
   );
 }
