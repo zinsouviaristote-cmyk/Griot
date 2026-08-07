@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+  <!-- Griot — marque compacte. Anneau ouvert (24px et moins) + une seule onde à
+       l'intérieur : la note a été retirée, symbole trop générique du secteur.
+       L'onde est l'élément signature du produit (voir le trait sous les titres
+       de section) — cette icône en est la source. Aplat #630ed4, sans dégradé,
+       épaisseur de trait constante (2px), cercle volontairement ouvert. -->
+  <circle cx="12" cy="12" r="8.5" stroke="#630ed4" stroke-width="2" stroke-linecap="round" stroke-dasharray="42.7 10.7" />
+  <path d="M5.5 12.5c1.8-2.6 3.5-2.6 5.3 0s3.5 2.6 5.3 0" stroke="#630ed4" stroke-width="2" stroke-linecap="round" />
+</svg>

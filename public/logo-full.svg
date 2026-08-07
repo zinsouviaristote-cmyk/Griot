@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 64" fill="none">
+  <!-- Griot — marque complète (icône + mot-symbole). Landing page, documents,
+       partages. Même icône que logo-mark.svg, agrandie — un seul dessin, deux
+       usages, jamais deux versions différentes de la marque. Rien en dessous
+       de la ligne : pas de signature, pas de mention de l'IA. -->
+  <g transform="translate(8,8) scale(2)">
+    <circle cx="12" cy="12" r="8.5" stroke="#630ed4" stroke-width="2" stroke-linecap="round" stroke-dasharray="42.7 10.7" />
+    <path d="M5.5 12.5c1.8-2.6 3.5-2.6 5.3 0s3.5 2.6 5.3 0" stroke="#630ed4" stroke-width="2" stroke-linecap="round" />
+  </g>
+  <text
+    x="76"
+    y="32"
+    dominant-baseline="central"
+    font-family="Manrope, ui-sans-serif, system-ui, sans-serif"
+    font-weight="700"
+    font-size="34"
+    letter-spacing="-0.5"
+    fill="#630ed4"
+  >Griot</text>
+</svg>
