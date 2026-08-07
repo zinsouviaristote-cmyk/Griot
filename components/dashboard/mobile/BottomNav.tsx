@@ -31,7 +31,7 @@ function TabLink({ item, isActive }: { item: TabItem; isActive: boolean }) {
         className={isActive ? "text-brand" : "text-ink-muted"}
         width={22}
         height={22}
-        strokeWidth={isActive ? 2 : 1.75}
+        strokeWidth={isActive ? 2 : 1.5}
         fill={isActive ? "currentColor" : "none"}
         fillOpacity={isActive ? 0.15 : 1}
         aria-hidden="true"
@@ -67,9 +67,9 @@ export function BottomNav() {
         <Link
           href="/creer"
           aria-label="Créer une chanson"
-          className="absolute left-1/2 top-0 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-brand-vivid text-white shadow-card-hover transition-transform duration-200 ease-magnetic active:scale-95"
+          className="absolute left-1/2 top-0 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-brand text-white shadow-card-hover transition-transform duration-200 ease-magnetic active:scale-95"
         >
-          <Plus className="h-6 w-6" strokeWidth={2.25} aria-hidden="true" />
+          <Plus className="h-6 w-6" strokeWidth={2} aria-hidden="true" />
         </Link>
       </div>
     </nav>

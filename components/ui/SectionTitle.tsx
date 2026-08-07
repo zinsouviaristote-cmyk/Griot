@@ -3,7 +3,7 @@
  * Un trait irrégulier sous chaque titre, comme la cadence d'une voix qui raconte :
  * jamais parfaitement droit, jamais un simple soulignement. On le retrouve ici et
  * dans la marque (voir Logo.tsx) — la même idée, deux applications, pas trois.
- * Volontairement discret : un seul trait, une seule couleur pleine (brand-vivid).
+ * Volontairement discret : un seul trait, une seule couleur pleine (brand).
  */
 function VoiceMark({ className = "" }: { className?: string }) {
   return (
@@ -18,7 +18,7 @@ function VoiceMark({ className = "" }: { className?: string }) {
       <path
         d="M1 5.5C4 2.2 6.8 2.2 9.5 5.2S15.2 8 18 5.2 23.8 2 26.5 5.2 32.2 8 35 5.2 40.8 2.2 43 5"
         stroke="currentColor"
-        strokeWidth="1.75"
+        strokeWidth="1.5"
         strokeLinecap="round"
       />
     </svg>
@@ -45,7 +45,7 @@ export function SectionTitle({
       >
         {children}
       </Tag>
-      <VoiceMark className={`mt-1.5 text-brand-vivid ${align === "center" ? "mx-auto" : ""}`} />
+      <VoiceMark className={`mt-1.5 text-brand ${align === "center" ? "mx-auto" : ""}`} />
     </div>
   );
 }

@@ -13,7 +13,7 @@ export function CreditCard({ balance }: { balance: number }) {
     <div className="rounded-card border border-border bg-surface p-4 shadow-card">
       <div className="flex items-center gap-2 text-ink-muted">
         <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-soft">
-          <Sparkle className="h-3.5 w-3.5 text-brand-vivid" strokeWidth={2} aria-hidden="true" />
+          <Sparkle className="h-3.5 w-3.5 text-brand" strokeWidth={1.5} aria-hidden="true" />
         </span>
         <span className="text-xs font-medium uppercase tracking-wide">Vos crédits</span>
       </div>

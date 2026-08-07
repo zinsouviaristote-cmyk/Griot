@@ -56,20 +56,20 @@ function NavSection({
                 href={item.href}
                 onClick={onNavigate}
                 aria-current={isActive ? "page" : undefined}
-                className={`group relative flex items-center gap-3 rounded-card px-3 py-2.5 text-sm font-medium transition-colors duration-150 ${
+                className={`group relative flex items-center gap-3 rounded-control px-3 py-2.5 text-sm font-medium transition-colors duration-150 ${
                   isActive
                     ? "bg-brand-soft text-brand"
                     : "text-ink-muted hover:bg-brand-soft/60 hover:text-ink"
                 }`}
               >
                 {isActive && (
-                  <span className="absolute -left-3 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-brand-vivid" />
+                  <span className="absolute -left-3 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-brand" />
                 )}
                 <item.icon
                   className={`h-[18px] w-[18px] shrink-0 transition-transform duration-200 group-hover:scale-110 ${
                     isActive ? "text-brand" : ""
                   }`}
-                  strokeWidth={1.75}
+                  strokeWidth={1.5}
                   aria-hidden="true"
                 />
                 {item.label}
@@ -109,7 +109,7 @@ export function SidebarContent({
           onClick={onNavigate}
           className="flex items-center gap-2.5 px-3 py-1.5 text-xs font-medium text-ink-muted transition-colors hover:text-ink"
         >
-          <CircleHelp className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
+          <CircleHelp className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
           Besoin d&apos;aide ?
         </Link>
       </div>

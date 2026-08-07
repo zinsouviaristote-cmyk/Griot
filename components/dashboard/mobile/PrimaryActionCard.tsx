@@ -15,8 +15,8 @@ export function PrimaryActionCard({ hasSongs }: { hasSongs: boolean }) {
       href="/creer"
       className="flex items-center gap-4 rounded-card border-2 border-brand bg-brand-soft p-4 shadow-card transition-transform duration-200 ease-magnetic active:scale-[0.98]"
     >
-      <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-card bg-brand-vivid text-white">
-        <Wand2 className="h-6 w-6" strokeWidth={1.75} aria-hidden="true" />
+      <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-card bg-brand text-white">
+        <Wand2 className="h-6 w-6" strokeWidth={1.5} aria-hidden="true" />
       </span>
       <div className="min-w-0 flex-1">
         <p className="font-display text-lg font-semibold text-ink">
@@ -24,7 +24,7 @@ export function PrimaryActionCard({ hasSongs }: { hasSongs: boolean }) {
         </p>
         <p className="mt-0.5 truncate text-sm text-ink-muted">{STYLE_SAMPLE}</p>
       </div>
-      <ChevronRight className="h-5 w-5 shrink-0 text-brand" strokeWidth={2} aria-hidden="true" />
+      <ChevronRight className="h-5 w-5 shrink-0 text-brand" strokeWidth={1.5} aria-hidden="true" />
     </Link>
   );
 }

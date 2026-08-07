@@ -9,11 +9,11 @@ export function OccasionCard({ occasion }: { occasion: OccasionMeta }) {
       className="group flex h-40 w-[210px] shrink-0 snap-start flex-col justify-between rounded-card border border-border bg-surface p-4 shadow-card transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-card-hover"
     >
       <div className="flex items-start justify-between">
-        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-soft text-brand-vivid">
-          <occasion.icon className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
+        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-soft text-brand">
+          <occasion.icon className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
         </span>
-        <span className="flex h-7 w-7 items-center justify-center rounded-full text-ink-muted transition-all duration-200 ease-magnetic group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-brand-vivid">
-          <ArrowUpRight className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+        <span className="flex h-7 w-7 items-center justify-center rounded-full text-ink-muted transition-all duration-200 ease-magnetic group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-brand">
+          <ArrowUpRight className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
         </span>
       </div>
       <div>

@@ -13,7 +13,7 @@ export function Avatar({
 
   return (
     <span
-      className={`inline-flex ${sizeClasses} shrink-0 items-center justify-center rounded-full bg-brand-vivid font-display font-semibold text-white`}
+      className={`inline-flex ${sizeClasses} shrink-0 items-center justify-center rounded-full bg-brand font-display font-semibold text-white`}
     >
       {initials}
     </span>

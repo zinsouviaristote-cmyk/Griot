@@ -1,16 +1,23 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces } from "next/font/google";
+import { Hanken_Grotesk, Manrope } from "next/font/google";
 import "./globals.css";
 
-// Fraunces porte uniquement les titres — deux graisses, un seul sous-ensemble latin.
-// Le corps de texte reste sur la pile système (voir tailwind.config.ts, font-sans) :
-// aucune police de corps ne traverse le réseau, l'essentiel du texte d'une page reste gratuit en Mo.
-const fraunces = Fraunces({
+// Manrope porte les titres (600/700/800) — géométrique, architecturé.
+// Hanken Grotesk porte le corps, les labels et les données — grande lisibilité,
+// personnalité technique. Sous-ensemble latin uniquement, seules les graisses
+// utilisées par l'échelle typographique (voir tailwind.config.ts, fontSize).
+const manrope = Manrope({
   subsets: ["latin"],
-  weight: ["500", "600"],
-  style: ["normal", "italic"],
+  weight: ["600", "700", "800"],
   display: "swap",
   variable: "--font-display",
+});
+
+const hankenGrotesk = Hanken_Grotesk({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  display: "swap",
+  variable: "--font-sans",
 });
 
 export const metadata: Metadata = {
@@ -20,7 +27,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#FDFCFB",
+  themeColor: "#f7f9fb",
   width: "device-width",
   initialScale: 1,
 };
@@ -31,8 +38,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className={fraunces.variable}>
-      <body>{children}</body>
+    <html lang="fr" className={`${manrope.variable} ${hankenGrotesk.variable}`}>
+      <body className="font-sans">{children}</body>
     </html>
   );
 }

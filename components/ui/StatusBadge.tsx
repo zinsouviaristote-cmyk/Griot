@@ -1,8 +1,8 @@
 import type { SongStatus } from "@/lib/types";
 
-// La palette du produit n'a qu'une seule couleur de marque : `brand` (profond) et
-// `brand-vivid` (vif) en donnent deux nuances distinctes pour les deux statuts
-// "en mouvement" (generating / preview_ready), sans inventer de teinte hors palette.
+// Les boutons et états actifs n'ont qu'un seul violet plein (`brand`). Ici, seule
+// exception sanctionnée par la palette : `brand-light` (la "variante claire" du
+// design system) distingue les deux statuts "en mouvement" sans inventer de teinte.
 const STATUS_CONFIG: Record<SongStatus, { label: string; text: string; bg: string; dot: string }> = {
   draft: {
     label: "Brouillon",
@@ -12,9 +12,9 @@ const STATUS_CONFIG: Record<SongStatus, { label: string; text: string; bg: strin
   },
   generating: {
     label: "En cours",
-    text: "text-brand-vivid",
-    bg: "bg-brand-vivid/10",
-    dot: "bg-brand-vivid",
+    text: "text-brand-light",
+    bg: "bg-brand-light/10",
+    dot: "bg-brand-light",
   },
   preview_ready: {
     label: "Extrait prêt",
@@ -52,7 +52,7 @@ export function StatusBadge({ status }: { status: SongStatus }) {
   const config = STATUS_CONFIG[status];
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${config.bg} ${config.text}`}
+      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-label-sm font-medium ${config.bg} ${config.text}`}
     >
       <span className={`h-1.5 w-1.5 rounded-full ${config.dot}`} aria-hidden="true" />
       {config.label}

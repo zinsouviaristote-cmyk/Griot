@@ -22,17 +22,17 @@ export function OccasionCarousel() {
             type="button"
             onClick={() => scrollBy(-1)}
             aria-label="Précédent"
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-border text-ink-muted transition-colors hover:border-brand-vivid/40 hover:text-brand-vivid"
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-border text-ink-muted transition-colors hover:border-brand/40 hover:text-brand"
           >
-            <ChevronLeft className="h-4 w-4" strokeWidth={2} />
+            <ChevronLeft className="h-4 w-4" strokeWidth={1.5} />
           </button>
           <button
             type="button"
             onClick={() => scrollBy(1)}
             aria-label="Suivant"
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-border text-ink-muted transition-colors hover:border-brand-vivid/40 hover:text-brand-vivid"
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-border text-ink-muted transition-colors hover:border-brand/40 hover:text-brand"
           >
-            <ChevronRight className="h-4 w-4" strokeWidth={2} />
+            <ChevronRight className="h-4 w-4" strokeWidth={1.5} />
           </button>
         </div>
       </div>

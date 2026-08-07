@@ -34,7 +34,7 @@ export function DashboardShell({
         userEmail={userEmail}
       />
 
-      <div className="lg:pl-[272px]">
+      <div className="lg:pl-[280px]">
         <TopBar creditBalance={creditBalance} userInitials={userInitials} />
         <main className="mx-auto max-w-shell px-4 pb-28 pt-20 lg:px-8 lg:pb-8 lg:pt-8">
           {children}

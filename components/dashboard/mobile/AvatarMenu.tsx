@@ -47,7 +47,7 @@ export function AvatarMenu({
                 onClick={() => setIsOpen(false)}
                 className="flex min-h-[44px] items-center gap-3 px-4 text-sm text-ink transition-colors hover:bg-brand-soft"
               >
-                <User className="h-4 w-4 text-ink-muted" strokeWidth={1.75} aria-hidden="true" />
+                <User className="h-4 w-4 text-ink-muted" strokeWidth={1.5} aria-hidden="true" />
                 Profil
               </Link>
               <Link
@@ -55,7 +55,7 @@ export function AvatarMenu({
                 onClick={() => setIsOpen(false)}
                 className="flex min-h-[44px] items-center gap-3 px-4 text-sm text-ink transition-colors hover:bg-brand-soft"
               >
-                <Music className="h-4 w-4 text-ink-muted" strokeWidth={1.75} aria-hidden="true" />
+                <Music className="h-4 w-4 text-ink-muted" strokeWidth={1.5} aria-hidden="true" />
                 Mes chansons
               </Link>
               <Link
@@ -63,7 +63,7 @@ export function AvatarMenu({
                 onClick={() => setIsOpen(false)}
                 className="flex min-h-[44px] items-center gap-3 px-4 text-sm text-ink transition-colors hover:bg-brand-soft"
               >
-                <CircleHelp className="h-4 w-4 text-ink-muted" strokeWidth={1.75} aria-hidden="true" />
+                <CircleHelp className="h-4 w-4 text-ink-muted" strokeWidth={1.5} aria-hidden="true" />
                 Aide
               </Link>
             </nav>
@@ -73,7 +73,7 @@ export function AvatarMenu({
                 onClick={() => setIsOpen(false)}
                 className="flex min-h-[44px] items-center gap-3 px-4 text-sm font-medium text-danger transition-colors hover:bg-danger/5"
               >
-                <LogOut className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
+                <LogOut className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
                 Déconnexion
               </Link>
             </div>

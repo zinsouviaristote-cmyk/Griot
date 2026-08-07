@@ -27,13 +27,13 @@ export function MobileTopBar({
           href="/recharger"
           className="flex items-center gap-1.5 rounded-full bg-brand-soft py-1 pl-3 pr-1 text-sm font-semibold text-brand"
         >
-          <Music2 className="h-3.5 w-3.5" strokeWidth={2} aria-hidden="true" />
+          <Music2 className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />
           {creditBalance}
           <span
-            className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-vivid text-white"
+            className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-white"
             aria-hidden="true"
           >
-            <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
+            <Plus className="h-3.5 w-3.5" strokeWidth={2} />
           </span>
         </Link>
 
@@ -42,7 +42,7 @@ export function MobileTopBar({
           aria-label="Notifications"
           className="flex h-11 w-11 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-brand-soft/60"
         >
-          <Bell className="h-5 w-5" strokeWidth={1.75} aria-hidden="true" />
+          <Bell className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
         </button>
 
         <AvatarMenu initials={userInitials} name={userName} email={userEmail} />

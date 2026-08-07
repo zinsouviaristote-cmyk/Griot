@@ -1,7 +1,7 @@
 # Griot
 
 SaaS de chansons personnalisées par IA pour l'Afrique de l'Ouest francophone :
-on raconte une histoire, on écoute l'extrait gratuitement, on paie par Mobile
+on écrit les paroles, on écoute l'extrait gratuitement, on paie par Mobile
 Money pour débloquer le MP3.
 
 ## Démarrer en local

@@ -29,15 +29,15 @@ export function SongCardMobile({ song }: { song: Song }) {
         <Link
           href={action.href}
           aria-disabled={action.disabled}
-          className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-card px-4 text-sm font-semibold transition-colors ${
+          className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-control px-4 text-sm font-semibold transition-colors ${
             action.disabled
               ? "pointer-events-none bg-page text-ink-muted/50"
-              : "bg-brand-soft text-brand-vivid hover:bg-brand-vivid hover:text-white"
+              : "bg-brand-soft text-brand hover:bg-brand hover:text-white"
           }`}
         >
           <action.icon
             className={`h-4 w-4 ${action.spin ? "animate-spin-slow" : ""}`}
-            strokeWidth={2}
+            strokeWidth={1.5}
             aria-hidden="true"
           />
           {action.label}
