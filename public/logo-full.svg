@@ -1,20 +1,31 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 64" fill="none">
-  <!-- Griot — marque complète (icône + mot-symbole). Landing page, documents,
-       partages. Même icône que logo-mark.svg, agrandie — un seul dessin, deux
-       usages, jamais deux versions différentes de la marque. Rien en dessous
-       de la ligne : pas de signature, pas de mention de l'IA. -->
-  <g transform="translate(8,8) scale(2)">
-    <circle cx="12" cy="12" r="8.5" stroke="#630ed4" stroke-width="2" stroke-linecap="round" stroke-dasharray="42.7 10.7" />
-    <path d="M5.5 12.5c1.8-2.6 3.5-2.6 5.3 0s3.5 2.6 5.3 0" stroke="#630ed4" stroke-width="2" stroke-linecap="round" />
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 48" fill="none">
+  <!-- Griot — marque complète, redessinée d'après le fichier fourni (intention du
+       dessin, pas trace pixel du PNG). Anneau ouvert où la note s'échappe : le
+       manche de la note casse l'anneau en haut, son fanion se prolonge en onde
+       qui sort par la droite. Le croissant sombre du fichier source était un
+       artefact d'ombre du rendu IA — retiré, pas reproduit.
+       Seul endroit du produit où un dégradé est autorisé : violet → indigo,
+       les deux couleurs de marque déjà définies (primary → secondary), jamais
+       une troisième teinte inventée. Landing page, documents, partages. -->
+  <defs>
+    <linearGradient id="griotGradient" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#630ed4" />
+      <stop offset="1" stop-color="#2e1065" />
+    </linearGradient>
+  </defs>
+
+  <circle cx="24" cy="24" r="17" stroke="url(#griotGradient)" stroke-width="4" stroke-linecap="round" stroke-dasharray="73.4 13.35" />
+  <circle cx="18" cy="31" r="5" fill="url(#griotGradient)" />
+  <path d="M22 29 24 7c2.3-3.4 4.6-3.4 6.9 0s4.6 3.4 6.9 0 4.6-3.4 6.9 0" stroke="url(#griotGradient)" stroke-width="4" stroke-linecap="round" fill="none" />
+
   <text
-    x="76"
-    y="32"
+    x="64"
+    y="24"
     dominant-baseline="central"
     font-family="Manrope, ui-sans-serif, system-ui, sans-serif"
     font-weight="700"
-    font-size="34"
+    font-size="33"
     letter-spacing="-0.5"
-    fill="#630ed4"
+    fill="url(#griotGradient)"
   >Griot</text>
 </svg>
