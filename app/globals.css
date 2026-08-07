@@ -50,14 +50,6 @@
     text-wrap: balance;
   }
 
-  /* L'attente ne doit jamais rivaliser avec le décor : un futur écran de
-     chargement ou de génération pose `data-decor-paused="true"` sur <html>
-     pour figer la dérive des cordes de fond. Aucun déclencheur pour l'instant —
-     ce produit n'a pas encore d'écran de génération (voir le plan, Phase 4). */
-  [data-decor-paused="true"] .decor-string {
-    animation-play-state: paused;
-  }
-
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
