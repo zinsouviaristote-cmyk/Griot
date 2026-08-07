@@ -3,6 +3,7 @@ import { Sidebar } from "@/components/dashboard/Sidebar";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { MobileTopBar } from "@/components/dashboard/mobile/MobileTopBar";
 import { BottomNav } from "@/components/dashboard/mobile/BottomNav";
+import { BackgroundMotifs } from "@/components/decor/BackgroundMotifs";
 
 /**
  * Deux shells de navigation distincts, jamais un seul redimensionné :
@@ -25,7 +26,14 @@ export function DashboardShell({
   children: ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-page">
+    // Pas de `bg-page` ici : `body` le porte déjà globalement (globals.css). Un
+    // second fond opaque à ce niveau empilerait au même rang que BackgroundMotifs
+    // (`position:fixed`, qui ignore un simple `relative` ambiant — seuls un
+    // `transform`/`filter` le contiendraient) et le couvrirait entièrement, y
+    // compris dans les zones vides. Sans ce second fond, le décor se pose
+    // naturellement entre le fond de `body` et les cartes.
+    <div className="min-h-screen">
+      <BackgroundMotifs />
       <Sidebar creditBalance={creditBalance} />
       <MobileTopBar
         creditBalance={creditBalance}

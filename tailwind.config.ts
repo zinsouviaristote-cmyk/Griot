@@ -97,11 +97,21 @@ const config: Config = {
           "0%": { transform: "rotate(0deg)" },
           "100%": { transform: "rotate(360deg)" },
         },
+        breathe: {
+          "0%, 100%": { transform: "scale(1)" },
+          "50%": { transform: "scale(1.06)" },
+        },
+        "pop-in": {
+          "0%": { opacity: "0", transform: "scale(0.95) translateY(-4px)" },
+          "100%": { opacity: "1", transform: "scale(1) translateY(0)" },
+        },
       },
       animation: {
         "reveal-up": "reveal-up 0.5s cubic-bezier(0.25,0.46,0.45,0.94) both",
         shimmer: "shimmer 1.8s ease-in-out infinite",
         "spin-slow": "spin-slow 6s linear infinite",
+        breathe: "breathe 3.2s ease-in-out infinite",
+        "pop-in": "pop-in 0.15s cubic-bezier(0.25,0.46,0.45,0.94) both",
       },
       maxWidth: {
         shell: "1440px",

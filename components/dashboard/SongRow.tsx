@@ -26,14 +26,14 @@ export function SongRow({ song }: { song: Song }) {
         <Link
           href={action.href}
           aria-disabled={action.disabled}
-          className={`inline-flex items-center gap-1.5 rounded-control px-3 py-1.5 text-xs font-semibold transition-colors ${
+          className={`group/action inline-flex items-center gap-1.5 rounded-control px-3 py-1.5 text-xs font-semibold transition-all duration-150 ease-magnetic ${
             action.disabled
               ? "pointer-events-none text-ink-muted/50"
-              : "text-brand hover:bg-brand-soft"
+              : "text-brand hover:bg-brand-soft active:scale-95"
           }`}
         >
           <action.icon
-            className={`h-3.5 w-3.5 ${action.spin ? "animate-spin-slow" : ""}`}
+            className={`h-3.5 w-3.5 transition-transform duration-150 ease-magnetic group-hover/action:translate-x-0.5 ${action.spin ? "animate-spin-slow" : ""}`}
             strokeWidth={1.5}
             aria-hidden="true"
           />

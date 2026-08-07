@@ -40,7 +40,7 @@ export function CreateSongHero() {
         </p>
 
         <form onSubmit={handleSubmit} className="mt-7 space-y-4">
-          <div className="flex flex-col gap-2.5 rounded-card border border-border bg-page p-2 sm:flex-row sm:items-center">
+          <div className="flex flex-col gap-2.5 rounded-card border border-border bg-page p-2 transition-colors duration-200 focus-within:border-brand/50 sm:flex-row sm:items-center">
             <input
               value={firstName}
               onChange={(event) => setFirstName(event.target.value)}
@@ -52,10 +52,14 @@ export function CreateSongHero() {
             <button
               type="submit"
               disabled={!firstName.trim()}
-              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-control bg-brand px-5 py-3 text-sm font-semibold text-white transition-all duration-200 ease-magnetic hover:scale-[1.02] hover:brightness-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100"
+              className="group inline-flex shrink-0 items-center justify-center gap-2 rounded-control bg-brand px-5 py-3 text-sm font-semibold text-white transition-all duration-200 ease-magnetic hover:scale-[1.02] hover:brightness-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100"
             >
               Créer sa chanson
-              <ArrowRight className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+              <ArrowRight
+                className="h-4 w-4 transition-transform duration-200 ease-magnetic group-hover:translate-x-1"
+                strokeWidth={1.5}
+                aria-hidden="true"
+              />
             </button>
           </div>
 
@@ -68,7 +72,7 @@ export function CreateSongHero() {
                   type="button"
                   onClick={() => setOccasion(isSelected ? null : item.id)}
                   aria-pressed={isSelected}
-                  className={`rounded-full border px-3.5 py-1.5 text-label-sm font-medium transition-colors duration-150 ${
+                  className={`rounded-full border px-3.5 py-1.5 text-label-sm font-medium transition-all duration-150 ease-magnetic hover:scale-105 active:scale-95 ${
                     isSelected
                       ? "border-brand bg-brand-soft text-brand"
                       : "border-border text-ink-muted hover:border-brand/40 hover:text-ink"

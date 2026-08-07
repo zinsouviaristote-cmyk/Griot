@@ -26,9 +26,9 @@ export function StatCard({
   variant?: "number" | "fcfa";
 }) {
   return (
-    <div className="rounded-card border border-border bg-surface p-5 shadow-card transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-card-hover">
+    <div className="group rounded-card border border-border bg-surface p-5 shadow-card transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-card-hover">
       <span
-        className={`flex h-10 w-10 items-center justify-center rounded-full ${TONE_CLASSES[tone]}`}
+        className={`flex h-10 w-10 items-center justify-center rounded-full transition-transform duration-300 ease-magnetic group-hover:scale-110 group-hover:-rotate-6 ${TONE_CLASSES[tone]}`}
       >
         <Icon className="h-[18px] w-[18px]" strokeWidth={1.5} aria-hidden="true" />
       </span>

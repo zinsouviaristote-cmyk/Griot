@@ -56,17 +56,20 @@ function NavSection({
                 href={item.href}
                 onClick={onNavigate}
                 aria-current={isActive ? "page" : undefined}
-                className={`group relative flex items-center gap-3 rounded-control px-3 py-2.5 text-sm font-medium transition-colors duration-150 ${
+                className={`group relative flex items-center gap-3 rounded-control px-3 py-2.5 text-sm font-medium transition-all duration-150 ease-magnetic active:scale-[0.98] ${
                   isActive
                     ? "bg-brand-soft text-brand"
-                    : "text-ink-muted hover:bg-brand-soft/60 hover:text-ink"
+                    : "text-ink-muted hover:translate-x-0.5 hover:bg-brand-soft/60 hover:text-ink"
                 }`}
               >
-                {isActive && (
-                  <span className="absolute -left-3 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-brand" />
-                )}
+                <span
+                  className={`absolute -left-3 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-brand transition-transform duration-200 ease-magnetic ${
+                    isActive ? "scale-y-100" : "scale-y-0"
+                  }`}
+                  aria-hidden="true"
+                />
                 <item.icon
-                  className={`h-[18px] w-[18px] shrink-0 transition-transform duration-200 group-hover:scale-110 ${
+                  className={`h-[18px] w-[18px] shrink-0 transition-transform duration-200 ease-magnetic group-hover:scale-110 ${
                     isActive ? "text-brand" : ""
                   }`}
                   strokeWidth={1.5}
@@ -93,7 +96,11 @@ export function SidebarContent({
 
   return (
     <div className="flex h-full flex-col gap-6 px-4 py-5">
-      <Link href="/" onClick={onNavigate} className="px-3">
+      <Link
+        href="/"
+        onClick={onNavigate}
+        className="inline-block px-3 transition-transform duration-200 ease-magnetic hover:scale-[1.03]"
+      >
         <Logo />
       </Link>
 
@@ -107,9 +114,13 @@ export function SidebarContent({
         <Link
           href="/aide"
           onClick={onNavigate}
-          className="flex items-center gap-2.5 px-3 py-1.5 text-xs font-medium text-ink-muted transition-colors hover:text-ink"
+          className="group flex items-center gap-2.5 px-3 py-1.5 text-xs font-medium text-ink-muted transition-colors hover:text-ink"
         >
-          <CircleHelp className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+          <CircleHelp
+            className="h-4 w-4 transition-transform duration-200 ease-magnetic group-hover:scale-110 group-hover:rotate-12"
+            strokeWidth={1.5}
+            aria-hidden="true"
+          />
           Besoin d&apos;aide ?
         </Link>
       </div>

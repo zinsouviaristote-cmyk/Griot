@@ -25,10 +25,10 @@ function TabLink({ item, isActive }: { item: TabItem; isActive: boolean }) {
     <Link
       href={item.href}
       aria-current={isActive ? "page" : undefined}
-      className="flex min-h-[44px] flex-col items-center justify-center gap-1 text-ink-muted transition-colors"
+      className="flex min-h-[44px] flex-col items-center justify-center gap-1 text-ink-muted transition-transform duration-150 ease-magnetic active:scale-90"
     >
       <item.icon
-        className={isActive ? "text-brand" : "text-ink-muted"}
+        className={`transition-transform duration-200 ease-magnetic ${isActive ? "scale-110 text-brand" : "text-ink-muted"}`}
         width={22}
         height={22}
         strokeWidth={isActive ? 2 : 1.5}
@@ -36,7 +36,7 @@ function TabLink({ item, isActive }: { item: TabItem; isActive: boolean }) {
         fillOpacity={isActive ? 0.15 : 1}
         aria-hidden="true"
       />
-      <span className={`text-xs font-medium ${isActive ? "text-brand" : "text-ink-muted"}`}>
+      <span className={`text-xs font-medium transition-colors ${isActive ? "text-brand" : "text-ink-muted"}`}>
         {item.label}
       </span>
     </Link>
@@ -67,9 +67,13 @@ export function BottomNav() {
         <Link
           href="/creer"
           aria-label="Créer une chanson"
-          className="absolute left-1/2 top-0 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-brand text-white shadow-card-hover transition-transform duration-200 ease-magnetic active:scale-95"
+          className="group absolute left-1/2 top-0 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-brand text-white shadow-card-hover transition-transform duration-200 ease-magnetic hover:scale-110 active:scale-95"
         >
-          <Plus className="h-6 w-6" strokeWidth={2} aria-hidden="true" />
+          <Plus
+            className="h-6 w-6 transition-transform duration-300 ease-magnetic group-hover:rotate-90"
+            strokeWidth={2}
+            aria-hidden="true"
+          />
         </Link>
       </div>
     </nav>
