@@ -3,6 +3,7 @@ import { Sidebar } from "@/components/dashboard/Sidebar";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { MobileTopBar } from "@/components/dashboard/mobile/MobileTopBar";
 import { BottomNav } from "@/components/dashboard/mobile/BottomNav";
+import { BackgroundStrings } from "@/components/decor/BackgroundStrings";
 
 /**
  * Deux shells de navigation distincts, jamais un seul redimensionné :
@@ -26,6 +27,7 @@ export function DashboardShell({
 }) {
   return (
     <div className="min-h-screen bg-page">
+      <BackgroundStrings />
       <Sidebar creditBalance={creditBalance} />
       <MobileTopBar
         creditBalance={creditBalance}

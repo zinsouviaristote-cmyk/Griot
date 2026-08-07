@@ -97,11 +97,30 @@ const config: Config = {
           "0%": { transform: "rotate(0deg)" },
           "100%": { transform: "rotate(360deg)" },
         },
+        // Dérive du décor de fond (cordes) — amplitude de quelques pixels seulement.
+        // Trois variantes pour désynchroniser les cordes entre elles, jamais le même
+        // battement : ça se sentirait au lieu de se voir, ce qui est le but, mais un
+        // mouvement synchronisé attirerait l'œil malgré tout.
+        "drift-a": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(4px)" },
+        },
+        "drift-b": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-3px)" },
+        },
+        "drift-c": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(3px)" },
+        },
       },
       animation: {
         "reveal-up": "reveal-up 0.5s cubic-bezier(0.25,0.46,0.45,0.94) both",
         shimmer: "shimmer 1.8s ease-in-out infinite",
         "spin-slow": "spin-slow 6s linear infinite",
+        "drift-a": "drift-a 28s ease-in-out infinite",
+        "drift-b": "drift-b 34s ease-in-out infinite",
+        "drift-c": "drift-c 24s ease-in-out infinite",
       },
       maxWidth: {
         shell: "1440px",
