@@ -83,35 +83,42 @@ export function TunnelProvider({
     hydrated.current = true;
     const stored = readStoredTunnel();
 
-    // Les réponses transmises par l'accueil (prénom, occasion) priment
-    // toujours sur une session laissée en plan : on ne récupère que ce qui
-    // manque, jamais ce qui est déjà rempli.
-    setData((current) => {
-      const merged = { ...current };
-      let changed = false;
-      for (const key of Object.keys(stored.data ?? {}) as (keyof TunnelData)[]) {
-        const currentValue = current[key];
-        const isEmpty = currentValue === "" || currentValue === null;
-        const storedValue = stored.data![key];
-        if (isEmpty && storedValue !== undefined && storedValue !== "" && storedValue !== null) {
-          (merged as Record<string, unknown>)[key] = storedValue;
-          changed = true;
-        }
-      }
-      if (resumeAuth?.result === "success" && resumeAuth.email) {
-        merged.authEmail = resumeAuth.email;
-        merged.authProvider = resumeAuth.provider ?? "google";
-        changed = true;
-      }
-      return changed ? merged : current;
-    });
-
-    // L'étape elle-même ne se restaure QUE si on revient d'une redirection de
-    // connexion — sinon, cliquer "Nouvelle chanson" depuis le tableau de bord
-    // reprendrait parfois un vieux brouillon au lieu de repartir de l'écran 1.
-    if (resumeAuth && stored.step) {
+    if (resumeAuth && stored.step && stored.data) {
+      // Retour d'une redirection de connexion : reprise COMPLÈTE et exacte de
+      // l'état sauvegardé, jamais la fusion champ-par-champ ci-dessous — c'est
+      // très précisément l'état qu'on vient de quitter, pas un vieux brouillon
+      // à compléter. La fusion "ne récupère que ce qui manque" laisserait les
+      // essais déjà générés (un tableau, jamais "vide" au sens de ce test)
+      // bloqués à zéro sur l'écran de choix.
       setStep(stored.step);
+      setData((current) => {
+        const restored: TunnelData = { ...current, ...stored.data };
+        if (resumeAuth.result === "success" && resumeAuth.email) {
+          restored.authEmail = resumeAuth.email;
+          restored.authProvider = resumeAuth.provider ?? "google";
+        }
+        return restored;
+      });
+    } else {
+      // Arrivée normale (pas de redirection) : les réponses transmises par
+      // l'accueil (prénom, occasion) priment toujours sur une session laissée
+      // en plan — on ne récupère que ce qui manque, jamais ce qui est déjà rempli.
+      setData((current) => {
+        const merged = { ...current };
+        let changed = false;
+        for (const key of Object.keys(stored.data ?? {}) as (keyof TunnelData)[]) {
+          const currentValue = current[key];
+          const isEmpty = currentValue === "" || currentValue === null;
+          const storedValue = stored.data![key];
+          if (isEmpty && storedValue !== undefined && storedValue !== "" && storedValue !== null) {
+            (merged as Record<string, unknown>)[key] = storedValue;
+            changed = true;
+          }
+        }
+        return changed ? merged : current;
+      });
     }
+
     if (resumeAuth?.result === "denied") {
       showToast("Connexion Google annulée — réessayez ou continuez par e-mail.", "default");
     } else if (resumeAuth?.result === "error") {
