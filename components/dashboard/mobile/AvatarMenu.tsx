@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { CircleHelp, LogOut, Music, User } from "lucide-react";
+import { CircleHelp, LogOut, Megaphone, Music, Settings, UsersRound, Wallet } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 
 export function AvatarMenu({
@@ -43,12 +43,12 @@ export function AvatarMenu({
             </div>
             <nav className="py-1.5">
               <Link
-                href="/profil"
+                href="/parametres"
                 onClick={() => setIsOpen(false)}
                 className="group flex min-h-[44px] items-center gap-3 px-4 text-sm text-ink transition-colors hover:bg-brand-soft"
               >
-                <User className="h-4 w-4 text-ink-muted transition-transform duration-150 ease-magnetic group-hover:translate-x-0.5" strokeWidth={1.5} aria-hidden="true" />
-                Profil
+                <Settings className="h-4 w-4 text-ink-muted transition-transform duration-150 ease-magnetic group-hover:translate-x-0.5" strokeWidth={1.5} aria-hidden="true" />
+                Paramètres
               </Link>
               <Link
                 href="/bibliotheque"
@@ -57,6 +57,30 @@ export function AvatarMenu({
               >
                 <Music className="h-4 w-4 text-ink-muted transition-transform duration-150 ease-magnetic group-hover:translate-x-0.5" strokeWidth={1.5} aria-hidden="true" />
                 Mes chansons
+              </Link>
+              <Link
+                href="/proches"
+                onClick={() => setIsOpen(false)}
+                className="group flex min-h-[44px] items-center gap-3 px-4 text-sm text-ink transition-colors hover:bg-brand-soft"
+              >
+                <UsersRound className="h-4 w-4 text-ink-muted transition-transform duration-150 ease-magnetic group-hover:translate-x-0.5" strokeWidth={1.5} aria-hidden="true" />
+                Mes proches
+              </Link>
+              <Link
+                href="/publications"
+                onClick={() => setIsOpen(false)}
+                className="group flex min-h-[44px] items-center gap-3 px-4 text-sm text-ink transition-colors hover:bg-brand-soft"
+              >
+                <Megaphone className="h-4 w-4 text-ink-muted transition-transform duration-150 ease-magnetic group-hover:translate-x-0.5" strokeWidth={1.5} aria-hidden="true" />
+                Mes publications
+              </Link>
+              <Link
+                href="/credits"
+                onClick={() => setIsOpen(false)}
+                className="group flex min-h-[44px] items-center gap-3 px-4 text-sm text-ink transition-colors hover:bg-brand-soft"
+              >
+                <Wallet className="h-4 w-4 text-ink-muted transition-transform duration-150 ease-magnetic group-hover:translate-x-0.5" strokeWidth={1.5} aria-hidden="true" />
+                Mes Notes
               </Link>
               <Link
                 href="/aide"
@@ -69,7 +93,7 @@ export function AvatarMenu({
             </nav>
             <div className="border-t border-border py-1.5">
               <Link
-                href="/deconnexion"
+                href="/connexion"
                 onClick={() => setIsOpen(false)}
                 className="group flex min-h-[44px] items-center gap-3 px-4 text-sm font-medium text-danger transition-colors hover:bg-danger/5"
               >

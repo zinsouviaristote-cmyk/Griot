@@ -25,6 +25,15 @@ const config: Config = {
           soft: "#eaddff",
         },
         secondary: "#4b41e1",
+        // Nuances d'occasion — dérivées du violet de marque (déclinaisons de teinte
+        // et de luminosité autour de #630ed4), jamais des couleurs indépendantes.
+        // Mariage et réussite réutilisent brand-light / secondary, déjà dans la
+        // famille ; ces trois-là sont propres à ce rôle.
+        occasion: {
+          anniversaire: "#a855f7",
+          amour: "#c026d3",
+          hommage: "#4a3b66",
+        },
         page: "#f7f9fb",
         surface: "#ffffff",
         // outline-variant à faible opacité, tel que prescrit — pas un token opaque.
@@ -105,13 +114,53 @@ const config: Config = {
           "0%": { opacity: "0", transform: "scale(0.95) translateY(-4px)" },
           "100%": { opacity: "1", transform: "scale(1) translateY(0)" },
         },
+        "toast-in": {
+          "0%": { opacity: "0", transform: "translateY(-16px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        "toast-out": {
+          "0%": { opacity: "1", transform: "translateY(0)" },
+          "100%": { opacity: "0", transform: "translateY(-16px)" },
+        },
+        "field-in": {
+          "0%": { opacity: "0", transform: "translateY(-4px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        // Panneau "Paroles" d'Explorer : glisse depuis la droite sur desktop
+        // (le contenu principal se recentre dans l'espace restant), depuis le
+        // bas sur mobile (voir sheet-up) — jamais le même geste, l'un pousse,
+        // l'autre recouvre.
+        "panel-in": {
+          "0%": { opacity: "0", transform: "translateX(24px)" },
+          "100%": { opacity: "1", transform: "translateX(0)" },
+        },
+        "sheet-up": {
+          "0%": { opacity: "0", transform: "translateY(24px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        "heart-pop": {
+          "0%": { transform: "scale(1)" },
+          "35%": { transform: "scale(1.35)" },
+          "100%": { transform: "scale(1)" },
+        },
+        "wave-bar": {
+          "0%, 100%": { transform: "scaleY(0.35)" },
+          "50%": { transform: "scaleY(1)" },
+        },
       },
       animation: {
         "reveal-up": "reveal-up 0.5s cubic-bezier(0.25,0.46,0.45,0.94) both",
         shimmer: "shimmer 1.8s ease-in-out infinite",
         "spin-slow": "spin-slow 6s linear infinite",
         breathe: "breathe 3.2s ease-in-out infinite",
+        "toast-in": "toast-in 0.25s cubic-bezier(0.25,0.46,0.45,0.94) both",
+        "toast-out": "toast-out 0.2s cubic-bezier(0.25,0.46,0.45,0.94) both",
         "pop-in": "pop-in 0.15s cubic-bezier(0.25,0.46,0.45,0.94) both",
+        "field-in": "field-in 0.2s ease-out both",
+        "panel-in": "panel-in 0.35s cubic-bezier(0.25,0.46,0.45,0.94) both",
+        "sheet-up": "sheet-up 0.3s cubic-bezier(0.25,0.46,0.45,0.94) both",
+        "heart-pop": "heart-pop 0.35s cubic-bezier(0.25,0.46,0.45,0.94) both",
+        "wave-bar": "wave-bar 0.9s ease-in-out infinite",
       },
       maxWidth: {
         shell: "1440px",

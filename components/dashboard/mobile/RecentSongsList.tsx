@@ -1,6 +1,7 @@
 import { Music4 } from "lucide-react";
 import { SongCardMobile } from "@/components/dashboard/SongCardMobile";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { Reveal } from "@/components/ui/Reveal";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import type { Song } from "@/lib/types";
 
@@ -21,8 +22,10 @@ export function RecentSongsList({ songs }: { songs: Song[] }) {
     <div>
       <SectionTitle>Chansons récentes</SectionTitle>
       <div className="mt-3 flex flex-col gap-3">
-        {songs.map((song) => (
-          <SongCardMobile key={song.id} song={song} />
+        {songs.map((song, index) => (
+          <Reveal key={song.id} delayMs={index * 150}>
+            <SongCardMobile song={song} />
+          </Reveal>
         ))}
       </div>
     </div>

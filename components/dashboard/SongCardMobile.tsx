@@ -1,3 +1,6 @@
+"use client";
+
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { getSongAction } from "@/components/dashboard/songAction";
@@ -6,10 +9,21 @@ import { formatDateFr } from "@/lib/format/date";
 import type { Song } from "@/lib/types";
 
 export function SongCardMobile({ song }: { song: Song }) {
+  const router = useRouter();
   const action = getSongAction(song);
+  const detailHref = `/bibliotheque/${song.id}`;
 
   return (
-    <div className="rounded-card border border-border bg-surface p-4 shadow-card transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-card-hover">
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => router.push(detailHref)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter") router.push(detailHref);
+      }}
+      aria-label={`Voir la chanson de ${song.recipientFirstName}`}
+      className="cursor-pointer rounded-card border border-border bg-surface p-4 shadow-card transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-card-hover focus-visible:outline-none focus-visible:shadow-ring-focus"
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="truncate font-display text-base font-semibold text-ink">
@@ -26,22 +40,34 @@ export function SongCardMobile({ song }: { song: Song }) {
 
       <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
         <span className="font-mono text-sm text-ink-muted">{formatDateFr(song.createdAt)}</span>
-        <Link
-          href={action.href}
-          aria-disabled={action.disabled}
-          className={`group inline-flex min-h-[44px] items-center gap-1.5 rounded-control px-4 text-sm font-semibold transition-all duration-200 ease-magnetic active:scale-95 ${
-            action.disabled
-              ? "pointer-events-none bg-page text-ink-muted/50"
-              : "bg-brand-soft text-brand hover:scale-[1.03] hover:bg-brand hover:text-white"
-          }`}
-        >
-          <action.icon
-            className={`h-4 w-4 transition-transform duration-200 ease-magnetic group-hover:translate-x-0.5 ${action.spin ? "animate-spin-slow" : ""}`}
-            strokeWidth={1.5}
-            aria-hidden="true"
-          />
-          {action.label}
-        </Link>
+        {/* En cours de génération : rien à ouvrir, donc un `span` plutôt qu'un lien —
+            un élément non interactif ne doit jamais avoir l'air cliquable. Même
+            traitement "désactivé" que partout ailleurs dans l'app : 50% d'opacité
+            uniforme sur tout le contenu (icône + texte), jamais une teinte isolée
+            qui fait deviner un contraste différent à chaque endroit. */}
+        {action.disabled ? (
+          <span className="inline-flex min-h-[44px] cursor-not-allowed items-center gap-1.5 rounded-control bg-page px-4 text-sm font-semibold text-ink-muted opacity-50">
+            <action.icon
+              className={action.spin ? "h-4 w-4 animate-spin-slow" : "h-4 w-4"}
+              strokeWidth={1.5}
+              aria-hidden="true"
+            />
+            {action.label}
+          </span>
+        ) : (
+          <Link
+            href={action.href}
+            onClick={(event) => event.stopPropagation()}
+            className="group inline-flex min-h-[44px] items-center gap-1.5 rounded-control bg-brand-soft px-4 text-sm font-semibold text-brand transition-all duration-200 ease-magnetic hover:scale-[1.03] hover:bg-brand hover:text-white active:scale-95"
+          >
+            <action.icon
+              className="h-4 w-4 transition-transform duration-200 ease-magnetic group-hover:translate-x-0.5"
+              strokeWidth={1.5}
+              aria-hidden="true"
+            />
+            {action.label}
+          </Link>
+        )}
       </div>
     </div>
   );

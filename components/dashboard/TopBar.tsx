@@ -1,14 +1,21 @@
 import Link from "next/link";
 import { Music2, Search } from "lucide-react";
-import { Avatar } from "@/components/ui/Avatar";
+import { AvatarMenu } from "@/components/dashboard/mobile/AvatarMenu";
 
 // Desktop uniquement — sur mobile, MobileTopBar prend le relais (voir DashboardShell).
+// L'avatar ouvre le même AvatarMenu que sur mobile (jusqu'ici statique, sans menu
+// ici) : Paramètres, Mes crédits et le reste de ces destinations n'avaient sinon
+// aucun accès sur desktop.
 export function TopBar({
   creditBalance,
   userInitials,
+  userName,
+  userEmail,
 }: {
   creditBalance: number;
   userInitials: string;
+  userName: string;
+  userEmail: string;
 }) {
   return (
     <header className="sticky top-0 z-20 hidden items-center gap-3 border-b border-border bg-page/95 px-8 py-4 lg:flex">
@@ -30,12 +37,10 @@ export function TopBar({
         className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-surface px-3.5 py-2 text-xs font-semibold text-ink transition-all duration-200 ease-magnetic hover:scale-105 hover:border-brand/50 active:scale-95"
       >
         <Music2 className="h-3.5 w-3.5 text-brand" strokeWidth={1.5} aria-hidden="true" />
-        {creditBalance} {creditBalance > 1 ? "chansons" : "chanson"}
+        {creditBalance} {creditBalance > 1 ? "Notes" : "Note"}
       </Link>
 
-      <span className="inline-block transition-transform duration-200 ease-magnetic hover:scale-105">
-        <Avatar initials={userInitials} size="sm" />
-      </span>
+      <AvatarMenu initials={userInitials} name={userName} email={userEmail} />
     </header>
   );
 }

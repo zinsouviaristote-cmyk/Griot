@@ -31,8 +31,8 @@ export function SongsTable({ songs }: { songs: Song[] }) {
           </tr>
         </thead>
         <tbody>
-          {songs.map((song) => (
-            <SongRow key={song.id} song={song} />
+          {songs.map((song, index) => (
+            <SongRow key={song.id} song={song} index={index} />
           ))}
         </tbody>
       </table>

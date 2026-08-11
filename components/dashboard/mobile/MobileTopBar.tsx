@@ -44,7 +44,7 @@ export function MobileTopBar({
         <button
           type="button"
           aria-label="Notifications"
-          className="group flex h-11 w-11 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-brand-soft/60"
+          className="group flex h-11 w-11 items-center justify-center rounded-full text-ink-muted transition-all duration-150 ease-magnetic hover:bg-brand-soft/60 active:scale-90"
         >
           <Bell
             className="h-5 w-5 transition-transform duration-300 ease-magnetic group-hover:-rotate-12 group-hover:scale-110"

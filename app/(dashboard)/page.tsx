@@ -20,7 +20,7 @@ export default function DashboardPage({
   const songs = isEmptyPreview ? [] : mockSongs;
   const creditBalance = isEmptyPreview ? 0 : mockUser.creditBalance;
   const stats = isEmptyPreview
-    ? { creditsRestants: 0, chansonsCreees: 0, chansonsOffertes: 0, totalDepenseFcfa: 0 }
+    ? { creditsRestants: 0, chansonsOffertes: 0, chansonsPartagees: 0, nextOccasion: null, likesRecus: null }
     : dashboardStats;
 
   return (
@@ -30,33 +30,46 @@ export default function DashboardPage({
           chansons récentes (voir la conversation : « conçue comme une application,
           pas comme un site réduit »). */}
       <div className="space-y-6 lg:hidden">
-        <MobileGreeting firstName={mockUser.firstName} creditBalance={creditBalance} />
-        <PrimaryActionCard hasSongs={songs.length > 0} />
-        <RecentSongsList songs={songs} />
+        <Reveal>
+          <MobileGreeting firstName={mockUser.firstName} creditBalance={creditBalance} />
+        </Reveal>
+        <Reveal delayMs={80}>
+          <PrimaryActionCard hasSongs={songs.length > 0} />
+        </Reveal>
+        <Reveal delayMs={160}>
+          <RecentSongsList songs={songs} />
+        </Reveal>
       </div>
 
-      {/* Desktop */}
-      <div className="hidden space-y-10 lg:block">
+      {/* Desktop — respirations volontairement inégales entre sections : un
+          intervalle plus large avant les dernières chansons (mt-12, 48px) qu'entre
+          les indicateurs et les occasions (mt-8, 32px) — 1,5x, sous le plafond du
+          double, pour que le rythme se sente sans se remarquer. */}
+      <div className="hidden lg:block">
         <Reveal>
           <CreateSongHero />
         </Reveal>
 
-        <Reveal delayMs={80}>
+        <Reveal delayMs={80} className="mt-8">
           <StatsGrid stats={stats} />
         </Reveal>
 
-        <Reveal delayMs={120}>
+        <Reveal delayMs={120} className="mt-8">
           <OccasionCarousel />
         </Reveal>
 
-        <Reveal delayMs={160}>
-          <section>
-            <div className="mb-3">
-              <SectionTitle>Dernières chansons</SectionTitle>
-            </div>
-            <SongsTable songs={songs} />
-          </section>
-        </Reveal>
+        {/* Pas de Reveal ici (contrairement aux sections au-dessus) : cette
+            section démarre sous la ligne de flottaison sur la hauteur d'écran de
+            référence (960px). La gater au scroll la laissait à opacity-0 tant que
+            personne n'avait défilé — un grand vide blanc, pas une respiration. Le
+            fondu en cascade reste bien réel : chaque ligne du tableau (SongRow)
+            porte son propre Reveal et se révèle à son tour au défilement. */}
+        <section className="mt-12">
+          <div className="mb-3">
+            <SectionTitle>Dernières chansons</SectionTitle>
+          </div>
+          <SongsTable songs={songs} />
+        </section>
       </div>
     </>
   );

@@ -1,0 +1,117 @@
+"use client";
+
+import type { FormEvent } from "react";
+import { UsersRound } from "lucide-react";
+import { useTunnel } from "@/lib/tunnel/TunnelContext";
+import { RELATIONSHIP_OPTIONS } from "@/lib/tunnel/types";
+import { Button } from "@/components/ui/Button";
+import { mockContacts } from "@/lib/data/mock-contacts";
+import type { Contact } from "@/lib/types";
+
+// Le prénom est l'élément le plus important de l'écran — c'est le mot que la
+// chanson va chanter — d'où un traitement typographique proche d'un titre,
+// pas un simple champ de formulaire parmi d'autres.
+export function RecipientStep() {
+  const { data, update, goNext } = useTunnel();
+  const canContinue = data.recipientFirstName.trim().length > 0 && data.relationship !== null;
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!canContinue) return;
+    goNext();
+  }
+
+  function pickContact(contact: Contact) {
+    update({ recipientFirstName: contact.firstName, relationship: contact.relationship, contactId: contact.id });
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {mockContacts.length > 0 && (
+        <div className="mb-6">
+          <p className="flex items-center gap-1.5 text-label-md uppercase tracking-wide text-ink-muted">
+            <UsersRound className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />
+            Ou choisissez parmi vos proches
+          </p>
+          <div className="mt-2.5 flex flex-wrap gap-2">
+            {mockContacts.map((contact) => {
+              const isSelected = data.contactId === contact.id;
+              return (
+                <button
+                  key={contact.id}
+                  type="button"
+                  onClick={() => pickContact(contact)}
+                  aria-pressed={isSelected}
+                  className={`min-h-11 rounded-full border px-3.5 py-2 text-sm font-medium transition-all duration-150 ease-magnetic hover:scale-105 active:scale-95 ${
+                    isSelected
+                      ? "border-brand bg-brand-soft text-brand"
+                      : "border-border text-ink-muted hover:border-brand/40 hover:text-ink"
+                  }`}
+                >
+                  {contact.firstName}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <label htmlFor="recipient-name" className="text-label-md uppercase tracking-wide text-ink-muted">
+        Son prénom
+      </label>
+      <input
+        id="recipient-name"
+        autoFocus
+        value={data.recipientFirstName}
+        onChange={(event) => update({ recipientFirstName: event.target.value, contactId: null })}
+        placeholder="Fatou"
+        className="mt-3 w-full border-b-2 border-border bg-transparent pb-2 font-display text-4xl font-bold text-ink placeholder:text-ink-muted/30 focus:border-brand focus:outline-none sm:text-5xl"
+      />
+
+      <p className="mt-10 text-label-md uppercase tracking-wide text-ink-muted">
+        Votre lien avec {data.recipientFirstName.trim() || "cette personne"}
+      </p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {RELATIONSHIP_OPTIONS.map((relationship) => {
+          const isSelected = data.relationship === relationship;
+          return (
+            <button
+              key={relationship}
+              type="button"
+              onClick={() => update({ relationship })}
+              aria-pressed={isSelected}
+              className={`min-h-11 rounded-full border px-3.5 py-2 text-sm font-medium capitalize transition-all duration-150 ease-magnetic hover:scale-105 active:scale-95 ${
+                isSelected
+                  ? "border-brand bg-brand-soft text-brand"
+                  : "border-border text-ink-muted hover:border-brand/40 hover:text-ink"
+              }`}
+            >
+              {relationship}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mt-8 max-w-[180px]">
+        <label htmlFor="recipient-age" className="text-label-md uppercase tracking-wide text-ink-muted">
+          Âge (facultatif)
+        </label>
+        <input
+          id="recipient-age"
+          type="number"
+          min={0}
+          max={120}
+          inputMode="numeric"
+          value={data.recipientAge}
+          onChange={(event) => update({ recipientAge: event.target.value })}
+          placeholder="Ex. 45"
+          className="mt-2 min-h-11 w-full rounded-control border border-border bg-surface px-3.5 text-sm text-ink placeholder:text-ink-muted focus:border-brand focus:outline-none focus:shadow-ring-focus"
+        />
+      </div>
+
+      <Button type="submit" disabled={!canContinue} className="mt-10 w-full sm:w-auto">
+        Continuer
+      </Button>
+    </form>
+  );
+}

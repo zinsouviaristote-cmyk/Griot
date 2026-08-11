@@ -3,17 +3,20 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  BarChart3,
   CircleHelp,
   Compass,
   Home,
   Library,
-  Music2,
-  PartyPopper,
+  Megaphone,
+  Settings,
+  UsersRound,
   Wand2,
   type LucideIcon,
 } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { CreditCard } from "@/components/dashboard/CreditCard";
+import { SidebarUserMenu } from "@/components/dashboard/SidebarUserMenu";
 
 interface NavItem {
   label: string;
@@ -25,12 +28,14 @@ const DISCOVER_ITEMS: NavItem[] = [
   { label: "Accueil", href: "/", icon: Home },
   { label: "Explorer", href: "/explorer", icon: Compass },
   { label: "Ma bibliothèque", href: "/bibliotheque", icon: Library },
+  { label: "Mes proches", href: "/proches", icon: UsersRound },
 ];
 
-const CREATE_ITEMS: NavItem[] = [
-  { label: "Nouvelle chanson", href: "/creer", icon: Wand2 },
-  { label: "Occasions", href: "/occasions", icon: PartyPopper },
-  { label: "Styles", href: "/styles", icon: Music2 },
+const CREATE_ITEMS: NavItem[] = [{ label: "Nouvelle chanson", href: "/creer", icon: Wand2 }];
+
+const ME_ITEMS: NavItem[] = [
+  { label: "Mes publications", href: "/publications", icon: Megaphone },
+  { label: "Statistiques", href: "/statistiques", icon: BarChart3 },
 ];
 
 function NavSection({
@@ -87,9 +92,15 @@ function NavSection({
 
 export function SidebarContent({
   creditBalance,
+  userInitials,
+  userName,
+  userEmail,
   onNavigate,
 }: {
   creditBalance: number;
+  userInitials: string;
+  userName: string;
+  userEmail: string;
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
@@ -104,13 +115,35 @@ export function SidebarContent({
         <Logo />
       </Link>
 
-      <nav className="flex flex-1 flex-col gap-6 overflow-y-auto">
+      <nav className="flex flex-col gap-6 overflow-y-auto">
         <NavSection title="Découvrir" items={DISCOVER_ITEMS} pathname={pathname} onNavigate={onNavigate} />
         <NavSection title="Créer" items={CREATE_ITEMS} pathname={pathname} onNavigate={onNavigate} />
+        <NavSection title="Moi" items={ME_ITEMS} pathname={pathname} onNavigate={onNavigate} />
       </nav>
+
+      {/* Absorbe l'espace restant sur un grand écran plutôt que de le laisser filer
+          en un seul bloc vide : un simple trait, centré dans ce qui reste, jamais
+          un second système de séparation. Sur un écran court, flex-1 vaut ~0 et ce
+          conteneur s'efface — seul le border-t du bloc crédits en dessous marque
+          la coupure, sans doublon visible. */}
+      <div className="flex flex-1 items-center px-3" aria-hidden="true">
+        <div className="h-px w-full bg-border" />
+      </div>
 
       <div className="space-y-3 border-t border-border pt-4">
         <CreditCard balance={creditBalance} />
+        <Link
+          href="/parametres"
+          onClick={onNavigate}
+          className="group flex items-center gap-2.5 px-3 py-1.5 text-xs font-medium text-ink-muted transition-colors hover:text-ink"
+        >
+          <Settings
+            className="h-4 w-4 transition-transform duration-200 ease-magnetic group-hover:scale-110 group-hover:rotate-90"
+            strokeWidth={1.5}
+            aria-hidden="true"
+          />
+          Paramètres
+        </Link>
         <Link
           href="/aide"
           onClick={onNavigate}
@@ -123,6 +156,10 @@ export function SidebarContent({
           />
           Besoin d&apos;aide ?
         </Link>
+      </div>
+
+      <div className="border-t border-border pt-3">
+        <SidebarUserMenu initials={userInitials} name={userName} email={userEmail} />
       </div>
     </div>
   );

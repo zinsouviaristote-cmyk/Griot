@@ -3,7 +3,7 @@ import type { SongStatus } from "@/lib/types";
 // Les boutons et états actifs n'ont qu'un seul violet plein (`brand`). Ici, seule
 // exception sanctionnée par la palette : `brand-light` (la "variante claire" du
 // design system) distingue les deux statuts "en mouvement" sans inventer de teinte.
-const STATUS_CONFIG: Record<
+export const STATUS_CONFIG: Record<
   SongStatus,
   { label: string; text: string; bg: string; dot: string; pulse?: boolean }
 > = {

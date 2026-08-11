@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { OccasionCard } from "@/components/dashboard/OccasionCard";
+import { Reveal } from "@/components/ui/Reveal";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { occasionCatalog } from "@/lib/data/mock-dashboard";
 
@@ -41,8 +42,10 @@ export function OccasionCarousel() {
         ref={scrollerRef}
         className="flex snap-x snap-mandatory gap-3.5 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
-        {occasionCatalog.map((occasion) => (
-          <OccasionCard key={occasion.id} occasion={occasion} />
+        {occasionCatalog.map((occasion, index) => (
+          <Reveal key={occasion.id} delayMs={index * 150} className="shrink-0 snap-start">
+            <OccasionCard occasion={occasion} />
+          </Reveal>
         ))}
       </div>
     </div>

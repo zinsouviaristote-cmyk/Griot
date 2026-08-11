@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
+import { TriangleAlert } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { Button } from "@/components/ui/Button";
+import { OccasionCardSkeleton, SongCardMobileSkeleton, StatCardSkeleton } from "@/components/ui/Skeleton";
+import { ToastDemo } from "@/components/design/ToastDemo";
 
 export const metadata: Metadata = {
   title: "Griot — Design system",
@@ -197,6 +200,67 @@ export default function DesignSystemPage() {
                 </div>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* Squelettes */}
+        <section>
+          <SectionTitle>Squelettes</SectionTitle>
+          <p className="mt-3 max-w-2xl text-body-md text-ink-muted">
+            La forme exacte du contenu attendu, jamais une roue générique — pour que
+            l&apos;écran ne saute pas quand les vraies données arrivent. Rendus automatiquement
+            par <code className="font-mono text-label-sm">app/(dashboard)/loading.tsx</code>{" "}
+            pendant le chargement de la route.
+          </p>
+          <div className="mt-6 space-y-6">
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+              {Array.from({ length: 4 }, (_, index) => (
+                <StatCardSkeleton key={index} />
+              ))}
+            </div>
+            <div className="flex gap-3.5 overflow-x-auto pb-1">
+              {Array.from({ length: 3 }, (_, index) => (
+                <OccasionCardSkeleton key={index} />
+              ))}
+            </div>
+            <div className="max-w-sm">
+              <SongCardMobileSkeleton />
+            </div>
+          </div>
+        </section>
+
+        {/* Retours */}
+        <section>
+          <SectionTitle>Retours</SectionTitle>
+          <p className="mt-3 max-w-2xl text-body-md text-ink-muted">
+            Toasts en glissement discret depuis le haut (16px, pas un plein écran), auto-masqués
+            après 3,5s ou fermés à la main. Erreurs de formulaire en ligne, sous le champ concerné.
+          </p>
+          <div className="mt-6 space-y-8 rounded-card border border-border bg-surface p-6 shadow-card sm:p-8">
+            <div>
+              <p className="mb-3 font-mono text-label-sm uppercase tracking-wide text-ink-muted">
+                Toast
+              </p>
+              <ToastDemo />
+            </div>
+            <div>
+              <p className="mb-3 font-mono text-label-sm uppercase tracking-wide text-ink-muted">
+                Erreur de champ
+              </p>
+              <div className="max-w-sm space-y-2">
+                <div className="rounded-card border border-danger/60 bg-page p-2">
+                  <input
+                    disabled
+                    placeholder="Prénom du destinataire — ex. Fatou"
+                    className="w-full rounded-control bg-transparent px-3.5 py-3 text-sm text-ink placeholder:text-ink-muted"
+                  />
+                </div>
+                <p className="flex items-center gap-1.5 text-label-sm text-danger">
+                  <TriangleAlert className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} aria-hidden="true" />
+                  Indiquez un prénom pour continuer.
+                </p>
+              </div>
+            </div>
           </div>
         </section>
       </div>

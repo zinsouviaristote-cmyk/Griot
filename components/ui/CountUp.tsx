@@ -21,10 +21,14 @@ export function CountUp({
   target,
   durationMs = 1200,
   variant = "number",
+  className = "font-mono tabular-nums",
 }: {
   target: number;
   durationMs?: number;
   variant?: "number" | "fcfa";
+  // Les gros chiffres autonomes (StatCard) veulent le mono ; un compteur glissé dans
+  // une phrase (MobileGreeting) veut juste la largeur stable de tabular-nums.
+  className?: string;
 }) {
   const format = FORMATTERS[variant];
   // "static" affiche toujours la vraie valeur : si le JS n'arrive jamais (coupure 3G
@@ -87,7 +91,7 @@ export function CountUp({
   }, [phase, target, durationMs]);
 
   return (
-    <span ref={ref} className="font-mono tabular-nums">
+    <span ref={ref} className={className}>
       {format(display)}
     </span>
   );

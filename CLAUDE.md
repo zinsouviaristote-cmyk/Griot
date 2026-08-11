@@ -16,3 +16,9 @@ Contexte permanent du projet Griot.
 **Performance.** Budget de 150 Ko par page hors audio. `backdrop-filter` au maximum sur un élément par écran, jamais sur une liste. Aucune image photographique décorative. Animations uniquement sur `transform` et `opacity`. Respect de `prefers-reduced-motion`.
 
 **Navigation desktop.** La barre latérale garde exactement ses entrées actuelles : Découvrir (Accueil, Explorer, Ma bibliothèque), Créer (Nouvelle chanson, Occasions, Styles), puis en bas la carte de crédits avec son bouton « Recharger », et l'aide.
+
+**Identité visuelle — vaut pour toute page construite désormais.**
+
+Toute nouvelle page reprend exactement le système du tableau de bord validé : tokens Tailwind existants, Manrope pour les titres et Hanken Grotesk pour le corps, violet `#630ed4` en aplat, fond de page `#f7f9fb` avec cartes blanches, bordure 1px et ombre douce, trait ondulé signature sous chaque titre de section, décor de courbes violettes en fond, badges d'état aux couleurs déjà définies. Aucun nouveau composant visuel n'est inventé : on réutilise les cartes, boutons, champs, badges et tableaux existants. Si un composant manque, il est créé dans le même langage et ajouté à la bibliothèque partagée.
+
+La sidebar desktop et la barre basse mobile sont déjà construites : chaque nouvelle page s'y insère sans les modifier.

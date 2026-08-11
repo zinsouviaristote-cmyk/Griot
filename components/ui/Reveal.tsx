@@ -14,12 +14,20 @@ export function Reveal({
   children,
   delayMs = 0,
   className = "",
+  as: Tag = "div",
+  ...rest
 }: {
   children: ReactNode;
   delayMs?: number;
   className?: string;
+  // `tr` pour une ligne de tableau : un `<div>` n'est pas un enfant valide de
+  // `<tbody>`, donc la ligne elle-même doit porter la classe et le ref de reveal.
+  as?: "div" | "tr";
+  // Passthrough pour rendre l'élément interactif (ligne de tableau cliquable,
+  // etc.) sans dupliquer la logique de reveal — jamais utilisé pour du style.
+  [key: string]: unknown;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLElement>(null);
   const [state, setState] = useState<"visible" | "hidden" | "revealing">("visible");
 
   useLayoutEffect(() => {
@@ -50,12 +58,13 @@ export function Reveal({
   const stateClass = state === "hidden" ? "opacity-0" : state === "revealing" ? "animate-reveal-up" : "";
 
   return (
-    <div
-      ref={ref}
+    <Tag
+      ref={ref as React.Ref<never>}
       className={`${stateClass} ${className}`}
       style={state === "revealing" ? { animationDelay: `${delayMs}ms` } : undefined}
+      {...rest}
     >
       {children}
-    </div>
+    </Tag>
   );
 }
