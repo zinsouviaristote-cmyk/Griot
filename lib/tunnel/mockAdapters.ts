@@ -1,5 +1,6 @@
 import { buildLyricsForMode } from "@/lib/tunnel/lyricsEngine";
 import type { StoryMode } from "@/lib/tunnel/types";
+import type { Occasion } from "@/lib/types";
 import type { Locale } from "@/lib/i18n/locale";
 
 // Adaptateurs factices — Phase 1. Aucun appel réseau réel : à remplacer par le
@@ -17,6 +18,7 @@ export interface LyricsInput {
   story: string;
   recipientFirstName: string;
   relationship: string | null;
+  occasion: Occasion;
 }
 
 // Génère (ou structure, ou transmet — selon le mode) les paroles. Gratuit et

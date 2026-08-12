@@ -1,19 +1,32 @@
 import type { StoryMode } from "@/lib/tunnel/types";
+import type { Occasion } from "@/lib/types";
 import type { Locale } from "@/lib/i18n/locale";
 
 // Moteur de paroles — Phase 1, aucune IA réelle : un gabarit qui EXTRAIT la
-// matière première de l'histoire (lieux, gestes, habitudes, objets) et la
-// recompose en vers courts, plutôt que de recopier le texte de la personne.
-// C'est la correction du bug produit central : une chanson qui ne fait que
-// coller le texte brut, ou qui ne parle que d'elle-même ("cette chanson…"),
-// ne dit rien de la personne qu'elle est censée célébrer.
+// matière première de l'histoire (lieux, gestes, objets, qualités, souvenirs
+// datés) et la recompose en vers courts, plutôt que de recopier le texte de
+// la personne. C'est la correction du bug produit le plus grave : des paroles
+// incompréhensibles ne sont jamais rattrapées par le moteur musical, qui
+// chante exactement ce qu'on lui donne — le texte est ce qui porte l'émotion.
 //
-// Paramétré par langue de chanson (voir RaconteLanguagePack) — vocabulaire,
-// mots-outils et gabarits de vers diffèrent entre français et anglais, mais
-// l'algorithme d'extraction et de composition reste unique : un seul endroit
-// à faire évoluer si la logique change, jamais deux moteurs à synchroniser.
+// Méthode en deux temps, toujours dans cet ordre :
+//   1. extractAnchors  — identifie les éléments concrets réellement présents
+//      dans l'histoire (jamais inventés, jamais complétés par du vide).
+//   2. buildRaconteAttempt — transforme chacun en vers imagé. Le texte brut de
+//      la personne n'apparaît JAMAIS tel quel (vérifié par validateRaconteLyrics).
+//
+// Si l'histoire ne contient pas au moins deux éléments concrets, le moteur ne
+// génère rien : voir hasEnoughStoryMaterial, utilisé par l'écran "Racontez-la"
+// pour demander une précision avant même d'arriver ici.
+//
+// Paramétré par langue de chanson ET par occasion (voir RaconteLanguagePack) :
+// vocabulaire, gabarits de vers et registre du pont diffèrent, mais
+// l'algorithme d'extraction et de composition reste unique.
 
-export const MAX_WORDS_PER_LINE = 12;
+export const MAX_WORDS_PER_LINE = 10;
+export const MIN_CONCRETE_ELEMENTS = 2;
+export const MIN_TOTAL_LINES = 16;
+export const MAX_TOTAL_LINES = 22;
 
 export const META_REFERENCE_PATTERNS = [
   /cette chanson/i,
@@ -21,6 +34,7 @@ export const META_REFERENCE_PATTERNS = [
   /ces mots/i,
   /la musique te dira/i,
   /cette musique/i,
+  /chaque mot est un cadeau/i,
 ];
 
 const EN_META_REFERENCE_PATTERNS = [
@@ -29,10 +43,29 @@ const EN_META_REFERENCE_PATTERNS = [
   /these words/i,
   /the music will tell you/i,
   /this tune/i,
+  /every word is a gift/i,
+];
+
+// Mots de fête interdits dans un hommage — le registre suit l'occasion,
+// jamais l'inverse. N'importe où ailleurs, ces mots restent autorisés.
+const FR_FESTIVE_WORDS = [
+  "fête", "fêter", "fêtons", "fêtez", "célébrons", "célébrer", "célébration",
+  "dansons", "dansez", "danse", "danser", "applaudissons", "applaudir",
+  "champagne", "feu d'artifice", "réjouissons",
+];
+
+const EN_FESTIVE_WORDS = [
+  "party", "celebrate", "celebration", "let's dance", "dance", "dancing",
+  "applaud", "cheers", "champagne", "fireworks", "rejoice",
 ];
 
 export function containsMetaReference(text: string, patterns: RegExp[] = META_REFERENCE_PATTERNS): boolean {
   return patterns.some((pattern) => pattern.test(text));
+}
+
+export function containsFestiveWord(text: string, words: string[]): boolean {
+  const lower = text.toLowerCase();
+  return words.some((word) => lower.includes(word));
 }
 
 export function wordCount(line: string): number {
@@ -43,17 +76,36 @@ export function isTagLine(line: string): boolean {
   return /^\[.+\]$/.test(line.trim());
 }
 
+function countContentLines(lyricsText: string): number {
+  return lyricsText.split("\n").filter((line) => line.trim() && !isTagLine(line)).length;
+}
+
 // Le contenu d'une section nommée (entre son étiquette et la suivante) —
 // utilisé pour vérifier que le prénom apparaît bien DANS le refrain, pas
-// seulement quelque part dans le texte.
+// seulement quelque part dans le texte. Ne renvoie que la PREMIÈRE occurrence.
 export function extractSection(lyricsText: string, tagName: string): string | null {
+  const sections = extractAllSections(lyricsText, tagName);
+  return sections.length > 0 ? sections[0] : null;
+}
+
+// Toutes les occurrences d'une section nommée — nécessaire pour vérifier que
+// le refrain se répète à l'identique, pas seulement la première fois.
+export function extractAllSections(lyricsText: string, tagName: string): string[] {
   const lines = lyricsText.split("\n");
-  const startIndex = lines.findIndex((line) => new RegExp(`^\\[${tagName}\\b`, "i").test(line.trim()));
-  if (startIndex === -1) return null;
-  const rest = lines.slice(startIndex + 1);
-  const endOffset = rest.findIndex((line) => isTagLine(line));
-  const section = endOffset === -1 ? rest : rest.slice(0, endOffset);
-  return section.join("\n");
+  const sections: string[] = [];
+  let i = 0;
+  while (i < lines.length) {
+    if (new RegExp(`^\\[${tagName}\\b`, "i").test(lines[i].trim())) {
+      const rest = lines.slice(i + 1);
+      const endOffset = rest.findIndex((line) => isTagLine(line));
+      const sectionLines = endOffset === -1 ? rest : rest.slice(0, endOffset);
+      sections.push(sectionLines.join("\n").trim());
+      i += (endOffset === -1 ? rest.length : endOffset) + 1;
+    } else {
+      i++;
+    }
+  }
+  return sections;
 }
 
 function countOccurrences(text: string, needle: string): number {
@@ -66,7 +118,7 @@ function countOccurrences(text: string, needle: string): number {
 function capLineWords(line: string): string {
   const words = line.trim().split(/\s+/).filter(Boolean);
   if (words.length <= MAX_WORDS_PER_LINE) return words.join(" ");
-  // Coupe proprement au mot 12 — jamais de "…", une ligne tronquée avec des
+  // Coupe proprement au mot 10 — jamais de "…", une ligne tronquée avec des
   // points de suspension est exactement le défaut qu'on corrige ici.
   return words.slice(0, MAX_WORDS_PER_LINE).join(" ");
 }
@@ -84,17 +136,28 @@ interface RaconteLanguagePack {
   concreteVocab: Set<string>;
   linkingWords: Set<string>;
   habitPatterns: RegExp[];
+  datedMemoryPatterns: RegExp[];
+  // Terminaisons qui trahissent un verbe à l'infinitif plutôt qu'un nom — un
+  // résidu d'un seul mot qui matche n'est jamais un élément concret, même
+  // s'il fait cinq lettres ou plus. `null` si la langue n'a pas ce problème.
+  nonNominalSuffix: RegExp | null;
   relationshipOpeners: Record<string, string>;
   defaultOpener: string;
   anchorLineTemplates: ((anchor: string, name: string) => string)[];
   coupletOpeners: string[];
+  coupletTwoOpeners: string[];
+  introSecondLines: string[];
   refrainClosers: string[];
   closingLines: string[];
+  pontNameLines: ((name: string) => string)[];
+  pontClosers: string[];
+  occasionPontLines: Record<Occasion, string[]>;
   metaReferencePatterns: RegExp[];
+  festiveWords: string[];
   refrainTag: string;
   introTag: string;
   coupletTag: (index: number) => string;
-  fallbackAnchor: string;
+  pontTag: string;
   fallbackName: string;
 }
 
@@ -122,7 +185,7 @@ const FR_CONCRETE_VOCAB = new Set([
   "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi",
   "main", "mains", "sourire", "larmes", "lettre", "lettres", "photo", "radio",
   "café", "thé", "pain", "riz", "mil", "igname", "feu", "lampe", "bougie",
-  "bougies", "panier", "sac", "vélo", "stylo", "montre", "bracelet",
+  "bougies", "panier", "sac", "vélo", "vélos", "stylo", "montre", "bracelet",
   "foulard", "chapeau", "valise", "bague", "collier", "pagne", "cahier",
   "tableau", "gâteau", "chocolat", "cœur", "cadeau",
   "travail", "voyage", "prière", "prières", "chant", "chants", "danse",
@@ -136,6 +199,12 @@ const FR_CONCRETE_VOCAB = new Set([
   "pêcheuse", "pêche", "tisserand", "artisan", "ingénieur", "ingénieure",
   "médecin", "avocat", "avocate", "professeur", "professeure", "pharmacien",
   "pharmacienne",
+  // Qualités — une chanson parle aussi de qui la personne EST, pas seulement
+  // de ce qu'elle a fait.
+  "courageuse", "courageux", "patiente", "patient", "généreuse", "généreux",
+  "douce", "doux", "forte", "fort", "drôle", "gentille", "gentil", "fidèle",
+  "dévouée", "dévoué", "tendre", "brave", "sage", "honnête", "travailleuse",
+  "travailleur", "discrète", "discret", "loyale", "loyal",
 ]);
 
 const FR_LINKING_WORDS = new Set(["du", "de", "des", "d", "au", "aux", "la", "le"]);
@@ -147,6 +216,13 @@ const FR_HABIT_PATTERNS: RegExp[] = [
   /(?:tous les|chaque)\s+([a-zà-ÿ']+(?:\s+[a-zà-ÿ']+){0,1})/i,
   /avant\s+(?:le|la|les|l')\s*([a-zà-ÿ']+(?:\s+[a-zà-ÿ']+){0,2})/i,
   /sans\s+jamais\s+([a-zà-ÿ']+(?:\s+[a-zà-ÿ']+){0,1})/i,
+];
+
+// Souvenirs datés — un âge ou une année précisément cités par la personne.
+// Jamais une date qu'elle n'a pas donnée : on ne fait que les repérer.
+const FR_DATED_MEMORY_PATTERNS: RegExp[] = [
+  /(?:à\s+mes|à\s+ses|quand\s+j'avais|quand\s+tu\s+avais)\s+(\d{1,2})\s*ans/i,
+  /\ben\s+(19|20)\d{2}\b/i,
 ];
 
 const FR_RELATIONSHIP_OPENERS: Record<string, string> = {
@@ -175,6 +251,18 @@ const FR_ANCHOR_LINE_TEMPLATES: ((anchor: string, name: string) => string)[] = [
 ];
 
 const FR_COUPLET_OPENERS = ["je repense à toi", "j'ai gardé ça en moi", "voici ce que je vois"];
+const FR_COUPLET_TWO_OPENERS = [
+  "Et je repense encore à ceci",
+  "Il y a aussi cela, gravé en moi",
+  "Je n'ai rien laissé s'effacer",
+];
+
+const FR_INTRO_SECOND_LINES = [
+  "Laisse-moi te raconter ce que je vois",
+  "Voici ce que je n'ai jamais oublié",
+  "Ferme les yeux et écoute bien",
+  "Ce que je porte, je te le rends",
+];
 
 const FR_REFRAIN_CLOSERS = [
   "je te le dis aujourd'hui",
@@ -191,22 +279,78 @@ const FR_CLOSING_LINES = [
   "et je continue de te le rendre",
 ];
 
+const FR_PONT_NAME_LINES: ((name: string) => string)[] = [
+  (name) => `${name}, tu comptes plus que les mots`,
+  (name) => `${name}, rien ne remplace ce que tu es`,
+  (name) => `Et ça, ${name}, je ne l'oublierai pas`,
+];
+
+const FR_PONT_CLOSERS = [
+  "Ce lien entre nous ne se brise pas",
+  "C'est simple et c'est vrai, encore et encore",
+  "Rien de tout cela ne s'efface",
+  "Et ça restera vrai demain aussi",
+];
+
+// Deux à quatre lignes par occasion — jamais un mot festif dans "hommage".
+// Choisies pour rester vraies même sans connaître les détails de la personne.
+const FR_OCCASION_PONT_LINES: Record<Occasion, string[]> = {
+  anniversaire: [
+    "Une année de plus s'ajoute à ton histoire",
+    "Que cette nouvelle année te ressemble encore",
+    "Encore une bougie, encore une promesse",
+    "Le temps passe et tu restes toi-même",
+  ],
+  amour: [
+    "Ce que je ressens ne tient pas dans des mots",
+    "Avec toi chaque jour semble neuf",
+    "Tu es devenu mon endroit préféré",
+    "Rien ne ressemble à ce qu'on a construit",
+  ],
+  mariage: [
+    "Aujourd'hui une nouvelle page commence",
+    "Que cette union vous porte longtemps",
+    "Deux chemins qui n'en font plus qu'un",
+    "Que la joie de ce jour ne s'efface jamais",
+  ],
+  reussite: [
+    "Ce que tu as construit force le respect",
+    "Ce chemin parcouru t'appartient",
+    "Rien ne t'a été offert, tout a été gagné",
+    "Ce sommet, c'est le tien, personne d'autre",
+  ],
+  hommage: [
+    "Ce que tu as semé reste debout",
+    "Ta mémoire habite chaque geste",
+    "Rien de ce que tu as donné n'a disparu",
+    "Ce que tu m'as appris me porte encore",
+  ],
+};
+
 const FR_PACK: RaconteLanguagePack = {
   stopwords: FR_STOPWORDS,
   concreteVocab: FR_CONCRETE_VOCAB,
   linkingWords: FR_LINKING_WORDS,
   habitPatterns: FR_HABIT_PATTERNS,
+  datedMemoryPatterns: FR_DATED_MEMORY_PATTERNS,
+  nonNominalSuffix: /(er|ir|oir|re)$/i,
   relationshipOpeners: FR_RELATIONSHIP_OPENERS,
   defaultOpener: FR_RELATIONSHIP_OPENERS.autre,
   anchorLineTemplates: FR_ANCHOR_LINE_TEMPLATES,
   coupletOpeners: FR_COUPLET_OPENERS,
+  coupletTwoOpeners: FR_COUPLET_TWO_OPENERS,
+  introSecondLines: FR_INTRO_SECOND_LINES,
   refrainClosers: FR_REFRAIN_CLOSERS,
   closingLines: FR_CLOSING_LINES,
+  pontNameLines: FR_PONT_NAME_LINES,
+  pontClosers: FR_PONT_CLOSERS,
+  occasionPontLines: FR_OCCASION_PONT_LINES,
   metaReferencePatterns: META_REFERENCE_PATTERNS,
+  festiveWords: FR_FESTIVE_WORDS,
   refrainTag: "Refrain",
   introTag: "Intro",
   coupletTag: (index) => `Couplet ${index}`,
-  fallbackAnchor: "ce que tu m'as donné",
+  pontTag: "Pont",
   fallbackName: "toi",
 };
 
@@ -235,7 +379,7 @@ const EN_CONCRETE_VOCAB = new Set([
   "monday", "tuesday", "wednesday", "thursday", "friday", "saturday",
   "hand", "hands", "smile", "tears", "letter", "letters", "photo", "radio",
   "coffee", "tea", "bread", "rice", "fire", "lamp", "candle", "candles",
-  "basket", "bag", "bicycle", "pen", "watch", "bracelet", "scarf", "hat",
+  "basket", "bag", "bicycle", "bicycles", "pen", "watch", "bracelet", "scarf", "hat",
   "suitcase", "ring", "necklace", "notebook", "painting", "cake",
   "chocolate", "heart", "gift",
   "work", "journey", "prayer", "prayers", "song", "songs", "dance",
@@ -245,6 +389,8 @@ const EN_CONCRETE_VOCAB = new Set([
   "worker", "driver", "cook", "mechanic", "hairdresser", "fisherman",
   "fisherwoman", "fishing", "weaver", "artisan", "engineer", "doctor",
   "lawyer", "professor", "pharmacist",
+  "brave", "patient", "generous", "gentle", "strong", "funny", "kind",
+  "loyal", "devoted", "tender", "wise", "honest", "hardworking", "quiet",
 ]);
 
 const EN_LINKING_WORDS = new Set(["of", "the", "in", "at", "from"]);
@@ -256,6 +402,11 @@ const EN_HABIT_PATTERNS: RegExp[] = [
   /every\s+(?:single\s+)?([a-z']+(?:\s+[a-z']+){0,1})/i,
   /before\s+(?:the|every)\s*([a-z']+(?:\s+[a-z']+){0,2})/i,
   /without\s+ever\s+([a-z']+(?:\s+[a-z']+){0,1})/i,
+];
+
+const EN_DATED_MEMORY_PATTERNS: RegExp[] = [
+  /(?:at|when\s+i\s+was|when\s+you\s+were)\s+(\d{1,2})\s*(?:years\s+old|yo)?/i,
+  /\bin\s+(19|20)\d{2}\b/i,
 ];
 
 const EN_RELATIONSHIP_OPENERS: Record<string, string> = {
@@ -284,6 +435,18 @@ const EN_ANCHOR_LINE_TEMPLATES: ((anchor: string, name: string) => string)[] = [
 ];
 
 const EN_COUPLET_OPENERS = ["I think back to you", "I kept this close to me", "here's what I see"];
+const EN_COUPLET_TWO_OPENERS = [
+  "And I still think back to this",
+  "There's this too, carved in me",
+  "I let none of it fade away",
+];
+
+const EN_INTRO_SECOND_LINES = [
+  "Let me tell you what I see",
+  "Here's what I never forgot",
+  "Close your eyes and listen close",
+  "What you gave me, I give back",
+];
 
 const EN_REFRAIN_CLOSERS = [
   "I'm telling you today",
@@ -300,29 +463,83 @@ const EN_CLOSING_LINES = [
   "and I keep giving it back to you",
 ];
 
+const EN_PONT_NAME_LINES: ((name: string) => string)[] = [
+  (name) => `${name}, you matter more than words`,
+  (name) => `${name}, nothing replaces who you are`,
+  (name) => `And that, ${name}, I won't forget`,
+];
+
+const EN_PONT_CLOSERS = [
+  "This bond between us doesn't break",
+  "It's simple and it's true, again and again",
+  "None of this ever fades",
+  "And it stays true tomorrow too",
+];
+
+const EN_OCCASION_PONT_LINES: Record<Occasion, string[]> = {
+  anniversaire: [
+    "One more year added to your story",
+    "May this new year still feel like you",
+    "One more candle, one more promise",
+    "Time moves on and you stay yourself",
+  ],
+  amour: [
+    "What I feel won't fit into words",
+    "With you every day feels brand new",
+    "You became my favorite place",
+    "Nothing compares to what we built",
+  ],
+  mariage: [
+    "Today a brand new page begins",
+    "May this union carry you far",
+    "Two paths now become just one",
+    "May this day's joy never fade",
+  ],
+  reussite: [
+    "What you built commands respect",
+    "This road walked belongs to you",
+    "Nothing was given, all was earned",
+    "This summit is yours, no one else's",
+  ],
+  hommage: [
+    "What you planted still stands tall",
+    "Your memory lives in every gesture",
+    "Nothing that you gave is gone",
+    "What you taught me still carries me",
+  ],
+};
+
 const EN_PACK: RaconteLanguagePack = {
   stopwords: EN_STOPWORDS,
   concreteVocab: EN_CONCRETE_VOCAB,
   linkingWords: EN_LINKING_WORDS,
   habitPatterns: EN_HABIT_PATTERNS,
+  datedMemoryPatterns: EN_DATED_MEMORY_PATTERNS,
+  nonNominalSuffix: null,
   relationshipOpeners: EN_RELATIONSHIP_OPENERS,
   defaultOpener: EN_RELATIONSHIP_OPENERS.autre,
   anchorLineTemplates: EN_ANCHOR_LINE_TEMPLATES,
   coupletOpeners: EN_COUPLET_OPENERS,
+  coupletTwoOpeners: EN_COUPLET_TWO_OPENERS,
+  introSecondLines: EN_INTRO_SECOND_LINES,
   refrainClosers: EN_REFRAIN_CLOSERS,
   closingLines: EN_CLOSING_LINES,
+  pontNameLines: EN_PONT_NAME_LINES,
+  pontClosers: EN_PONT_CLOSERS,
+  occasionPontLines: EN_OCCASION_PONT_LINES,
   metaReferencePatterns: EN_META_REFERENCE_PATTERNS,
+  festiveWords: EN_FESTIVE_WORDS,
   refrainTag: "Chorus",
   introTag: "Intro",
   coupletTag: (index) => `Verse ${index}`,
-  fallbackAnchor: "what you gave me",
+  pontTag: "Bridge",
   fallbackName: "you",
 };
 
 const LANGUAGE_PACKS: Record<Locale, RaconteLanguagePack> = { fr: FR_PACK, en: EN_PACK };
 
 // ---------------------------------------------------------------------------
-// Extraction d'éléments concrets (mode "raconte")
+// Premier temps : extraction d'éléments concrets (mode "raconte")
 // ---------------------------------------------------------------------------
 
 function stripPunct(word: string): string {
@@ -361,11 +578,13 @@ function cleanPhrase(phrase: string, pack: RaconteLanguagePack): string {
   return words.join(" ").trim();
 }
 
-// Repère les éléments concrets d'une histoire libre : habitudes ("jamais",
-// "toujours", "chaque"…) puis noms de lieux/objets/métiers d'un vocabulaire
-// courant. Repli sur les mots les plus longs si le texte est trop pauvre en
-// vocabulaire reconnu — jamais de liste vide, toujours ancré dans le texte
-// fourni (jamais un fait inventé).
+// Repère les éléments concrets d'une histoire libre : d'abord les souvenirs
+// datés (un âge, une année précisément cités), puis les habitudes ("jamais",
+// "toujours", "chaque"…), puis les lieux/objets/métiers/qualités d'un
+// vocabulaire courant. AUCUN repli sur "les mots les plus longs" : un élément
+// qui n'est pas reconnu n'est pas un élément concret — mieux vaut en avoir
+// deux vrais que six approximatifs (voir hasEnoughStoryMaterial, qui bloque
+// la génération en dessous du minimum plutôt que d'inventer).
 export function extractAnchors(story: string, language: Locale = "fr"): string[] {
   const pack = LANGUAGE_PACKS[language];
   const anchors: string[] = [];
@@ -374,15 +593,25 @@ export function extractAnchors(story: string, language: Locale = "fr"): string[]
   function add(phrase: string) {
     const cleaned = cleanPhrase(phrase, pack);
     if (!cleaned) return;
-    // Un résidu d'un seul mot, court et hors vocabulaire, est presque toujours
-    // ce qui reste après avoir retiré les mots-outils d'un motif d'habitude
-    // (ex. "toujours été là" → "là") — pas un élément concret en soi.
+    // Un résidu d'un seul mot, hors vocabulaire, est presque toujours ce qui
+    // reste après avoir retiré les mots-outils d'un motif d'habitude — soit
+    // trop court pour porter du sens (ex. "toujours été là" → "là"), soit un
+    // verbe à l'infinitif plutôt qu'un nom (ex. "jamais rien demander" →
+    // "demander") : ni l'un ni l'autre n'est un élément concret en soi.
     const words = cleaned.split(/\s+/);
-    if (words.length === 1 && cleaned.length < 5 && !pack.concreteVocab.has(normalize(cleaned))) return;
+    const looksLikeBareVerb = words.length === 1 && pack.nonNominalSuffix?.test(cleaned);
+    if (words.length === 1 && !pack.concreteVocab.has(normalize(cleaned)) && (cleaned.length < 5 || looksLikeBareVerb)) {
+      return;
+    }
     const key = cleaned.toLowerCase();
     if (seen.has(key)) return;
     seen.add(key);
     anchors.push(cleaned);
+  }
+
+  for (const pattern of pack.datedMemoryPatterns) {
+    const match = story.match(pattern);
+    if (match?.[0]) add(match[0].trim());
   }
 
   for (const pattern of pack.habitPatterns) {
@@ -403,17 +632,6 @@ export function extractAnchors(story: string, language: Locale = "fr"): string[]
     add(phrase);
   }
 
-  if (anchors.length < 3) {
-    const candidates = words
-      .map(stripPunct)
-      .filter((w) => w.length >= 5 && !pack.stopwords.has(normalize(w)))
-      .sort((a, b) => b.length - a.length);
-    for (const candidate of candidates) {
-      if (anchors.length >= 3) break;
-      add(candidate);
-    }
-  }
-
   // Un mot repéré seul ("soir") et ce même mot capturé dans une phrase plus
   // longue par un motif d'habitude ("soir après") comptent pour deux
   // éléments distincts sans l'être : ça grignote des places sur la limite de
@@ -431,12 +649,19 @@ export function extractAnchors(story: string, language: Locale = "fr"): string[]
   return deduped.slice(0, 6);
 }
 
+// Garde-fou produit central : en dessous de deux éléments concrets, il n'y a
+// pas assez de matière pour des paroles vraies — mieux vaut le dire à
+// l'utilisateur (voir StoryStep) que de livrer des vers creux.
+export function hasEnoughStoryMaterial(story: string, language: Locale = "fr"): boolean {
+  return extractAnchors(story, language).length >= MIN_CONCRETE_ELEMENTS;
+}
+
 // ---------------------------------------------------------------------------
-// Composition (mode "raconte")
+// Second temps : composition (mode "raconte")
 // ---------------------------------------------------------------------------
 
 // Générateur pseudo-aléatoire déterministe (mulberry32) : "Reformuler" doit
-// produire une variante différente à chaque appel, mais un même graine doit
+// produire une variante différente à chaque appel, mais une même graine doit
 // toujours redonner le même résultat — nécessaire pour des tests reproductibles.
 function mulberry32(seed: number): () => number {
   let state = seed;
@@ -453,9 +678,20 @@ function pick<T>(items: T[], rng: () => number): T {
   return items[Math.floor(rng() * items.length)] ?? items[0];
 }
 
-interface RaconteInput {
+// Pioche deux éléments distincts d'une liste (au moins deux) — utilisé pour
+// les deux vers du pont propres à l'occasion, afin qu'ils ne se répètent
+// jamais l'un l'autre au sein d'une même génération.
+function pickTwoDistinct(items: string[], rng: () => number): [string, string] {
+  const first = pick(items, rng);
+  const rest = items.filter((item) => item !== first);
+  const second = rest.length > 0 ? pick(rest, rng) : first;
+  return [first, second];
+}
+
+export interface RaconteInput {
   recipientFirstName: string;
   relationship: string | null;
+  occasion: Occasion;
   story: string;
 }
 
@@ -467,37 +703,41 @@ function buildRaconteAttempt(input: RaconteInput, anchors: string[], seed: numbe
   const rng = mulberry32(seed);
   const name = input.recipientFirstName.trim() || pack.fallbackName;
   const opener = pack.relationshipOpeners[input.relationship ?? "autre"] ?? pack.defaultOpener;
-  const safeAnchors = anchors.length > 0 ? anchors : [pack.fallbackAnchor];
 
   // Chaque élément concret extrait doit apparaître — jamais seulement les
-  // quatre premiers d'une liste plus longue. Répartis entre les deux couplets
+  // premiers d'une liste plus longue. Répartis entre les deux couplets
   // plutôt que plafonnés à un nombre fixe de lignes par couplet.
-  const half = Math.ceil(safeAnchors.length / 2);
-  const groupA = safeAnchors.slice(0, half);
-  const groupB = safeAnchors.slice(half);
+  const half = Math.ceil(anchors.length / 2);
+  const groupA = anchors.slice(0, half);
+  const groupB = anchors.slice(half);
 
-  const introLine = capLineWords(`${opener}, ${name}`);
+  const introLine1 = capLineWords(`${opener}, ${name}`);
+  const introLine2 = pick(pack.introSecondLines, rng);
 
   const coupletA = [
     capLineWords(`${name}, ${pick(pack.coupletOpeners, rng)}`),
     ...groupA.map((anchor) => buildAnchorLine(anchor, name, rng, pack)),
+    capLineWords(pick(pack.closingLines, rng)),
   ];
 
-  const closer1 = pick(pack.refrainClosers, rng);
-  const refrain = [`${name}, ${name},`, capLineWords(`${name}, ${closer1}`)];
+  // Le refrain est généré UNE seule fois puis réutilisé mot pour mot à
+  // chaque occurrence — jamais deux versions différentes d'un même refrain.
+  const refrainCloser = pick(pack.refrainClosers, rng);
+  const refrain = [`${name}, ${name},`, capLineWords(`${name}, ${refrainCloser}`)];
 
   const coupletB = [
+    pick(pack.coupletTwoOpeners, rng),
     ...groupB.map((anchor) => buildAnchorLine(anchor, name, rng, pack)),
     capLineWords(pick(pack.closingLines, rng)),
   ];
 
-  const remainingClosers = pack.refrainClosers.filter((c) => c !== closer1);
-  const closer2 = remainingClosers.length > 0 ? pick(remainingClosers, rng) : closer1;
-  const refrainRepeat = [`${name}, ${name},`, capLineWords(`${name}, ${closer2}`)];
+  const [occasionLine1, occasionLine2] = pickTwoDistinct(pack.occasionPontLines[input.occasion], rng);
+  const pont = [occasionLine1, occasionLine2, capLineWords(pick(pack.pontNameLines, rng)(name)), pick(pack.pontClosers, rng)];
 
   return [
     `[${pack.introTag}]`,
-    introLine,
+    introLine1,
+    introLine2,
     "",
     `[${pack.coupletTag(1)}]`,
     ...coupletA,
@@ -508,8 +748,11 @@ function buildRaconteAttempt(input: RaconteInput, anchors: string[], seed: numbe
     `[${pack.coupletTag(2)}]`,
     ...coupletB,
     "",
+    `[${pack.pontTag}]`,
+    ...pont,
+    "",
     `[${pack.refrainTag}]`,
-    ...refrainRepeat,
+    ...refrain,
   ].join("\n");
 }
 
@@ -518,13 +761,14 @@ export interface LyricsValidation {
   reasons: string[];
 }
 
-// Les cinq contrôles automatiques exigés par le produit — un texte qui en
-// rate un seul est rejeté et régénéré, jamais livré tel quel.
+// Les contrôles automatiques exigés par le produit — un texte qui en rate un
+// seul est rejeté et régénéré, jamais livré tel quel.
 export function validateRaconteLyrics(
   lyricsText: string,
   anchors: string[],
   name: string,
   story: string,
+  occasion: Occasion,
   language: Locale = "fr",
 ): LyricsValidation {
   const pack = LANGUAGE_PACKS[language];
@@ -538,12 +782,19 @@ export function validateRaconteLyrics(
   const nameCount = countOccurrences(lyricsText, name);
   if (nameCount < 3) reasons.push(`Le prénom apparaît ${nameCount} fois (minimum 3)`);
 
-  const refrainSection = extractSection(lyricsText, pack.refrainTag);
-  if (!refrainSection || countOccurrences(refrainSection, name) < 1) {
+  const refrainOccurrences = extractAllSections(lyricsText, pack.refrainTag);
+  if (refrainOccurrences.length === 0 || countOccurrences(refrainOccurrences[0], name) < 1) {
     reasons.push("Le prénom n'apparaît pas dans le refrain");
+  }
+  if (refrainOccurrences.length >= 2 && !refrainOccurrences.every((section) => section === refrainOccurrences[0])) {
+    reasons.push("Le refrain ne se répète pas à l'identique");
   }
 
   if (containsMetaReference(lyricsText, pack.metaReferencePatterns)) reasons.push("Vers auto-référentiel détecté");
+
+  if (occasion === "hommage" && containsFestiveWord(lyricsText, pack.festiveWords)) {
+    reasons.push("Mot festif détecté dans un hommage");
+  }
 
   for (const line of lyricsText.split("\n")) {
     const trimmed = line.trim();
@@ -554,15 +805,22 @@ export function validateRaconteLyrics(
     }
   }
 
+  const contentLines = countContentLines(lyricsText);
+  if (contentLines < MIN_TOTAL_LINES || contentLines > MAX_TOTAL_LINES) {
+    reasons.push(`Longueur totale hors limites : ${contentLines} lignes (attendu ${MIN_TOTAL_LINES} à ${MAX_TOTAL_LINES})`);
+  }
+
   return { valid: reasons.length === 0, reasons };
 }
 
-const MAX_GENERATION_ATTEMPTS = 6;
+const MAX_GENERATION_ATTEMPTS = 8;
 
 // Boucle "génère puis valide" — régénère avec une graine différente tant
 // qu'un contrôle échoue, jusqu'à MAX_GENERATION_ATTEMPTS (filet de sécurité :
 // la construction par gabarits satisfait déjà ces règles dans l'immense
-// majorité des cas, mais on ne livre jamais sans avoir vérifié).
+// majorité des cas, mais on ne livre jamais sans avoir vérifié). N'invente
+// jamais d'éléments concrets manquants : si l'histoire est trop pauvre,
+// l'appelant doit avoir déjà bloqué en amont (voir hasEnoughStoryMaterial).
 export function generateRaconteLyrics(input: RaconteInput, seed = 0, language: Locale = "fr"): string {
   const pack = LANGUAGE_PACKS[language];
   const anchors = extractAnchors(input.story, language);
@@ -570,7 +828,7 @@ export function generateRaconteLyrics(input: RaconteInput, seed = 0, language: L
   let last = "";
   for (let attempt = 0; attempt < MAX_GENERATION_ATTEMPTS; attempt++) {
     last = buildRaconteAttempt(input, anchors, seed + attempt * 97 + input.story.length, pack);
-    if (validateRaconteLyrics(last, anchors, name, input.story, language).valid) return last;
+    if (validateRaconteLyrics(last, anchors, name, input.story, input.occasion, language).valid) return last;
   }
   return last;
 }
@@ -669,7 +927,7 @@ export function passThroughStructuredLyrics(rawText: string): string {
 
 export function buildLyricsForMode(
   mode: StoryMode,
-  input: { story: string; recipientFirstName: string; relationship: string | null },
+  input: { story: string; recipientFirstName: string; relationship: string | null; occasion: Occasion },
   seed = 0,
   language: Locale = "fr",
 ): string {

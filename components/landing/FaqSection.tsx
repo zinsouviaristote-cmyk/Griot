@@ -51,9 +51,9 @@ function FaqItem({
         type="button"
         onClick={onToggle}
         aria-expanded={open}
-        className="flex min-h-11 w-full items-center justify-between gap-4 px-5 py-4 text-left"
+        className="flex min-h-12 w-full items-center justify-between gap-4 px-5 py-5 text-left"
       >
-        <span className="font-display text-base font-semibold text-ink sm:text-lg">{question}</span>
+        <span className="font-display text-base font-bold text-ink sm:text-lg">{question}</span>
         <Plus
           className={`h-5 w-5 shrink-0 text-brand transition-transform duration-300 ease-magnetic ${
             open ? "rotate-45" : "rotate-0"
@@ -78,7 +78,8 @@ function FaqItem({
 }
 
 export function FaqSection() {
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
+  // Tout fermé au chargement — à l'utilisateur de choisir ce qu'il veut lire.
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
     <section

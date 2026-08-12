@@ -588,6 +588,7 @@ export const fr = {
       fullscreenExit: "Quitter le plein écran",
       remaining: "Encore {{count}} caractère{{plural}} : vous y êtes presque.",
       enough: "C'est largement suffisant.",
+      needMoreDetail: "Racontez-nous un souvenir précis, un lieu, un geste. C'est ce qui rendra la chanson vraie.",
       continue: "Continuer",
     },
     generation: {

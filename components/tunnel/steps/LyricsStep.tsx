@@ -51,6 +51,7 @@ export function LyricsStep() {
     story: data.story,
     recipientFirstName: data.recipientFirstName,
     relationship: data.relationship,
+    occasion: data.occasion ?? "anniversaire",
   };
 
   useEffect(() => {
@@ -197,12 +198,14 @@ export function LyricsStep() {
         {lines.map((line, index) => {
           if (isTagLine(line)) {
             return (
-              <p key={index} className="mt-4 text-label-md uppercase tracking-wide text-ink-muted first:mt-0">
-                {line.replace(/[[\]]/g, "")}
-              </p>
+              <div key={index} className="mt-7 border-t border-border pt-5 first:mt-0 first:border-t-0 first:pt-0">
+                <span className="inline-block rounded-full bg-brand-soft px-2.5 py-1 text-label-sm font-semibold uppercase tracking-wide text-brand">
+                  {line.replace(/[[\]]/g, "")}
+                </span>
+              </div>
             );
           }
-          if (!line.trim()) return <div key={index} className="h-2" aria-hidden="true" />;
+          if (!line.trim()) return <div key={index} className="h-3" aria-hidden="true" />;
           const isEditing = editingIndex === index;
           return isEditing ? (
             <input
@@ -217,14 +220,14 @@ export function LyricsStep() {
                   (event.target as HTMLInputElement).blur();
                 }
               }}
-              className="mt-1 block min-h-11 w-full rounded-control border border-brand bg-page px-3 text-sm text-ink focus:outline-none focus:shadow-ring-focus"
+              className="mt-2.5 block min-h-12 w-full rounded-control border border-brand bg-page px-3 text-base text-ink leading-relaxed focus:outline-none focus:shadow-ring-focus"
             />
           ) : (
             <button
               key={index}
               type="button"
               onClick={() => setEditingIndex(index)}
-              className="mt-1 block min-h-11 w-full rounded-control px-3 py-2 text-left text-sm leading-relaxed text-ink transition-colors hover:bg-page"
+              className="mt-2.5 block min-h-12 w-full rounded-control px-3 py-2.5 text-left text-base leading-relaxed text-ink transition-colors hover:bg-page"
             >
               {renderHighlighted(line, data.recipientFirstName)}
             </button>

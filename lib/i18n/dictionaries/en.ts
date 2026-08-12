@@ -589,6 +589,7 @@ export const en: DeepDictionary<typeof fr> = {
       fullscreenExit: "Exit full screen",
       remaining: "{{count}} more character{{plural}}: almost there.",
       enough: "That's plenty.",
+      needMoreDetail: "Tell us a specific memory, a place, a gesture. That's what will make the song feel true.",
       continue: "Continue",
     },
     generation: {

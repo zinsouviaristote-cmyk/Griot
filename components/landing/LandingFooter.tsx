@@ -3,7 +3,7 @@ import { Logo } from "@/components/ui/Logo";
 
 export function LandingFooter() {
   return (
-    <footer className="border-t border-border bg-page/60 px-4 py-8">
+    <footer className="border-t border-border bg-brand-soft/40 px-4 py-8">
       <div className="mx-auto flex max-w-shell flex-col items-center gap-4 text-center sm:flex-row sm:justify-between sm:text-left">
         <Logo />
 
