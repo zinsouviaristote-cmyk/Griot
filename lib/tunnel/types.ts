@@ -1,4 +1,5 @@
 import { RELATIONSHIP_OPTIONS, type Occasion, type MusicStyle, type Relationship } from "@/lib/types";
+import type { Locale } from "@/lib/i18n/locale";
 
 export { RELATIONSHIP_OPTIONS };
 export type { Relationship };
@@ -101,9 +102,11 @@ export function packNotes(pack: CreditPack): number {
 // est la valeur exacte, puisqu'une Note EST un essai ; "chansons" reste une
 // estimation ("de quoi faire", jamais "soit") — une chanson peut coûter plus
 // ou moins de deux essais selon le nombre de reprises.
-export function formatPackEquivalence(pack: CreditPack): string {
+type PluralTranslate = (key: string, count: number, vars?: Record<string, string | number>) => string;
+
+export function formatPackEquivalence(pack: CreditPack, tn: PluralTranslate): string {
   const notes = packNotes(pack);
-  return `${notes} essai${notes > 1 ? "s" : ""}, de quoi faire ${pack.songs} chanson${pack.songs > 1 ? "s" : ""}`;
+  return `${tn("credits.attemptsCount", notes)}, ${tn("credits.enoughForSongs", pack.songs)}`;
 }
 
 // Forme volontairement plate et sérialisable : c'est exactement le corps qu'un
@@ -129,6 +132,12 @@ export interface TunnelData {
   storyMode: StoryMode;
   style: MusicStyle | null;
   voiceType: VoiceType | null;
+  // Langue dans laquelle la chanson est chantée — distincte de la langue de
+  // l'interface (voir lib/i18n) même si l'une initialise l'autre par défaut.
+  // Modifiable à l'écran "lyrics" ; pilote le moteur de paroles (voir
+  // lyricsEngine.ts) et les mots-clés de style restent en anglais dans les
+  // deux cas, jamais montrés à l'utilisateur.
+  songLanguage: Locale;
   // Renseignés une fois la connexion Google (ou le lien magique) aboutie à
   // l'écran de génération — jamais avant : la friction arrive après la
   // question posée, pas avant. `null` tant que personne ne s'est connecté ;
@@ -161,6 +170,7 @@ export const EMPTY_TUNNEL_DATA: TunnelData = {
   storyMode: "raconte",
   style: null,
   voiceType: null,
+  songLanguage: "fr",
   authEmail: null,
   authProvider: null,
   lyricsDraft: null,

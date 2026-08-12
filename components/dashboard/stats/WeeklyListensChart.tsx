@@ -1,3 +1,6 @@
+"use client";
+
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 import type { WeeklyListenPoint } from "@/lib/data/mock-stats";
 
 // Coordonnées internes fixes, étirées à 100% de la largeur du conteneur via
@@ -12,6 +15,7 @@ const PADDING_BOTTOM = 6;
 // Trait fin violet, sobre — une seule ligne de base en guise de grille, jamais
 // de quadrillage : "sans grille lourde" (voir la demande).
 export function WeeklyListensChart({ points }: { points: WeeklyListenPoint[] }) {
+  const { t } = useLanguage();
   const max = Math.max(...points.map((p) => p.count), 1);
   const plotHeight = HEIGHT - PADDING_TOP - PADDING_BOTTOM;
   const stepX = (WIDTH - PADDING_X * 2) / (points.length - 1);
@@ -47,7 +51,9 @@ export function WeeklyListensChart({ points }: { points: WeeklyListenPoint[] }) 
         ))}
       </div>
       <span className="sr-only">
-        Écoutes des sept derniers jours : {points.map((p) => `${p.label}, ${p.count} écoutes`).join(" ; ")}.
+        {t("stats.weeklyChart.srSummary", {
+          summary: points.map((p) => t("stats.weeklyChart.srPoint", { label: p.label, count: p.count })).join(" ; "),
+        })}
       </span>
     </div>
   );

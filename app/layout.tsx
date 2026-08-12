@@ -3,6 +3,7 @@ import { Hanken_Grotesk, Manrope } from "next/font/google";
 import { ToastProvider } from "@/components/ui/Toast";
 import { PlayerProvider } from "@/lib/player/PlayerContext";
 import { PersistentPlayerBar } from "@/components/player/PersistentPlayerBar";
+import { LanguageProvider } from "@/lib/i18n/LanguageContext";
 import "./globals.css";
 
 // Manrope porte les titres (600/700/800) — géométrique, architecturé.
@@ -24,7 +25,7 @@ const hankenGrotesk = Hanken_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "Griot — vos histoires en chanson",
+  title: "Griot : vos histoires en chanson",
   description:
     "Racontez une histoire, écoutez l'extrait gratuitement, payez par Mobile Money pour recevoir la chanson complète.",
 };
@@ -43,12 +44,14 @@ export default function RootLayout({
   return (
     <html lang="fr" className={`${manrope.variable} ${hankenGrotesk.variable}`}>
       <body className="font-sans">
-        <ToastProvider>
-          <PlayerProvider>
-            {children}
-            <PersistentPlayerBar />
-          </PlayerProvider>
-        </ToastProvider>
+        <LanguageProvider>
+          <ToastProvider>
+            <PlayerProvider>
+              {children}
+              <PersistentPlayerBar />
+            </PlayerProvider>
+          </ToastProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

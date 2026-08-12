@@ -4,9 +4,12 @@ import { useTunnel } from "@/lib/tunnel/TunnelContext";
 import { occasionCatalog } from "@/lib/data/mock-dashboard";
 import { OCCASION_TONES } from "@/lib/occasionTones";
 import { SectionTitle } from "@/components/ui/SectionTitle";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { occasionLabel } from "@/lib/i18n/catalog";
 import type { Occasion } from "@/lib/types";
 
 export function OccasionStep() {
+  const { t } = useLanguage();
   const { data, update, goNext } = useTunnel();
 
   function choose(id: Occasion) {
@@ -17,11 +20,9 @@ export function OccasionStep() {
   return (
     <div>
       <SectionTitle as="h1" size="lg">
-        Pour quelle occasion ?
+        {t("tunnel.occasion.title")}
       </SectionTitle>
-      <p className="mt-2 text-body-md text-ink-muted">
-        Un clic suffit — la chanson s&apos;adapte au ton dès maintenant.
-      </p>
+      <p className="mt-2 text-body-md text-ink-muted">{t("tunnel.occasion.subtitle")}</p>
 
       <div className="mt-8 grid grid-cols-2 gap-3">
         {occasionCatalog.map((item) => {
@@ -42,7 +43,7 @@ export function OccasionStep() {
               >
                 <item.icon className="h-[18px] w-[18px]" strokeWidth={1.5} aria-hidden="true" />
               </span>
-              <span className="font-display text-base font-semibold text-ink">{item.label}</span>
+              <span className="font-display text-base font-semibold text-ink">{occasionLabel(t, item.id)}</span>
             </button>
           );
         })}

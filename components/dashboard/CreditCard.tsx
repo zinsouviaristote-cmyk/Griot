@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import { Sparkle } from "lucide-react";
 import { ButtonLink } from "@/components/ui/Button";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 /**
  * L'élément le plus important de la sidebar : remplace la carte d'abonnement
@@ -10,6 +13,7 @@ import { ButtonLink } from "@/components/ui/Button";
  * un seul chemin, jamais une page /credits séparée.
  */
 export function CreditCard({ balance }: { balance: number }) {
+  const { t, tn } = useLanguage();
   const isLow = balance <= 1;
 
   return (
@@ -20,20 +24,16 @@ export function CreditCard({ balance }: { balance: number }) {
             <Sparkle className="h-3.5 w-3.5 animate-pulse text-brand" strokeWidth={1.5} aria-hidden="true" />
           </span>
           <span className="text-xs font-medium uppercase tracking-wide transition-colors group-hover:text-ink">
-            Vos Notes
+            {t("credits.label")}
           </span>
         </div>
         <p className="mt-2.5 font-display text-3xl font-semibold text-ink">
-          {balance} <span className="font-sans text-base font-normal text-ink-muted">{balance > 1 ? "Notes" : "Note"}</span>
+          {balance} <span className="font-sans text-base font-normal text-ink-muted">{tn("credits.unit", balance)}</span>
         </p>
-        <p className="mt-1 text-xs text-ink-muted">
-          {isLow
-            ? "Il vous en reste peu — rechargez pour ne pas être bloqué."
-            : "Une Note = un essai. Le premier essai de chaque chanson est offert. Vous écoutez avant de payer."}
-        </p>
+        <p className="mt-1 text-xs text-ink-muted">{isLow ? t("credits.lowBalance") : t("credits.explainer")}</p>
       </Link>
       <ButtonLink href="/recharger" variant="primary" className="mt-3.5 w-full">
-        Recharger
+        {t("credits.recharge")}
       </ButtonLink>
     </div>
   );

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Heart } from "lucide-react";
 import { hasLiked, recordLike } from "@/lib/explorer/likes";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 // Toujours rendu "non aimé" côté serveur — l'état réel (par appareil, via
 // localStorage) ne peut être connu qu'après montage, sinon on risque un
@@ -16,6 +17,7 @@ export function LikeButton({
   likes: number;
   size?: "sm" | "md";
 }) {
+  const { t } = useLanguage();
   const [liked, setLiked] = useState(false);
   const [count, setCount] = useState(likes);
   const [popping, setPopping] = useState(false);
@@ -49,7 +51,7 @@ export function LikeButton({
       onAnimationEnd={() => setPopping(false)}
       disabled={liked}
       aria-pressed={liked}
-      aria-label={liked ? "Chanson aimée" : "Aimer cette chanson"}
+      aria-label={liked ? t("explorer.likeButton.liked") : t("explorer.likeButton.like")}
       className={`flex min-h-11 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors duration-150 ${
         liked ? "text-brand" : "text-ink-muted hover:text-brand"
       } disabled:cursor-default`}

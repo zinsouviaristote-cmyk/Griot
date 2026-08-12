@@ -6,6 +6,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { useToast } from "@/components/ui/Toast";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 // Téléversement + recadrage carré simple (zoom centré, pas de repositionnement
 // libre) — la seule action de "Mon profil" que les gens veulent vraiment faire.
@@ -20,6 +21,7 @@ export function ProfilePhotoField({
   photoUrl: string | null;
   onChange: (url: string | null) => void;
 }) {
+  const { t } = useLanguage();
   const inputRef = useRef<HTMLInputElement>(null);
   const showToast = useToast();
   const [pendingUrl, setPendingUrl] = useState<string | null>(null);
@@ -42,13 +44,13 @@ export function ProfilePhotoField({
     if (photoUrl) URL.revokeObjectURL(photoUrl);
     onChange(pendingUrl);
     setPendingUrl(null);
-    showToast("Photo de profil mise à jour.", "success");
+    showToast(t("settings.photo.photoUpdated"), "success");
   }
 
   function handleRemove() {
     if (photoUrl) URL.revokeObjectURL(photoUrl);
     onChange(null);
-    showToast("Photo de profil retirée.", "default");
+    showToast(t("settings.photo.photoRemoved"), "default");
   }
 
   return (
@@ -57,7 +59,7 @@ export function ProfilePhotoField({
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          aria-label={photoUrl ? "Changer la photo de profil" : "Ajouter une photo de profil"}
+          aria-label={photoUrl ? t("settings.photo.changePhoto") : t("settings.photo.addPhoto")}
           className="group relative block h-16 w-16 overflow-hidden rounded-full transition-transform duration-150 ease-magnetic active:scale-95"
         >
           {photoUrl ? (
@@ -86,13 +88,13 @@ export function ProfilePhotoField({
           onClick={handleRemove}
           className="min-h-11 text-xs font-medium text-ink-muted transition-colors hover:text-danger hover:underline"
         >
-          Retirer la photo
+          {t("settings.photo.removePhoto")}
         </button>
       )}
 
       <Modal open={pendingUrl !== null} onClose={handleCancelCrop} labelledBy="crop-photo-title">
         <p id="crop-photo-title" className="font-display text-lg font-semibold text-ink">
-          Ajuster la photo
+          {t("settings.photo.adjustTitle")}
         </p>
         {pendingUrl && (
           <>
@@ -106,7 +108,7 @@ export function ProfilePhotoField({
               />
             </div>
             <label className="mt-4 block">
-              <span className="text-xs font-medium text-ink-muted">Zoom</span>
+              <span className="text-xs font-medium text-ink-muted">{t("settings.photo.zoom")}</span>
               <input
                 type="range"
                 min={1}
@@ -121,10 +123,10 @@ export function ProfilePhotoField({
         )}
         <div className="mt-5 flex gap-3">
           <Button variant="ghost" onClick={handleCancelCrop} className="flex-1">
-            Annuler
+            {t("settings.photo.cancel")}
           </Button>
           <Button onClick={handleConfirmCrop} className="flex-1">
-            Utiliser cette photo
+            {t("settings.photo.useThisPhoto")}
           </Button>
         </div>
       </Modal>

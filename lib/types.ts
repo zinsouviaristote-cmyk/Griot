@@ -75,10 +75,12 @@ export interface Contact {
   note: string | null;
 }
 
+// Contrairement à `Song`/`Contact`, cette interface ne porte plus `label`
+// ni `tagline` : les deux sont désormais des traductions (voir
+// lib/i18n/catalog.ts, occasionLabel/occasionTagline), jamais un texte figé
+// dans les données — seule l'icône reste propre à l'occasion elle-même.
 export interface OccasionMeta {
   id: Occasion;
-  label: string;
-  tagline: string;
   icon: LucideIcon;
 }
 
@@ -92,7 +94,6 @@ export interface DashboardUser {
   // Facultatif : sert uniquement aux rappels et à la livraison WhatsApp (voir
   // Paramètres > Notifications), plus jamais un identifiant de connexion.
   phone: string | null;
-  language: string;
 }
 
 // Une chanson publiée dans Explorer — entité distincte de Song : la publication
@@ -137,7 +138,12 @@ export interface CreditTransaction {
   id: string;
   date: string;
   motif: CreditMotif;
-  label: string;
+  // Clé de traduction (espace de noms recharge.history.transactions) plutôt
+  // qu'un texte déjà composé — une ligne d'historique doit s'afficher dans la
+  // langue d'interface courante, jamais figée dans celle où la donnée a été
+  // écrite.
+  labelKey: string;
+  labelParams?: Record<string, string | number>;
   delta: number;
   balanceAfter: number;
 }

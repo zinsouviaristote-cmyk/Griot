@@ -1,5 +1,6 @@
 import { buildLyricsForMode } from "@/lib/tunnel/lyricsEngine";
 import type { StoryMode } from "@/lib/tunnel/types";
+import type { Locale } from "@/lib/i18n/locale";
 
 // Adaptateurs factices — Phase 1. Aucun appel réseau réel : à remplacer par le
 // moteur de génération et l'envoi d'e-mails en Phase 2, derrière exactement
@@ -20,10 +21,13 @@ export interface LyricsInput {
 
 // Génère (ou structure, ou transmet — selon le mode) les paroles. Gratuit et
 // rapide : aucun essai audio n'est en jeu ici, seulement du texte — c'est ce
-// qui rend "Reformuler" possible sans jamais consommer de Note.
-export async function mockGenerateLyrics(input: LyricsInput, seed = 0): Promise<string> {
+// qui rend "Reformuler" possible sans jamais consommer de Note. `language`
+// pilote le vocabulaire du moteur (voir lyricsEngine.ts) — jamais les mots de
+// la personne elle-même en mode paroles libres/structurées, seulement les
+// étiquettes de section qu'on y ajoute.
+export async function mockGenerateLyrics(input: LyricsInput, seed = 0, language: Locale = "fr"): Promise<string> {
   await wait(600);
-  return buildLyricsForMode(input.storyMode, input, seed);
+  return buildLyricsForMode(input.storyMode, input, seed, language);
 }
 
 // Simule la synthèse audio à partir de paroles déjà validées — c'est

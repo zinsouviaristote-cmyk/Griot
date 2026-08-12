@@ -10,6 +10,7 @@ import { PlayerProgressBar } from "@/components/player/PlayerProgressBar";
 import { ExpandedPlayerSheet } from "@/components/player/ExpandedPlayerSheet";
 import { LikeButton } from "@/components/explorer/LikeButton";
 import { useToast } from "@/components/ui/Toast";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 /**
  * Lecteur persistant — un seul montage, à la racine de l'application (voir
@@ -23,6 +24,7 @@ import { useToast } from "@/components/ui/Toast";
  * ExpandedPlayerSheet).
  */
 export function PersistentPlayerBar() {
+  const { t } = useLanguage();
   const player = usePlayer();
   const showToast = useToast();
   const pathname = usePathname();
@@ -36,9 +38,9 @@ export function PersistentPlayerBar() {
   async function handleShare() {
     try {
       await navigator.clipboard.writeText(window.location.href);
-      showToast("Lien copié.", "success");
+      showToast(t("explorer.linkCopied"), "success");
     } catch {
-      showToast("Impossible de copier le lien.", "danger");
+      showToast(t("explorer.linkCopyFailed"), "danger");
     }
   }
 
@@ -66,7 +68,7 @@ export function PersistentPlayerBar() {
               type="button"
               onClick={() => player.prev()}
               disabled={!player.hasPrev}
-              aria-label="Chanson précédente"
+              aria-label={t("explorer.previousSong")}
               className="flex h-8 w-8 items-center justify-center rounded-full text-ink-muted transition-transform duration-150 ease-magnetic hover:text-ink active:scale-90 disabled:opacity-30"
             >
               <SkipBack className="h-4 w-4" strokeWidth={1.5} fill="currentColor" aria-hidden="true" />
@@ -76,7 +78,7 @@ export function PersistentPlayerBar() {
               type="button"
               onClick={() => player.next()}
               disabled={!player.hasNext}
-              aria-label="Chanson suivante"
+              aria-label={t("explorer.nextSong")}
               className="flex h-8 w-8 items-center justify-center rounded-full text-ink-muted transition-transform duration-150 ease-magnetic hover:text-ink active:scale-90 disabled:opacity-30"
             >
               <SkipForward className="h-4 w-4" strokeWidth={1.5} fill="currentColor" aria-hidden="true" />
@@ -96,7 +98,7 @@ export function PersistentPlayerBar() {
           <button
             type="button"
             onClick={handleShare}
-            aria-label="Partager le lien"
+            aria-label={t("explorer.shareLink")}
             className="flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-colors hover:text-brand active:scale-90"
           >
             <Share2 className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
@@ -104,7 +106,7 @@ export function PersistentPlayerBar() {
           <button
             type="button"
             onClick={() => player.setVolume(player.volume > 0 ? 0 : 1)}
-            aria-label={player.volume > 0 ? "Couper le son" : "Rétablir le son"}
+            aria-label={player.volume > 0 ? t("explorer.mute") : t("explorer.unmute")}
             className="flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-colors hover:text-brand active:scale-90"
           >
             {player.volume > 0 ? (
@@ -127,7 +129,7 @@ export function PersistentPlayerBar() {
         onKeyDown={(event) => {
           if (event.key === "Enter" || event.key === " ") player.setExpanded(true);
         }}
-        aria-label={`Agrandir le lecteur — ${current.title}`}
+        aria-label={t("player.expandWithTitle", { title: current.title })}
         className={`fixed inset-x-0 z-40 flex h-16 cursor-pointer items-center gap-3 border-t border-border bg-surface px-3 pb-[env(safe-area-inset-bottom)] lg:hidden ${
           hasShellChrome ? "bottom-16" : "bottom-0"
         }`}

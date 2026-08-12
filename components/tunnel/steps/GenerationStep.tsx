@@ -7,14 +7,8 @@ import { mockGenerateAudio } from "@/lib/tunnel/mockAdapters";
 import { GoogleButton } from "@/components/auth/GoogleButton";
 import { MagicLinkForm } from "@/components/auth/MagicLinkForm";
 import { GoogleMark } from "@/components/auth/GoogleMark";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 import type { SongAttempt } from "@/lib/tunnel/types";
-
-const STATUS_MESSAGES = [
-  "On lit votre histoire…",
-  "On compose la mélodie…",
-  "On enregistre la voix…",
-  "On peaufine le mix…",
-];
 
 // La génération elle-même ne dépend jamais de la redirection ci-dessous : ce
 // tunnel entier revit à l'identique au retour (voir TunnelContext), donc même
@@ -26,8 +20,15 @@ const STATUS_MESSAGES = [
 // l'écran précédent) : seule la prise audio change d'un essai à l'autre —
 // "Réessayer" ne repasse jamais par l'écriture.
 export function GenerationStep() {
+  const { t } = useLanguage();
   const { data, update, goNext } = useTunnel();
   const [messageIndex, setMessageIndex] = useState(0);
+  const statusMessages = [
+    t("tunnel.generation.statusReading"),
+    t("tunnel.generation.statusComposing"),
+    t("tunnel.generation.statusRecording"),
+    t("tunnel.generation.statusMixing"),
+  ];
 
   useEffect(() => {
     // Pas de garde "déjà démarré" par ref : en Strict Mode (dev), React monte
@@ -56,9 +57,10 @@ export function GenerationStep() {
 
   useEffect(() => {
     const interval = window.setInterval(() => {
-      setMessageIndex((i) => (i + 1) % STATUS_MESSAGES.length);
+      setMessageIndex((i) => (i + 1) % statusMessages.length);
     }, 2000);
     return () => window.clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -66,9 +68,9 @@ export function GenerationStep() {
       <span className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-soft">
         <Sparkles className="h-7 w-7 animate-breathe text-brand" strokeWidth={1.5} aria-hidden="true" />
       </span>
-      <p className="mt-6 font-display text-headline-md text-ink">On prépare votre chanson</p>
+      <p className="mt-6 font-display text-headline-md text-ink">{t("tunnel.generation.preparing")}</p>
       <p key={messageIndex} aria-live="polite" className="mt-2 min-h-[24px] animate-field-in text-body-md text-ink-muted">
-        {STATUS_MESSAGES[messageIndex]}
+        {statusMessages[messageIndex]}
       </p>
 
       {/* La friction arrive avant la récompense, jamais après : proposée
@@ -79,23 +81,21 @@ export function GenerationStep() {
           <div className="flex items-center gap-3">
             <CheckCircle2 className="h-5 w-5 shrink-0 text-success" strokeWidth={1.5} aria-hidden="true" />
             <div className="min-w-0">
-              <p className="text-sm text-ink">Connecté avec {data.authEmail}</p>
+              <p className="text-sm text-ink">{t("tunnel.generation.connectedAs", { email: data.authEmail ?? "" })}</p>
               <p className="mt-0.5 flex items-center gap-1 text-xs text-ink-muted">
                 {data.authProvider === "google" ? (
                   <GoogleMark className="h-3 w-3" />
                 ) : (
                   <Mail className="h-3 w-3" strokeWidth={1.5} aria-hidden="true" />
                 )}
-                Vous retrouverez cette chanson dans votre bibliothèque.
+                {t("tunnel.generation.connectedHint")}
               </p>
             </div>
           </div>
         ) : (
           <>
-            <p className="text-sm font-medium text-ink">Connectez-vous pour la retrouver facilement</p>
-            <p className="mt-1 text-xs text-ink-muted">
-              Facultatif — votre extrait gratuit reste disponible même sans compte.
-            </p>
+            <p className="text-sm font-medium text-ink">{t("tunnel.generation.connectPrompt")}</p>
+            <p className="mt-1 text-xs text-ink-muted">{t("tunnel.generation.connectOptional")}</p>
 
             <div className="mt-3">
               <GoogleButton returnTo="/creer" />
@@ -103,7 +103,7 @@ export function GenerationStep() {
 
             <div className="mt-4 flex items-center gap-3" aria-hidden="true">
               <div className="h-px flex-1 bg-border" />
-              <span className="text-xs font-medium text-ink-muted">ou</span>
+              <span className="text-xs font-medium text-ink-muted">{t("tunnel.generation.or")}</span>
               <div className="h-px flex-1 bg-border" />
             </div>
 

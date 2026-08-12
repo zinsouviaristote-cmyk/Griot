@@ -4,7 +4,9 @@ import { useState } from "react";
 import { GoogleMark } from "@/components/auth/GoogleMark";
 import { Avatar } from "@/components/ui/Avatar";
 import { withParams } from "@/lib/auth/returnUrl";
+import { markMockSessionActive } from "@/lib/auth/session";
 import { mockUser } from "@/lib/data/mock-dashboard";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 type Outcome = "success" | "denied" | "error";
 
@@ -14,6 +16,7 @@ type Outcome = "success" | "denied" | "error";
 // peut produire (accepté, refusé, en échec), pour que chacune reste testable
 // sans dépendre d'un compte Google réel.
 export function GoogleConsentView({ returnTo }: { returnTo: string }) {
+  const { t } = useLanguage();
   const [pending, setPending] = useState<Outcome | null>(null);
 
   function resolve(outcome: Outcome) {
@@ -23,6 +26,7 @@ export function GoogleConsentView({ returnTo }: { returnTo: string }) {
         outcome === "success"
           ? { auth: "success", provider: "google", email: mockUser.email, name: mockUser.firstName }
           : { auth: outcome };
+      if (outcome === "success") markMockSessionActive();
       window.location.href = withParams(returnTo, params);
     }, 700);
   }
@@ -31,8 +35,8 @@ export function GoogleConsentView({ returnTo }: { returnTo: string }) {
     <div className="flex min-h-screen items-center justify-center bg-[#f2f2f2] px-4 py-12">
       <div className="w-full max-w-sm rounded-lg border border-[#dadce0] bg-white p-8 text-center shadow-sm">
         <GoogleMark className="mx-auto h-9 w-9" />
-        <p className="mt-4 text-xl text-[#202124]">Choisissez un compte</p>
-        <p className="mt-1 text-sm text-[#5f6368]">pour continuer vers Griot</p>
+        <p className="mt-4 text-xl text-[#202124]">{t("auth.googleChooseAccount")}</p>
+        <p className="mt-1 text-sm text-[#5f6368]">{t("auth.googleContinueTo")}</p>
 
         <button
           type="button"
@@ -49,9 +53,9 @@ export function GoogleConsentView({ returnTo }: { returnTo: string }) {
 
         {pending && (
           <p className="mt-4 text-xs text-[#5f6368]" aria-live="polite">
-            {pending === "success" && "Connexion…"}
-            {pending === "denied" && "Retour à Griot…"}
-            {pending === "error" && "Échec de la connexion…"}
+            {pending === "success" && t("auth.googleConnecting")}
+            {pending === "denied" && t("auth.googleReturning")}
+            {pending === "error" && t("auth.googleFailed")}
           </p>
         )}
 
@@ -62,7 +66,7 @@ export function GoogleConsentView({ returnTo }: { returnTo: string }) {
             disabled={pending !== null}
             className="font-medium text-[#1a73e8] hover:underline disabled:opacity-60"
           >
-            Annuler
+            {t("auth.googleCancel")}
           </button>
           <button
             type="button"
@@ -70,15 +74,12 @@ export function GoogleConsentView({ returnTo }: { returnTo: string }) {
             disabled={pending !== null}
             className="text-[#5f6368] hover:underline disabled:opacity-60"
           >
-            Simuler une erreur réseau
+            {t("auth.googleSimulateError")}
           </button>
         </div>
       </div>
 
-      <p className="sr-only">
-        Simulation locale de la connexion Google, à des fins de démonstration — aucune donnée n&apos;est envoyée à
-        Google.
-      </p>
+      <p className="sr-only">{t("auth.googleSrDisclaimer")}</p>
     </div>
   );
 }

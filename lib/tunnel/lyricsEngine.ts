@@ -1,4 +1,5 @@
 import type { StoryMode } from "@/lib/tunnel/types";
+import type { Locale } from "@/lib/i18n/locale";
 
 // Moteur de paroles — Phase 1, aucune IA réelle : un gabarit qui EXTRAIT la
 // matière première de l'histoire (lieux, gestes, habitudes, objets) et la
@@ -6,6 +7,11 @@ import type { StoryMode } from "@/lib/tunnel/types";
 // C'est la correction du bug produit central : une chanson qui ne fait que
 // coller le texte brut, ou qui ne parle que d'elle-même ("cette chanson…"),
 // ne dit rien de la personne qu'elle est censée célébrer.
+//
+// Paramétré par langue de chanson (voir RaconteLanguagePack) — vocabulaire,
+// mots-outils et gabarits de vers diffèrent entre français et anglais, mais
+// l'algorithme d'extraction et de composition reste unique : un seul endroit
+// à faire évoluer si la logique change, jamais deux moteurs à synchroniser.
 
 export const MAX_WORDS_PER_LINE = 12;
 
@@ -17,8 +23,16 @@ export const META_REFERENCE_PATTERNS = [
   /cette musique/i,
 ];
 
-export function containsMetaReference(text: string): boolean {
-  return META_REFERENCE_PATTERNS.some((pattern) => pattern.test(text));
+const EN_META_REFERENCE_PATTERNS = [
+  /this song/i,
+  /this melody/i,
+  /these words/i,
+  /the music will tell you/i,
+  /this tune/i,
+];
+
+export function containsMetaReference(text: string, patterns: RegExp[] = META_REFERENCE_PATTERNS): boolean {
+  return patterns.some((pattern) => pattern.test(text));
 }
 
 export function wordCount(line: string): number {
@@ -62,10 +76,29 @@ function capitalize(text: string): string {
 }
 
 // ---------------------------------------------------------------------------
-// Extraction d'éléments concrets (mode "raconte")
+// Vocabulaire propre à chaque langue de chanson
 // ---------------------------------------------------------------------------
 
-const STOPWORDS = new Set([
+interface RaconteLanguagePack {
+  stopwords: Set<string>;
+  concreteVocab: Set<string>;
+  linkingWords: Set<string>;
+  habitPatterns: RegExp[];
+  relationshipOpeners: Record<string, string>;
+  defaultOpener: string;
+  anchorLineTemplates: ((anchor: string, name: string) => string)[];
+  coupletOpeners: string[];
+  refrainClosers: string[];
+  closingLines: string[];
+  metaReferencePatterns: RegExp[];
+  refrainTag: string;
+  introTag: string;
+  coupletTag: (index: number) => string;
+  fallbackAnchor: string;
+  fallbackName: string;
+}
+
+const FR_STOPWORDS = new Set([
   "le", "la", "les", "l", "un", "une", "des", "de", "du", "d", "et", "ou", "à",
   "au", "aux", "ce", "cette", "ces", "cet", "qui", "que", "qu", "pour", "avec",
   "sans", "sur", "sous", "dans", "chez", "par", "en", "est", "es", "suis",
@@ -79,7 +112,7 @@ const STOPWORDS = new Set([
   "bien", "cela", "ça", "avait", "avais", "avaient",
 ]);
 
-const CONCRETE_VOCAB = new Set([
+const FR_CONCRETE_VOCAB = new Set([
   "marché", "marchés", "maison", "cuisine", "jardin", "école", "champ",
   "champs", "rivière", "village", "ville", "quartier", "route", "chemin",
   "terre", "gare", "église", "mosquée", "atelier", "boutique", "magasin",
@@ -105,9 +138,9 @@ const CONCRETE_VOCAB = new Set([
   "pharmacienne",
 ]);
 
-const LINKING_WORDS = new Set(["du", "de", "des", "d", "au", "aux", "la", "le"]);
+const FR_LINKING_WORDS = new Set(["du", "de", "des", "d", "au", "aux", "la", "le"]);
 
-const HABIT_PATTERNS: RegExp[] = [
+const FR_HABIT_PATTERNS: RegExp[] = [
   /ne\s+t'?es?\s+jamais\s+([a-zà-ÿ']+(?:\s+[a-zà-ÿ']+){0,1})/i,
   /jamais\s+([a-zà-ÿ']+(?:\s+[a-zà-ÿ']+){0,1})/i,
   /toujours\s+([a-zà-ÿ']+(?:\s+[a-zà-ÿ']+){0,1})/i,
@@ -115,6 +148,182 @@ const HABIT_PATTERNS: RegExp[] = [
   /avant\s+(?:le|la|les|l')\s*([a-zà-ÿ']+(?:\s+[a-zà-ÿ']+){0,2})/i,
   /sans\s+jamais\s+([a-zà-ÿ']+(?:\s+[a-zà-ÿ']+){0,1})/i,
 ];
+
+const FR_RELATIONSHIP_OPENERS: Record<string, string> = {
+  "ma mère": "Maman, laisse-moi te dire",
+  "mon père": "Papa, laisse-moi te dire",
+  "ma femme": "Depuis le premier jour",
+  "mon mari": "Depuis le premier jour",
+  "mon frère": "Frère, écoute bien ceci",
+  "ma sœur": "Sœur, écoute bien ceci",
+  "mon ami·e": "Sur la route de la vie",
+  "mon enfant": "Petit à petit tu grandis",
+  "ma grand-mère": "Tes mains ont tout donné",
+  "mon grand-père": "Tes mains ont tout donné",
+  autre: "Sur mon chemin, un jour",
+};
+
+const FR_ANCHOR_LINE_TEMPLATES: ((anchor: string, name: string) => string)[] = [
+  (a) => `Je revois ${a}`,
+  (a) => `Il y a ${a}, gravé dans ma mémoire`,
+  (a) => `Rien n'effaçait ${a}`,
+  (a) => `${capitalize(a)}, je n'ai rien oublié`,
+  (a, name) => `${name}, je pense à ${a}`,
+  (a) => `Dans ${a}, je te retrouve encore`,
+  (a) => `On se souvient de ${a}`,
+  (a) => `Chaque ${a} raconte qui tu es`,
+];
+
+const FR_COUPLET_OPENERS = ["je repense à toi", "j'ai gardé ça en moi", "voici ce que je vois"];
+
+const FR_REFRAIN_CLOSERS = [
+  "je te le dis aujourd'hui",
+  "merci pour tout, encore et encore",
+  "tu comptes plus que tout",
+  "voilà ce que je devais te dire",
+  "et ça ne changera jamais",
+];
+
+const FR_CLOSING_LINES = [
+  "ce que tu as donné ne s'efface pas",
+  "je porte tout ça avec moi",
+  "rien de tout cela ne s'oublie",
+  "et je continue de te le rendre",
+];
+
+const FR_PACK: RaconteLanguagePack = {
+  stopwords: FR_STOPWORDS,
+  concreteVocab: FR_CONCRETE_VOCAB,
+  linkingWords: FR_LINKING_WORDS,
+  habitPatterns: FR_HABIT_PATTERNS,
+  relationshipOpeners: FR_RELATIONSHIP_OPENERS,
+  defaultOpener: FR_RELATIONSHIP_OPENERS.autre,
+  anchorLineTemplates: FR_ANCHOR_LINE_TEMPLATES,
+  coupletOpeners: FR_COUPLET_OPENERS,
+  refrainClosers: FR_REFRAIN_CLOSERS,
+  closingLines: FR_CLOSING_LINES,
+  metaReferencePatterns: META_REFERENCE_PATTERNS,
+  refrainTag: "Refrain",
+  introTag: "Intro",
+  coupletTag: (index) => `Couplet ${index}`,
+  fallbackAnchor: "ce que tu m'as donné",
+  fallbackName: "toi",
+};
+
+// ---------------------------------------------------------------------------
+// Pack anglais — même algorithme, vocabulaire et gabarits propres à la langue.
+// ---------------------------------------------------------------------------
+
+const EN_STOPWORDS = new Set([
+  "the", "a", "an", "of", "to", "and", "or", "in", "on", "at", "for", "with",
+  "without", "from", "by", "is", "are", "was", "were", "been", "be", "am",
+  "i", "you", "he", "she", "we", "they", "it", "my", "your", "his", "her",
+  "our", "their", "this", "that", "these", "those", "who", "what", "when",
+  "where", "why", "how", "not", "never", "always", "so", "as", "more",
+  "most", "very", "all", "some", "none", "still", "already", "again",
+  "once", "too", "also", "just", "did", "do", "does", "had", "have", "has",
+  "there", "than", "such", "own", "same", "no", "if", "but",
+]);
+
+const EN_CONCRETE_VOCAB = new Set([
+  "market", "house", "kitchen", "garden", "school", "field", "fields",
+  "river", "village", "town", "neighborhood", "road", "street", "land",
+  "station", "church", "mosque", "workshop", "shop", "store", "factory",
+  "capital",
+  "morning", "mornings", "evening", "evenings", "sun", "sunrise", "night",
+  "nights", "dawn", "stars", "moon", "season", "rain", "harvest", "sunday",
+  "monday", "tuesday", "wednesday", "thursday", "friday", "saturday",
+  "hand", "hands", "smile", "tears", "letter", "letters", "photo", "radio",
+  "coffee", "tea", "bread", "rice", "fire", "lamp", "candle", "candles",
+  "basket", "bag", "bicycle", "pen", "watch", "bracelet", "scarf", "hat",
+  "suitcase", "ring", "necklace", "notebook", "painting", "cake",
+  "chocolate", "heart", "gift",
+  "work", "journey", "prayer", "prayers", "song", "songs", "dance",
+  "celebration", "advice", "story", "stories", "silence", "courage",
+  "patience", "sacrifice", "family", "children", "money",
+  "seamstress", "tailor", "nurse", "teacher", "farmer", "trader", "vendor",
+  "worker", "driver", "cook", "mechanic", "hairdresser", "fisherman",
+  "fisherwoman", "fishing", "weaver", "artisan", "engineer", "doctor",
+  "lawyer", "professor", "pharmacist",
+]);
+
+const EN_LINKING_WORDS = new Set(["of", "the", "in", "at", "from"]);
+
+const EN_HABIT_PATTERNS: RegExp[] = [
+  /never\s+once\s+([a-z']+(?:\s+[a-z']+){0,1})/i,
+  /never\s+([a-z']+(?:\s+[a-z']+){0,1})/i,
+  /always\s+([a-z']+(?:\s+[a-z']+){0,1})/i,
+  /every\s+(?:single\s+)?([a-z']+(?:\s+[a-z']+){0,1})/i,
+  /before\s+(?:the|every)\s*([a-z']+(?:\s+[a-z']+){0,2})/i,
+  /without\s+ever\s+([a-z']+(?:\s+[a-z']+){0,1})/i,
+];
+
+const EN_RELATIONSHIP_OPENERS: Record<string, string> = {
+  "ma mère": "Mama, let me tell you",
+  "mon père": "Papa, let me tell you",
+  "ma femme": "Since the very first day",
+  "mon mari": "Since the very first day",
+  "mon frère": "Brother, listen closely",
+  "ma sœur": "Sister, listen closely",
+  "mon ami·e": "On the road of life",
+  "mon enfant": "Little by little you grow",
+  "ma grand-mère": "Your hands have given everything",
+  "mon grand-père": "Your hands have given everything",
+  autre: "On my path, one day",
+};
+
+const EN_ANCHOR_LINE_TEMPLATES: ((anchor: string, name: string) => string)[] = [
+  (a) => `I still see ${a}`,
+  (a) => `There was ${a}, carved into my memory`,
+  (a) => `Nothing could erase ${a}`,
+  (a) => `${capitalize(a)}, I haven't forgotten a thing`,
+  (a, name) => `${name}, I think of ${a}`,
+  (a) => `In ${a}, I find you still`,
+  (a) => `We still remember ${a}`,
+  (a) => `Every ${a} tells me who you are`,
+];
+
+const EN_COUPLET_OPENERS = ["I think back to you", "I kept this close to me", "here's what I see"];
+
+const EN_REFRAIN_CLOSERS = [
+  "I'm telling you today",
+  "thank you for everything, again and again",
+  "you matter more than anything",
+  "this is what I had to tell you",
+  "and that will never change",
+];
+
+const EN_CLOSING_LINES = [
+  "what you gave never fades away",
+  "I carry all of it with me",
+  "none of it is ever forgotten",
+  "and I keep giving it back to you",
+];
+
+const EN_PACK: RaconteLanguagePack = {
+  stopwords: EN_STOPWORDS,
+  concreteVocab: EN_CONCRETE_VOCAB,
+  linkingWords: EN_LINKING_WORDS,
+  habitPatterns: EN_HABIT_PATTERNS,
+  relationshipOpeners: EN_RELATIONSHIP_OPENERS,
+  defaultOpener: EN_RELATIONSHIP_OPENERS.autre,
+  anchorLineTemplates: EN_ANCHOR_LINE_TEMPLATES,
+  coupletOpeners: EN_COUPLET_OPENERS,
+  refrainClosers: EN_REFRAIN_CLOSERS,
+  closingLines: EN_CLOSING_LINES,
+  metaReferencePatterns: EN_META_REFERENCE_PATTERNS,
+  refrainTag: "Chorus",
+  introTag: "Intro",
+  coupletTag: (index) => `Verse ${index}`,
+  fallbackAnchor: "what you gave me",
+  fallbackName: "you",
+};
+
+const LANGUAGE_PACKS: Record<Locale, RaconteLanguagePack> = { fr: FR_PACK, en: EN_PACK };
+
+// ---------------------------------------------------------------------------
+// Extraction d'éléments concrets (mode "raconte")
+// ---------------------------------------------------------------------------
 
 function stripPunct(word: string): string {
   return word.replace(/^[«"'’(]+|[»"'’).,;:!?…]+$/g, "");
@@ -126,6 +335,7 @@ function normalize(word: string): string {
 
 // Forme affichable d'un mot : au singulier apostrophé ("l'usine", "d'un"),
 // c'est la partie APRÈS l'apostrophe qui porte le sens — "usine", pas "l".
+// Sans effet en anglais (pas d'élision), la coupure ne s'y déclenche jamais.
 function displayForm(rawWord: string): string {
   const stripped = stripPunct(rawWord);
   const idx = stripped.lastIndexOf("'");
@@ -135,19 +345,19 @@ function displayForm(rawWord: string): string {
 // Reconnaît un mot du vocabulaire concret même élidé ("l'usine") ou au
 // pluriel ("vélos") — le vocabulaire ne liste que les formes de base, la
 // reconnaissance ne doit pas dépendre d'avoir pensé à chaque variante.
-function vocabWord(rawWord: string): string | null {
+function vocabWord(rawWord: string, pack: RaconteLanguagePack): string | null {
   const displayed = displayForm(rawWord);
   const normalized = normalize(displayed);
-  if (CONCRETE_VOCAB.has(normalized) || CONCRETE_VOCAB.has(normalized.replace(/s$/, ""))) {
+  if (pack.concreteVocab.has(normalized) || pack.concreteVocab.has(normalized.replace(/s$/, ""))) {
     return displayed;
   }
   return null;
 }
 
-function cleanPhrase(phrase: string): string {
+function cleanPhrase(phrase: string, pack: RaconteLanguagePack): string {
   const words = phrase.trim().split(/\s+/).map(stripPunct).filter(Boolean);
-  while (words.length && STOPWORDS.has(normalize(words[0]))) words.shift();
-  while (words.length && STOPWORDS.has(normalize(words[words.length - 1]))) words.pop();
+  while (words.length && pack.stopwords.has(normalize(words[0]))) words.shift();
+  while (words.length && pack.stopwords.has(normalize(words[words.length - 1]))) words.pop();
   return words.join(" ").trim();
 }
 
@@ -156,37 +366,38 @@ function cleanPhrase(phrase: string): string {
 // courant. Repli sur les mots les plus longs si le texte est trop pauvre en
 // vocabulaire reconnu — jamais de liste vide, toujours ancré dans le texte
 // fourni (jamais un fait inventé).
-export function extractAnchors(story: string): string[] {
+export function extractAnchors(story: string, language: Locale = "fr"): string[] {
+  const pack = LANGUAGE_PACKS[language];
   const anchors: string[] = [];
   const seen = new Set<string>();
 
   function add(phrase: string) {
-    const cleaned = cleanPhrase(phrase);
+    const cleaned = cleanPhrase(phrase, pack);
     if (!cleaned) return;
     // Un résidu d'un seul mot, court et hors vocabulaire, est presque toujours
     // ce qui reste après avoir retiré les mots-outils d'un motif d'habitude
     // (ex. "toujours été là" → "là") — pas un élément concret en soi.
     const words = cleaned.split(/\s+/);
-    if (words.length === 1 && cleaned.length < 5 && !CONCRETE_VOCAB.has(normalize(cleaned))) return;
+    if (words.length === 1 && cleaned.length < 5 && !pack.concreteVocab.has(normalize(cleaned))) return;
     const key = cleaned.toLowerCase();
     if (seen.has(key)) return;
     seen.add(key);
     anchors.push(cleaned);
   }
 
-  for (const pattern of HABIT_PATTERNS) {
+  for (const pattern of pack.habitPatterns) {
     const match = story.match(pattern);
     if (match?.[1]) add(match[1]);
   }
 
   const words = story.split(/\s+/).filter(Boolean);
   for (let i = 0; i < words.length; i++) {
-    const displayed = vocabWord(words[i]);
+    const displayed = vocabWord(words[i], pack);
     if (!displayed) continue;
     let phrase = displayed;
     const next1 = words[i + 1] ? normalize(words[i + 1]) : "";
     const next2 = words[i + 2] ? stripPunct(words[i + 2]) : "";
-    if (LINKING_WORDS.has(next1) && next2) {
+    if (pack.linkingWords.has(next1) && next2) {
       phrase = `${phrase} ${stripPunct(words[i + 1])} ${next2}`;
     }
     add(phrase);
@@ -195,7 +406,7 @@ export function extractAnchors(story: string): string[] {
   if (anchors.length < 3) {
     const candidates = words
       .map(stripPunct)
-      .filter((w) => w.length >= 5 && !STOPWORDS.has(normalize(w)))
+      .filter((w) => w.length >= 5 && !pack.stopwords.has(normalize(w)))
       .sort((a, b) => b.length - a.length);
     for (const candidate of candidates) {
       if (anchors.length >= 3) break;
@@ -242,63 +453,21 @@ function pick<T>(items: T[], rng: () => number): T {
   return items[Math.floor(rng() * items.length)] ?? items[0];
 }
 
-const RELATIONSHIP_OPENERS: Record<string, string> = {
-  "ma mère": "Maman, laisse-moi te dire",
-  "mon père": "Papa, laisse-moi te dire",
-  "ma femme": "Depuis le premier jour",
-  "mon mari": "Depuis le premier jour",
-  "mon frère": "Frère, écoute bien ceci",
-  "ma sœur": "Sœur, écoute bien ceci",
-  "mon ami·e": "Sur la route de la vie",
-  "mon enfant": "Petit à petit tu grandis",
-  "ma grand-mère": "Tes mains ont tout donné",
-  "mon grand-père": "Tes mains ont tout donné",
-  autre: "Sur mon chemin, un jour",
-};
-
-const ANCHOR_LINE_TEMPLATES: ((anchor: string, name: string) => string)[] = [
-  (a) => `Je revois ${a}`,
-  (a) => `Il y a ${a}, gravé dans ma mémoire`,
-  (a) => `Rien n'effaçait ${a}`,
-  (a) => `${capitalize(a)}, je n'ai rien oublié`,
-  (a, name) => `${name}, je pense à ${a}`,
-  (a) => `Dans ${a}, je te retrouve encore`,
-  (a) => `On se souvient de ${a}`,
-  (a) => `Chaque ${a} raconte qui tu es`,
-];
-
-const COUPLET_OPENERS = ["je repense à toi", "j'ai gardé ça en moi", "voici ce que je vois"];
-
-const REFRAIN_CLOSERS = [
-  "je te le dis aujourd'hui",
-  "merci pour tout, encore et encore",
-  "tu comptes plus que tout",
-  "voilà ce que je devais te dire",
-  "et ça ne changera jamais",
-];
-
-const CLOSING_LINES = [
-  "ce que tu as donné ne s'efface pas",
-  "je porte tout ça avec moi",
-  "rien de tout cela ne s'oublie",
-  "et je continue de te le rendre",
-];
-
 interface RaconteInput {
   recipientFirstName: string;
   relationship: string | null;
   story: string;
 }
 
-function buildAnchorLine(anchor: string, name: string, rng: () => number): string {
-  return capLineWords(pick(ANCHOR_LINE_TEMPLATES, rng)(anchor, name));
+function buildAnchorLine(anchor: string, name: string, rng: () => number, pack: RaconteLanguagePack): string {
+  return capLineWords(pick(pack.anchorLineTemplates, rng)(anchor, name));
 }
 
-function buildRaconteAttempt(input: RaconteInput, anchors: string[], seed: number): string {
+function buildRaconteAttempt(input: RaconteInput, anchors: string[], seed: number, pack: RaconteLanguagePack): string {
   const rng = mulberry32(seed);
-  const name = input.recipientFirstName.trim() || "toi";
-  const opener = RELATIONSHIP_OPENERS[input.relationship ?? "autre"] ?? RELATIONSHIP_OPENERS.autre;
-  const safeAnchors = anchors.length > 0 ? anchors : ["ce que tu m'as donné"];
+  const name = input.recipientFirstName.trim() || pack.fallbackName;
+  const opener = pack.relationshipOpeners[input.relationship ?? "autre"] ?? pack.defaultOpener;
+  const safeAnchors = anchors.length > 0 ? anchors : [pack.fallbackAnchor];
 
   // Chaque élément concret extrait doit apparaître — jamais seulement les
   // quatre premiers d'une liste plus longue. Répartis entre les deux couplets
@@ -310,36 +479,36 @@ function buildRaconteAttempt(input: RaconteInput, anchors: string[], seed: numbe
   const introLine = capLineWords(`${opener}, ${name}`);
 
   const coupletA = [
-    capLineWords(`${name}, ${pick(COUPLET_OPENERS, rng)}`),
-    ...groupA.map((anchor) => buildAnchorLine(anchor, name, rng)),
+    capLineWords(`${name}, ${pick(pack.coupletOpeners, rng)}`),
+    ...groupA.map((anchor) => buildAnchorLine(anchor, name, rng, pack)),
   ];
 
-  const closer1 = pick(REFRAIN_CLOSERS, rng);
+  const closer1 = pick(pack.refrainClosers, rng);
   const refrain = [`${name}, ${name},`, capLineWords(`${name}, ${closer1}`)];
 
   const coupletB = [
-    ...groupB.map((anchor) => buildAnchorLine(anchor, name, rng)),
-    capLineWords(pick(CLOSING_LINES, rng)),
+    ...groupB.map((anchor) => buildAnchorLine(anchor, name, rng, pack)),
+    capLineWords(pick(pack.closingLines, rng)),
   ];
 
-  const remainingClosers = REFRAIN_CLOSERS.filter((c) => c !== closer1);
+  const remainingClosers = pack.refrainClosers.filter((c) => c !== closer1);
   const closer2 = remainingClosers.length > 0 ? pick(remainingClosers, rng) : closer1;
   const refrainRepeat = [`${name}, ${name},`, capLineWords(`${name}, ${closer2}`)];
 
   return [
-    "[Intro]",
+    `[${pack.introTag}]`,
     introLine,
     "",
-    "[Couplet 1]",
+    `[${pack.coupletTag(1)}]`,
     ...coupletA,
     "",
-    "[Refrain]",
+    `[${pack.refrainTag}]`,
     ...refrain,
     "",
-    "[Couplet 2]",
+    `[${pack.coupletTag(2)}]`,
     ...coupletB,
     "",
-    "[Refrain]",
+    `[${pack.refrainTag}]`,
     ...refrainRepeat,
   ].join("\n");
 }
@@ -356,7 +525,9 @@ export function validateRaconteLyrics(
   anchors: string[],
   name: string,
   story: string,
+  language: Locale = "fr",
 ): LyricsValidation {
+  const pack = LANGUAGE_PACKS[language];
   const reasons: string[] = [];
   const lower = lyricsText.toLowerCase();
 
@@ -367,12 +538,12 @@ export function validateRaconteLyrics(
   const nameCount = countOccurrences(lyricsText, name);
   if (nameCount < 3) reasons.push(`Le prénom apparaît ${nameCount} fois (minimum 3)`);
 
-  const refrainSection = extractSection(lyricsText, "Refrain");
+  const refrainSection = extractSection(lyricsText, pack.refrainTag);
   if (!refrainSection || countOccurrences(refrainSection, name) < 1) {
     reasons.push("Le prénom n'apparaît pas dans le refrain");
   }
 
-  if (containsMetaReference(lyricsText)) reasons.push("Vers auto-référentiel détecté");
+  if (containsMetaReference(lyricsText, pack.metaReferencePatterns)) reasons.push("Vers auto-référentiel détecté");
 
   for (const line of lyricsText.split("\n")) {
     const trimmed = line.trim();
@@ -392,13 +563,14 @@ const MAX_GENERATION_ATTEMPTS = 6;
 // qu'un contrôle échoue, jusqu'à MAX_GENERATION_ATTEMPTS (filet de sécurité :
 // la construction par gabarits satisfait déjà ces règles dans l'immense
 // majorité des cas, mais on ne livre jamais sans avoir vérifié).
-export function generateRaconteLyrics(input: RaconteInput, seed = 0): string {
-  const anchors = extractAnchors(input.story);
-  const name = input.recipientFirstName.trim() || "toi";
+export function generateRaconteLyrics(input: RaconteInput, seed = 0, language: Locale = "fr"): string {
+  const pack = LANGUAGE_PACKS[language];
+  const anchors = extractAnchors(input.story, language);
+  const name = input.recipientFirstName.trim() || pack.fallbackName;
   let last = "";
   for (let attempt = 0; attempt < MAX_GENERATION_ATTEMPTS; attempt++) {
-    last = buildRaconteAttempt(input, anchors, seed + attempt * 97 + input.story.length);
-    if (validateRaconteLyrics(last, anchors, name, input.story).valid) return last;
+    last = buildRaconteAttempt(input, anchors, seed + attempt * 97 + input.story.length, pack);
+    if (validateRaconteLyrics(last, anchors, name, input.story, language).valid) return last;
   }
   return last;
 }
@@ -429,8 +601,16 @@ function breakLongLines(text: string): string {
 // sans en changer les mots : découpe en paragraphes (ou phrases si aucun
 // paragraphe n'est marqué), désigne comme refrain le passage le plus court
 // qui nomme le destinataire — les refrains sont typiquement brefs et
-// adressés directement à la personne.
-export function structureUserLyrics(rawText: string, recipientFirstName: string, seed = 0): string {
+// adressés directement à la personne. Seules les ÉTIQUETTES de section
+// suivent la langue de la chanson ([Refrain] / [Chorus]) : les mots de la
+// personne, eux, ne changent jamais, quelle que soit la langue choisie.
+export function structureUserLyrics(
+  rawText: string,
+  recipientFirstName: string,
+  seed = 0,
+  language: Locale = "fr",
+): string {
+  const pack = LANGUAGE_PACKS[language];
   const normalized = rawText.replace(/\r\n/g, "\n").trim();
   if (!normalized) return "";
 
@@ -465,7 +645,7 @@ export function structureUserLyrics(rawText: string, recipientFirstName: string,
 
   let coupletIndex = 1;
   const sections = paragraphs.map((text, index) => {
-    const tag = index === refrainEntry.index ? "Refrain" : `Couplet ${coupletIndex++}`;
+    const tag = index === refrainEntry.index ? pack.refrainTag : pack.coupletTag(coupletIndex++);
     return { tag, text };
   });
 
@@ -491,8 +671,9 @@ export function buildLyricsForMode(
   mode: StoryMode,
   input: { story: string; recipientFirstName: string; relationship: string | null },
   seed = 0,
+  language: Locale = "fr",
 ): string {
   if (mode === "paroles_structurees") return passThroughStructuredLyrics(input.story);
-  if (mode === "paroles_libres") return structureUserLyrics(input.story, input.recipientFirstName, seed);
-  return generateRaconteLyrics(input, seed);
+  if (mode === "paroles_libres") return structureUserLyrics(input.story, input.recipientFirstName, seed, language);
+  return generateRaconteLyrics(input, seed, language);
 }

@@ -9,6 +9,8 @@ import { REFORMULATE_COUNTER_THRESHOLD, REFORMULATE_LIMIT } from "@/lib/tunnel/t
 import { Button } from "@/components/ui/Button";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { useMobilePlayerBarVisible } from "@/lib/player/useMobilePlayerBarVisible";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
+import type { Locale } from "@/lib/i18n/locale";
 
 function linesFromDraft(draft: string): string[] {
   return draft.split("\n");
@@ -34,6 +36,7 @@ function renderHighlighted(line: string, name: string) {
 }
 
 export function LyricsStep() {
+  const { t } = useLanguage();
   const { data, update, goNext } = useTunnel();
   const playerBarVisible = useMobilePlayerBarVisible();
   const [lines, setLines] = useState<string[]>(() => (data.lyricsDraft ? linesFromDraft(data.lyricsDraft) : []));
@@ -53,7 +56,7 @@ export function LyricsStep() {
   useEffect(() => {
     if (data.lyricsDraft !== null) return;
     let cancelled = false;
-    mockGenerateLyrics(lyricsInput, seedRef.current).then((text) => {
+    mockGenerateLyrics(lyricsInput, seedRef.current, data.songLanguage).then((text) => {
       if (cancelled) return;
       update({ lyricsDraft: text });
       setLines(linesFromDraft(text));
@@ -64,6 +67,21 @@ export function LyricsStep() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Changer la langue de la chanson régénère les paroles : le vocabulaire du
+  // moteur (voir lyricsEngine.ts) est propre à chaque langue, un simple
+  // changement d'étiquette ne suffirait pas en mode "raconte". Désactivé
+  // pendant un chargement ou une reformulation déjà en cours, pour ne jamais
+  // empiler deux générations concurrentes.
+  async function handleSongLanguageChange(nextLanguage: Locale) {
+    if (nextLanguage === data.songLanguage || loading || reformulating) return;
+    update({ songLanguage: nextLanguage });
+    setReformulating(true);
+    const text = await mockGenerateLyrics(lyricsInput, seedRef.current, nextLanguage);
+    update({ lyricsDraft: text });
+    setLines(linesFromDraft(text));
+    setReformulating(false);
+  }
 
   // Fait remonter la ligne éditée au-dessus du clavier virtuel — sur un
   // écran de 360px, un champ en bas de liste se retrouve sinon masqué dès
@@ -101,7 +119,7 @@ export function LyricsStep() {
     if (reformulateDisabled) return;
     setReformulating(true);
     seedRef.current += 1;
-    const text = await mockGenerateLyrics(lyricsInput, seedRef.current);
+    const text = await mockGenerateLyrics(lyricsInput, seedRef.current, data.songLanguage);
     const nextCount = data.reformulateCount + 1;
     update({ lyricsDraft: text, reformulateCount: nextCount });
     setLines(linesFromDraft(text));
@@ -123,25 +141,54 @@ export function LyricsStep() {
         <span className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-soft">
           <Sparkles className="h-6 w-6 animate-breathe text-brand" strokeWidth={1.5} aria-hidden="true" />
         </span>
-        <p className="mt-4 font-display text-lg font-semibold text-ink">On prépare un premier jet…</p>
+        <p className="mt-4 font-display text-lg font-semibold text-ink">{t("tunnel.lyrics.loading")}</p>
       </div>
     );
   }
 
   return (
     <div className="pb-24">
-      <SectionTitle as="h1" size="lg">
-        Vérifiez les paroles
-      </SectionTitle>
-      <p className="mt-2 text-body-md text-ink-muted">Chaque ligne est modifiable — touchez-la pour la corriger.</p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <SectionTitle as="h1" size="lg">
+            {t("tunnel.lyrics.title")}
+          </SectionTitle>
+          <p className="mt-2 text-body-md text-ink-muted">{t("tunnel.lyrics.subtitle")}</p>
+        </div>
+
+        {/* Langue de la chanson, distincte de la langue de l'interface — voir
+            handleSongLanguageChange, qui régénère les paroles avec le
+            vocabulaire de la langue choisie. */}
+        <div
+          role="tablist"
+          aria-label={t("tunnel.lyrics.songLanguageLabel")}
+          className="inline-flex shrink-0 rounded-full border border-border bg-page p-1"
+        >
+          {(["fr", "en"] as Locale[]).map((option) => (
+            <button
+              key={option}
+              type="button"
+              role="tab"
+              aria-selected={data.songLanguage === option}
+              onClick={() => handleSongLanguageChange(option)}
+              disabled={loading || reformulating}
+              className={`min-h-9 rounded-full px-3 text-xs font-medium transition-all duration-150 ease-magnetic disabled:cursor-not-allowed disabled:opacity-60 ${
+                data.songLanguage === option ? "bg-brand text-white shadow-card" : "text-ink-muted hover:text-ink"
+              }`}
+            >
+              {t(option === "fr" ? "tunnel.lyrics.songLanguageFrench" : "tunnel.lyrics.songLanguageEnglish")}
+            </button>
+          ))}
+        </div>
+      </div>
 
       {data.recipientFirstName.trim() && (
         <p className="mt-4 flex items-start gap-2 rounded-card border border-warning/30 bg-warning/10 p-3 text-sm text-ink">
           <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-warning" strokeWidth={1.5} aria-hidden="true" />
           <span>
-            Vérifiez l&apos;orthographe de{" "}
-            <mark className="rounded bg-brand-soft px-0.5 text-brand">{data.recipientFirstName}</mark> — c&apos;est
-            ce que la chanson va chanter.
+            {t("tunnel.lyrics.spellingWarningBefore")}
+            <mark className="rounded bg-brand-soft px-0.5 text-brand">{data.recipientFirstName}</mark>
+            {t("tunnel.lyrics.spellingWarningAfter")}
           </span>
         </p>
       )}
@@ -197,7 +244,7 @@ export function LyricsStep() {
             strokeWidth={1.5}
             aria-hidden="true"
           />
-          {isStructured ? "Reformuler (indisponible pour vos paroles)" : "Reformuler"}
+          {isStructured ? t("tunnel.lyrics.reformulateDisabled") : t("tunnel.lyrics.reformulate")}
         </button>
         {!isStructured && data.reformulateCount >= REFORMULATE_COUNTER_THRESHOLD && (
           <span className="font-mono text-xs tabular-nums text-ink-muted">
@@ -215,9 +262,9 @@ export function LyricsStep() {
           playerBarVisible ? "bottom-16" : "bottom-0"
         }`}
       >
-        <p className="text-xs text-ink-muted">Cet essai est gratuit.</p>
+        <p className="text-xs text-ink-muted">{t("tunnel.lyrics.freeAttempt")}</p>
         <Button onClick={handleContinue} className="mt-2 w-full sm:w-auto">
-          Générer l&apos;extrait
+          {t("tunnel.lyrics.generatePreview")}
         </Button>
       </div>
     </div>

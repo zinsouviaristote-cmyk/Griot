@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { ExplorerFeed } from "@/components/explorer/ExplorerFeed";
+import { ExplorerHeading } from "@/components/explorer/ExplorerHeading";
 import { mockPublishedSongs } from "@/lib/data/mock-explorer";
 
 export const metadata: Metadata = {
-  title: "Explorer — Griot",
+  title: "Explorer : Griot",
 };
 
 // Plein écran, en dehors du gabarit habituel des pages du tableau de bord :
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
 export default function ExplorerPage() {
   return (
     <>
-      <h1 className="sr-only">Explorer</h1>
+      <ExplorerHeading />
       <div className="fixed left-0 right-0 top-[65px] bottom-[65px] lg:bottom-0 lg:left-[280px] lg:right-0 lg:top-[77px]">
         <ExplorerFeed entries={mockPublishedSongs} />
       </div>

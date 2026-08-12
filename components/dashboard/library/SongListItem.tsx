@@ -14,11 +14,13 @@ import { TrackArt } from "@/components/player/TrackArt";
 import { TrackPlayButton } from "@/components/player/TrackPlayButton";
 import { SongActionsMenu } from "@/components/dashboard/library/SongActionsMenu";
 import { getSongAction } from "@/components/dashboard/songAction";
-import { getOccasionLabel, mockUser, styleLabels } from "@/lib/data/mock-dashboard";
-import { formatDateFr } from "@/lib/format/date";
+import { mockUser } from "@/lib/data/mock-dashboard";
+import { formatDate } from "@/lib/format/date";
 import { formatDuration } from "@/lib/format/duration";
 import { mockDeleteSong } from "@/lib/data/mockLibraryActions";
 import { getPublishedEntryForSong } from "@/lib/data/mock-explorer";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { occasionLabel, relationshipLabel, styleLabel } from "@/lib/i18n/catalog";
 import type { PlayerTrack } from "@/lib/player/PlayerContext";
 import type { PublishedSong, Song } from "@/lib/types";
 
@@ -38,6 +40,7 @@ function tunnelHref(song: Song): string {
  * sous-ensemble de chansons (voir PublicationsView).
  */
 export function SongListItem({ song, index = 0, queue }: { song: Song; index?: number; queue: PlayerTrack[] }) {
+  const { t, locale } = useLanguage();
   const showToast = useToast();
   const [publishedEntry, setPublishedEntry] = useState<PublishedSong | null>(
     () => getPublishedEntryForSong(song.id) ?? null,
@@ -48,14 +51,14 @@ export function SongListItem({ song, index = 0, queue }: { song: Song; index?: n
   const [deleted, setDeleted] = useState(false);
 
   const detailHref = `/bibliotheque/${song.id}`;
-  const action = getSongAction(song);
+  const action = getSongAction(song, t);
   const isUnlocked = song.status === "paid" || song.status === "delivered";
 
   const track: PlayerTrack | null = song.audioUrl
     ? {
         id: song.id,
         title: song.recipientFirstName,
-        subtitle: `${getOccasionLabel(song.occasion)} · ${styleLabels[song.style]}`,
+        subtitle: `${occasionLabel(t, song.occasion)} · ${styleLabel(t, song.style)}`,
         occasion: song.occasion,
         audioUrl: song.audioUrl,
         publishedId: publishedEntry?.id,
@@ -66,9 +69,9 @@ export function SongListItem({ song, index = 0, queue }: { song: Song; index?: n
   async function handleShare() {
     try {
       await navigator.clipboard.writeText(`${window.location.origin}${detailHref}`);
-      showToast("Lien copié.", "success");
+      showToast(t("library.item.linkCopied"), "success");
     } catch {
-      showToast("Impossible de copier le lien.", "danger");
+      showToast(t("library.item.linkCopyFailed"), "danger");
     }
   }
 
@@ -91,18 +94,18 @@ export function SongListItem({ song, index = 0, queue }: { song: Song; index?: n
       lyrics: song.lyrics ? song.lyrics.split("\n").filter(Boolean) : [],
     });
     setPublishOpen(false);
-    showToast("Chanson publiée dans Explorer.", "success");
+    showToast(t("library.item.publishedToast"), "success");
   }
 
   function handleUnpublish() {
     setPublishedEntry(null);
-    showToast(`${song.recipientFirstName} retirée d'Explorer.`, "default");
+    showToast(t("library.item.unpublishedToast", { name: song.recipientFirstName }), "default");
   }
 
   async function handleDelete() {
     setDeleting(true);
     await mockDeleteSong(song.id);
-    showToast(`La chanson de ${song.recipientFirstName} a été supprimée.`, "default");
+    showToast(t("library.item.deletedToast", { name: song.recipientFirstName }), "default");
     setDeleteOpen(false);
     setDeleted(true);
   }
@@ -147,13 +150,13 @@ export function SongListItem({ song, index = 0, queue }: { song: Song; index?: n
               </Link>
               <StatusBadge status={song.status} />
             </div>
-            <p className="truncate text-xs text-ink-muted">{song.relationship}</p>
+            <p className="truncate text-xs text-ink-muted">{relationshipLabel(t, song.relationship)}</p>
             <p className="mt-1 truncate text-xs text-ink-muted">
-              {getOccasionLabel(song.occasion)} · {styleLabels[song.style]} · {formatDateFr(song.createdAt)}
+              {occasionLabel(t, song.occasion)} · {styleLabel(t, song.style)} · {formatDate(song.createdAt, locale)}
             </p>
 
             <div className="-mx-1 mt-1 flex flex-wrap items-center">
-              <span className="flex min-h-11 items-center gap-1 px-1 text-xs text-ink-muted" aria-label={`${song.listens} écoutes`}>
+              <span className="flex min-h-11 items-center gap-1 px-1 text-xs text-ink-muted" aria-label={t("library.item.listensAriaLabel", { count: song.listens })}>
                 <Ear className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />
                 {song.listens}
               </span>
@@ -167,7 +170,7 @@ export function SongListItem({ song, index = 0, queue }: { song: Song; index?: n
               <button
                 type="button"
                 onClick={handleShare}
-                aria-label="Partager le lien"
+                aria-label={t("library.item.shareAriaLabel")}
                 className="flex h-11 w-11 items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:bg-page hover:text-brand active:scale-90"
               >
                 <Share2 className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />
@@ -176,7 +179,7 @@ export function SongListItem({ song, index = 0, queue }: { song: Song; index?: n
                 <a
                   href={track.audioUrl}
                   download={`griot-${song.recipientFirstName}.wav`}
-                  aria-label="Télécharger le MP3"
+                  aria-label={t("library.item.downloadAriaLabel")}
                   className="flex h-11 w-11 items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:bg-page hover:text-brand active:scale-90"
                 >
                   <Download className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />
@@ -191,7 +194,7 @@ export function SongListItem({ song, index = 0, queue }: { song: Song; index?: n
                 <SongActionsMenu
                   isPublished={!!publishedEntry}
                   redoHref={tunnelHref(song)}
-                  redoLabel={`Refaire pour ${song.recipientFirstName}`}
+                  redoLabel={t("library.item.redoLabel", { name: song.recipientFirstName })}
                   onPublish={() => setPublishOpen(true)}
                   onUnpublish={handleUnpublish}
                   onDelete={() => setDeleteOpen(true)}
@@ -232,18 +235,15 @@ export function SongListItem({ song, index = 0, queue }: { song: Song; index?: n
 
       <Modal open={deleteOpen} onClose={() => setDeleteOpen(false)} labelledBy={`delete-${song.id}-title`}>
         <p id={`delete-${song.id}-title`} className="font-display text-lg font-semibold text-ink">
-          Supprimer la chanson de {song.recipientFirstName} ?
+          {t("library.item.deleteTitle", { name: song.recipientFirstName })}
         </p>
-        <p className="mt-2 text-sm text-ink-muted">
-          Cette chanson a été créée pour {song.recipientFirstName} — une fois supprimée, elle n&apos;existera plus
-          nulle part. Cette action est définitive.
-        </p>
+        <p className="mt-2 text-sm text-ink-muted">{t("library.item.deleteBody", { name: song.recipientFirstName })}</p>
         <div className="mt-5 flex gap-3">
           <Button variant="ghost" onClick={() => setDeleteOpen(false)} className="flex-1" disabled={deleting}>
-            Annuler
+            {t("library.item.cancel")}
           </Button>
           <Button onClick={handleDelete} disabled={deleting} className="flex-1 !bg-danger hover:!brightness-90">
-            {deleting ? "Suppression…" : "Supprimer"}
+            {deleting ? t("library.item.deleting") : t("library.item.delete")}
           </Button>
         </div>
       </Modal>

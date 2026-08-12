@@ -1,15 +1,17 @@
+"use client";
+
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { LikesFeatureCardSkeleton, SongListItemSkeleton } from "@/components/ui/Skeleton";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 export default function PublicationsLoading() {
+  const { t } = useLanguage();
   return (
     <div>
       <SectionTitle as="h1" size="lg">
-        Mes publications
+        {t("publications.pageTitle")}
       </SectionTitle>
-      <p className="mt-2 max-w-xl text-body-md text-ink-muted">
-        Les chansons que vous avez choisi de partager dans Explorer.
-      </p>
+      <p className="mt-2 max-w-xl text-body-md text-ink-muted">{t("publications.pageSubtitle")}</p>
 
       <div className="mt-6">
         <LikesFeatureCardSkeleton />

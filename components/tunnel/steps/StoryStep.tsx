@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/Button";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { useMobilePlayerBarVisible } from "@/lib/player/useMobilePlayerBarVisible";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 type UiMode = "simple" | "avance";
 
@@ -24,34 +25,8 @@ function uiModeFor(storyMode: StoryMode): UiMode {
   return storyMode === "raconte" ? "simple" : "avance";
 }
 
-const SIMPLE_COPY = {
-  title: "Racontez-la",
-  subtitle: "Pas besoin d'être écrivain — quelques phrases suffisent, la mélodie fait le reste.",
-  prompts: ["Un souvenir avec cette personne", "Une qualité qui la définit", "Ce que vous voudriez lui dire"],
-  placeholder: "Racontez à votre façon…",
-};
-
-const ADVANCED_TITLE = "Écrivez vos paroles";
-
-const ADVANCED_COPY: Record<"paroles_libres" | "paroles_structurees", { subtitle: string; prompts: string[] }> = {
-  paroles_libres: {
-    subtitle: "Vos mots, tels quels — on se contente de les mettre en forme (intro, couplets, refrain).",
-    prompts: [
-      "Écrivez comme vous voulez que ce soit chanté",
-      "On choisit quel passage devient le refrain",
-      "Pas un mot n'est changé, ni ajouté, ni retiré",
-    ],
-  },
-  paroles_structurees: {
-    subtitle: "Balises détectées — [Intro], [Couplet], [Refrain]… transmises à la lettre, sans modification.",
-    prompts: ["Rien n'est modifié, pas même la ponctuation", "Le bouton Reformuler sera désactivé à l'écran suivant"],
-  },
-};
-
-const ADVANCED_PLACEHOLDER =
-  "Vos paroles, dans l'ordre où elles doivent être chantées…\n\nDéjà balisées avec [Couplet], [Refrain] ? On les respecte à la lettre. Sinon, on les met en forme sans en changer un mot.";
-
 export function StoryStep() {
+  const { t } = useLanguage();
   const { data, update, goNext } = useTunnel();
   const uiMode = uiModeFor(data.storyMode);
   const advancedSubMode = data.storyMode === "paroles_structurees" ? "paroles_structurees" : "paroles_libres";
@@ -124,16 +99,24 @@ export function StoryStep() {
     commitStory(next);
   }
 
-  const title = uiMode === "simple" ? SIMPLE_COPY.title : ADVANCED_TITLE;
-  const subtitle = uiMode === "simple" ? SIMPLE_COPY.subtitle : ADVANCED_COPY[advancedSubMode].subtitle;
-  const prompts = uiMode === "simple" ? SIMPLE_COPY.prompts : ADVANCED_COPY[advancedSubMode].prompts;
+  const title = uiMode === "simple" ? t("tunnel.story.simpleTitle") : t("tunnel.story.advancedTitle");
+  const subtitle =
+    uiMode === "simple"
+      ? t("tunnel.story.simpleSubtitle")
+      : t(advancedSubMode === "paroles_libres" ? "tunnel.story.advancedFreeSubtitle" : "tunnel.story.advancedStructuredSubtitle");
+  const prompts =
+    uiMode === "simple"
+      ? [t("tunnel.story.simplePrompt1"), t("tunnel.story.simplePrompt2"), t("tunnel.story.simplePrompt3")]
+      : advancedSubMode === "paroles_libres"
+        ? [t("tunnel.story.advancedFreePrompt1"), t("tunnel.story.advancedFreePrompt2"), t("tunnel.story.advancedFreePrompt3")]
+        : [t("tunnel.story.advancedStructuredPrompt1"), t("tunnel.story.advancedStructuredPrompt2")];
 
   const counter = (
     <div className="mt-2 flex items-center justify-between text-label-sm">
       <span className={remaining > 0 ? "text-ink-muted" : "text-success"}>
         {remaining > 0
-          ? `Encore ${remaining} caractère${remaining > 1 ? "s" : ""} — vous y êtes presque.`
-          : "C'est largement suffisant."}
+          ? t("tunnel.story.remaining", { count: remaining, plural: remaining > 1 ? "s" : "" })
+          : t("tunnel.story.enough")}
       </span>
       <span className="font-mono tabular-nums text-ink-muted">
         {length}/{maxLength}
@@ -143,7 +126,7 @@ export function StoryStep() {
 
   const continueButton = (
     <Button onClick={goNext} disabled={!canContinue} className="w-full sm:w-auto">
-      Continuer
+      {t("tunnel.story.continue")}
     </Button>
   );
 
@@ -156,7 +139,7 @@ export function StoryStep() {
           type="button"
           onClick={undo}
           disabled={past.length === 0}
-          aria-label="Annuler"
+          aria-label={t("tunnel.story.undo")}
           className="flex h-8 w-8 items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:bg-brand-soft/60 hover:text-ink active:scale-90 disabled:pointer-events-none disabled:opacity-30"
         >
           <Undo2 className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
@@ -165,7 +148,7 @@ export function StoryStep() {
           type="button"
           onClick={redo}
           disabled={future.length === 0}
-          aria-label="Rétablir"
+          aria-label={t("tunnel.story.redo")}
           className="flex h-8 w-8 items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:bg-brand-soft/60 hover:text-ink active:scale-90 disabled:pointer-events-none disabled:opacity-30"
         >
           <Redo2 className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
@@ -175,7 +158,7 @@ export function StoryStep() {
         type="button"
         onClick={() => setFullscreen((current) => !current)}
         aria-pressed={fullscreen}
-        aria-label={fullscreen ? "Quitter le plein écran" : "Plein écran"}
+        aria-label={fullscreen ? t("tunnel.story.fullscreenExit") : t("tunnel.story.fullscreenEnter")}
         className="flex h-8 w-8 items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:bg-brand-soft/60 hover:text-ink active:scale-90"
       >
         {fullscreen ? (
@@ -192,7 +175,7 @@ export function StoryStep() {
       value={data.story}
       onChange={(event) => handleAdvancedChange(event.target.value)}
       rows={fullscreen ? undefined : 10}
-      placeholder={ADVANCED_PLACEHOLDER}
+      placeholder={t("tunnel.story.advancedPlaceholder")}
       aria-describedby="story-help"
       className={`w-full resize-none rounded-b-card border border-border bg-surface p-4 text-sm leading-relaxed text-ink placeholder:text-ink-muted focus:border-brand focus:outline-none focus:shadow-ring-focus ${
         fullscreen ? "min-h-0 flex-1" : "min-h-[28vh] sm:min-h-[45vh]"
@@ -236,7 +219,7 @@ export function StoryStep() {
           est déjà écrit (voir setUiMode — le texte survit à la bascule). */}
       <div
         role="tablist"
-        aria-label="Mode de saisie des paroles"
+        aria-label={t("tunnel.story.modeTabsLabel")}
         className="mt-5 inline-flex rounded-full border border-border bg-page p-1"
       >
         {(["simple", "avance"] as UiMode[]).map((mode) => (
@@ -250,7 +233,7 @@ export function StoryStep() {
               uiMode === mode ? "bg-brand text-white shadow-card" : "text-ink-muted hover:text-ink"
             }`}
           >
-            {mode === "simple" ? "Simple" : "Avancé"}
+            {mode === "simple" ? t("tunnel.story.modeSimple") : t("tunnel.story.modeAdvanced")}
           </button>
         ))}
       </div>
@@ -270,7 +253,7 @@ export function StoryStep() {
             value={data.story}
             onChange={(event) => commitStory(event.target.value)}
             rows={8}
-            placeholder={SIMPLE_COPY.placeholder}
+            placeholder={t("tunnel.story.simplePlaceholder")}
             aria-describedby="story-help"
             className="mt-4 w-full resize-none rounded-card border border-border bg-surface p-4 text-sm leading-relaxed text-ink placeholder:text-ink-muted focus:border-brand focus:outline-none focus:shadow-ring-focus"
           />

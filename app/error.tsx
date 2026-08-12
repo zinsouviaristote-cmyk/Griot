@@ -1,11 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Hanken_Grotesk, Manrope } from "next/font/google";
 import { TriangleAlert } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { Button, ButtonLink } from "@/components/ui/Button";
+import { getStoredOrDetectedLocale } from "@/lib/i18n/locale";
+import { fr } from "@/lib/i18n/dictionaries/fr";
+import { en } from "@/lib/i18n/dictionaries/en";
 import "./globals.css";
 
 // Une limite d'erreur racine remplace tout app/layout.tsx, polices comprises —
@@ -19,13 +22,21 @@ const hankenGrotesk = Hanken_Grotesk({ subsets: ["latin"], weight: ["400", "500"
 // TopBar n'aient eu la chance de s'afficher, donc ce fichier ne dépend d'aucune
 // des deux. Ton chaleureux, jamais de message technique (pas de `error.message`
 // affiché) : la personne qui voit cet écran n'a pas à comprendre la panne.
+// Ce chrome ne peut pas dépendre de LanguageProvider (il remplace tout
+// app/layout.tsx, potentiellement parce que layout.tsx lui-même a échoué) :
+// langue lue directement (stockage puis navigateur), dictionnaires importés
+// tels quels, sans passer par le contexte React habituel.
 export default function GlobalError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
+  const [locale, setLocale] = useState<"fr" | "en">("fr");
+  const t = locale === "en" ? en.errorPage : fr.errorPage;
+
   useEffect(() => {
+    setLocale(getStoredOrDetectedLocale());
     // Un vrai suivi d'erreurs (Sentry ou équivalent) se brancherait ici en Phase 2.
   }, []);
 
   return (
-    <html lang="fr" className={`${manrope.variable} ${hankenGrotesk.variable}`}>
+    <html lang={locale} className={`${manrope.variable} ${hankenGrotesk.variable}`}>
       <body className="font-sans">
         <div className="relative flex min-h-screen flex-col items-center justify-center px-4 py-16 text-center">
           <Logo />
@@ -34,18 +45,16 @@ export default function GlobalError({ reset }: { error: Error & { digest?: strin
           </span>
           <div className="mt-6">
             <SectionTitle as="h1" size="lg" align="center">
-              Un problème est survenu
+              {t.title}
             </SectionTitle>
           </div>
-          <p className="mt-3 max-w-sm text-body-md text-ink-muted">
-            Ce n&apos;est pas vous, c&apos;est nous — réessayez dans un instant.
-          </p>
+          <p className="mt-3 max-w-sm text-body-md text-ink-muted">{t.body}</p>
           <div className="mt-8 flex gap-3">
             <Button variant="secondary" onClick={reset}>
-              Réessayer
+              {t.retry}
             </Button>
             <ButtonLink href="/" variant="primary">
-              Retour à l&apos;accueil
+              {t.backHome}
             </ButtonLink>
           </div>
         </div>

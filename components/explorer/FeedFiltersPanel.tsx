@@ -3,10 +3,10 @@
 import { X } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
-import { occasionCatalog, styleLabels } from "@/lib/data/mock-dashboard";
+import { occasionCatalog, MUSIC_STYLE_IDS } from "@/lib/data/mock-dashboard";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { occasionLabel, styleLabel } from "@/lib/i18n/catalog";
 import type { MusicStyle, Occasion } from "@/lib/types";
-
-const STYLE_ENTRIES = Object.entries(styleLabels) as [MusicStyle, string][];
 
 // Un panneau, pas une barre permanente : les filtres n'ont droit qu'à l'espace
 // qu'on leur ouvre volontairement, jamais une bande fixe qui grignoterait
@@ -28,25 +28,26 @@ export function FeedFiltersPanel({
   onStyleChange: (value: MusicStyle | "tous") => void;
   resultCount: number;
 }) {
+  const { t, tn } = useLanguage();
   const isFiltering = occasionFilter !== "toutes" || styleFilter !== "tous";
 
   return (
     <Modal open={open} onClose={onClose} labelledBy="explorer-filters-title" size="md">
       <div className="flex items-start justify-between">
         <p id="explorer-filters-title" className="font-display text-lg font-semibold text-ink">
-          Filtrer Explorer
+          {t("explorer.filters.title")}
         </p>
         <button
           type="button"
           onClick={onClose}
-          aria-label="Fermer"
+          aria-label={t("explorer.filters.close")}
           className="flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-page hover:text-ink active:scale-90"
         >
           <X className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
         </button>
       </div>
 
-      <p className="mt-4 text-label-md uppercase tracking-wide text-ink-muted">Occasion</p>
+      <p className="mt-4 text-label-md uppercase tracking-wide text-ink-muted">{t("explorer.filters.occasion")}</p>
       <div className="mt-2 flex flex-wrap gap-2">
         <button
           type="button"
@@ -58,7 +59,7 @@ export function FeedFiltersPanel({
               : "border-border bg-surface text-ink-muted hover:border-brand/40 hover:text-ink"
           }`}
         >
-          Toutes
+          {t("explorer.filters.allOccasions")}
         </button>
         {occasionCatalog.map((occasion) => (
           <button
@@ -72,12 +73,12 @@ export function FeedFiltersPanel({
                 : "border-border bg-surface text-ink-muted hover:border-brand/40 hover:text-ink"
             }`}
           >
-            {occasion.label}
+            {occasionLabel(t, occasion.id)}
           </button>
         ))}
       </div>
 
-      <p className="mt-5 text-label-md uppercase tracking-wide text-ink-muted">Style</p>
+      <p className="mt-5 text-label-md uppercase tracking-wide text-ink-muted">{t("explorer.filters.style")}</p>
       <div className="mt-2 flex flex-wrap gap-2">
         <button
           type="button"
@@ -89,9 +90,9 @@ export function FeedFiltersPanel({
               : "border-border bg-surface text-ink-muted hover:border-brand/40 hover:text-ink"
           }`}
         >
-          Tous
+          {t("explorer.filters.allStyles")}
         </button>
-        {STYLE_ENTRIES.map(([style, label]) => (
+        {MUSIC_STYLE_IDS.map((style) => (
           <button
             key={style}
             type="button"
@@ -103,7 +104,7 @@ export function FeedFiltersPanel({
                 : "border-border bg-surface text-ink-muted hover:border-brand/40 hover:text-ink"
             }`}
           >
-            {label}
+            {styleLabel(t, style)}
           </button>
         ))}
       </div>
@@ -118,13 +119,13 @@ export function FeedFiltersPanel({
             }}
             className="text-sm font-medium text-brand hover:underline"
           >
-            Réinitialiser
+            {t("explorer.filters.reset")}
           </button>
         ) : (
           <span />
         )}
         <Button type="button" variant="primary" onClick={onClose}>
-          Voir {resultCount} chanson{resultCount > 1 ? "s" : ""}
+          {tn("explorer.filters.seeResults", resultCount)}
         </Button>
       </div>
     </Modal>

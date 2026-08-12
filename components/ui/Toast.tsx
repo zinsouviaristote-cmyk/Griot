@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { CheckCircle2, Info, TriangleAlert, X } from "lucide-react";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 type ToastTone = "default" | "success" | "danger";
 
@@ -31,6 +32,7 @@ const ToastContext = createContext<ShowToast | null>(null);
 // sa propre sortie (`leaving`) pour ne retirer le toast du DOM qu'une fois
 // l'animation terminée, jamais en coupant l'apparition en cours de route.
 function ToastCard({ toast, onDone }: { toast: ToastItem; onDone: (id: number) => void }) {
+  const { t } = useLanguage();
   const [leaving, setLeaving] = useState(false);
   const Icon = TONE_ICON[toast.tone];
 
@@ -54,7 +56,7 @@ function ToastCard({ toast, onDone }: { toast: ToastItem; onDone: (id: number) =
       <button
         type="button"
         onClick={() => setLeaving(true)}
-        aria-label="Fermer"
+        aria-label={t("common.close")}
         className="shrink-0 rounded-full p-1 text-ink-muted transition-colors duration-150 hover:bg-page hover:text-ink active:scale-90"
       >
         <X className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />

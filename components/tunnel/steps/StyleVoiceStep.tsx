@@ -7,11 +7,14 @@ import { styleCatalog } from "@/lib/tunnel/types";
 import { MOCK_AUDIO_SRC } from "@/lib/tunnel/mockAdapters";
 import { Button } from "@/components/ui/Button";
 import { SectionTitle } from "@/components/ui/SectionTitle";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { styleLabel, styleTagline } from "@/lib/i18n/catalog";
 import type { MusicStyle } from "@/lib/types";
 
 const PREVIEW_DURATION_MS = 8000;
 
 export function StyleVoiceStep() {
+  const { t } = useLanguage();
   const { data, update, goNext } = useTunnel();
   const [playingId, setPlayingId] = useState<MusicStyle | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -56,9 +59,9 @@ export function StyleVoiceStep() {
   return (
     <div>
       <SectionTitle as="h1" size="lg">
-        Le style et la voix
+        {t("tunnel.style.title")}
       </SectionTitle>
-      <p className="mt-2 text-body-md text-ink-muted">Écoutez un extrait de 8 secondes avant de choisir.</p>
+      <p className="mt-2 text-body-md text-ink-muted">{t("tunnel.style.subtitle")}</p>
 
       <audio ref={audioRef} src={MOCK_AUDIO_SRC} preload="none" onEnded={stopPreview} className="hidden" />
 
@@ -76,7 +79,11 @@ export function StyleVoiceStep() {
               <button
                 type="button"
                 onClick={() => togglePreview(s.id)}
-                aria-label={isPlaying ? `Arrêter l'extrait ${s.label}` : `Écouter un extrait de ${s.label}`}
+                aria-label={
+                  isPlaying
+                    ? t("tunnel.style.stopPreview", { style: styleLabel(t, s.id) })
+                    : t("tunnel.style.playPreview", { style: styleLabel(t, s.id) })
+                }
                 className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand text-white transition-transform duration-150 ease-magnetic active:scale-90"
               >
                 {isPlaying ? (
@@ -91,15 +98,15 @@ export function StyleVoiceStep() {
                 aria-pressed={isSelected}
                 className="min-h-11 flex-1 text-left"
               >
-                <p className="font-display text-base font-semibold text-ink">{s.label}</p>
-                <p className="text-xs text-ink-muted">{s.tagline}</p>
+                <p className="font-display text-base font-semibold text-ink">{styleLabel(t, s.id)}</p>
+                <p className="text-xs text-ink-muted">{styleTagline(t, s.id)}</p>
               </button>
             </div>
           );
         })}
       </div>
 
-      <p className="mt-8 text-label-md uppercase tracking-wide text-ink-muted">Voix</p>
+      <p className="mt-8 text-label-md uppercase tracking-wide text-ink-muted">{t("tunnel.style.voiceLabel")}</p>
       <div className="mt-3 grid grid-cols-2 gap-3">
         {(["femme", "homme"] as const).map((voice) => {
           const isSelected = data.voiceType === voice;
@@ -115,14 +122,14 @@ export function StyleVoiceStep() {
                   : "border-border text-ink-muted hover:border-brand/40 hover:text-ink"
               }`}
             >
-              {voice === "homme" ? "Voix d'homme" : "Voix de femme"}
+              {voice === "homme" ? t("tunnel.style.voiceMale") : t("tunnel.style.voiceFemale")}
             </button>
           );
         })}
       </div>
 
       <Button onClick={goNext} disabled={!canContinue} className="mt-8 w-full sm:w-auto">
-        Continuer
+        {t("tunnel.style.continue")}
       </Button>
     </div>
   );

@@ -14,45 +14,49 @@ import {
   User,
 } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
+import { clearMockSession } from "@/lib/auth/session";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
+import type { Locale } from "@/lib/i18n/locale";
 
 type Panel = "root" | "langue" | "theme";
 
 interface OptionRow {
+  key: string;
   label: string;
   active: boolean;
   soon?: boolean;
+  onSelect?: () => void;
 }
-
-const LANGUAGE_OPTIONS: OptionRow[] = [
-  { label: "Français", active: true },
-  { label: "Anglais", active: false, soon: true },
-];
-
-const THEME_OPTIONS: OptionRow[] = [
-  { label: "Clair", active: true },
-  { label: "Sombre", active: false, soon: true },
-  { label: "Système", active: false, soon: true },
-];
 
 function OptionList({ options }: { options: OptionRow[] }) {
   return (
     <div className="py-1.5">
       {options.map((option) => (
-        <div
-          key={option.label}
+        <button
+          key={option.key}
+          type="button"
           role="menuitemradio"
           aria-checked={option.active}
-          className={`flex min-h-[44px] items-center justify-between gap-3 px-4 text-sm ${
-            option.soon ? "text-ink-muted/50" : "text-ink"
+          disabled={option.soon}
+          onClick={option.onSelect}
+          className={`flex min-h-[44px] w-full items-center justify-between gap-3 px-4 text-left text-sm transition-colors ${
+            option.soon ? "cursor-not-allowed text-ink-muted/50" : "text-ink hover:bg-brand-soft"
           }`}
         >
-          <span>{option.label}</span>
+          <span className="flex items-center gap-2">
+            {option.label}
+            {option.soon && <SoonBadge />}
+          </span>
           {option.active && <Check className="h-4 w-4 text-brand" strokeWidth={1.5} aria-hidden="true" />}
-          {option.soon && <span className="text-label-sm text-ink-muted/60">bientôt</span>}
-        </div>
+        </button>
       ))}
     </div>
   );
+}
+
+function SoonBadge() {
+  const { t } = useLanguage();
+  return <span className="text-label-sm text-ink-muted/60">({t("accountMenu.comingSoon")})</span>;
 }
 
 // Menu utilisateur ancré en bas de la sidebar desktop — avatar, nom, bouton
@@ -67,9 +71,31 @@ export function SidebarUserMenu({
   name: string;
   email: string;
 }) {
+  const { t, locale, setLocale } = useLanguage();
   const [open, setOpen] = useState(false);
   const [panel, setPanel] = useState<Panel>("root");
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const languageOptions: OptionRow[] = [
+    {
+      key: "fr",
+      label: t("accountMenu.languageFrench"),
+      active: locale === "fr",
+      onSelect: () => setLocale("fr" as Locale),
+    },
+    {
+      key: "en",
+      label: t("accountMenu.languageEnglish"),
+      active: locale === "en",
+      onSelect: () => setLocale("en" as Locale),
+    },
+  ];
+
+  const themeOptions: OptionRow[] = [
+    { key: "light", label: t("accountMenu.themeLight"), active: true },
+    { key: "dark", label: t("accountMenu.themeDark"), active: false, soon: true },
+    { key: "system", label: t("accountMenu.themeSystem"), active: false, soon: true },
+  ];
 
   useEffect(() => {
     if (!open) return;
@@ -114,7 +140,13 @@ export function SidebarUserMenu({
       {open && (
         <div
           role="menu"
-          aria-label={panel === "root" ? "Menu du compte" : panel === "langue" ? "Langue" : "Thème"}
+          aria-label={
+            panel === "root"
+              ? t("accountMenu.rootLabel")
+              : panel === "langue"
+                ? t("accountMenu.languageAriaLabel")
+                : t("accountMenu.themeAriaLabel")
+          }
           className="absolute inset-x-0 bottom-full z-50 mb-2 animate-pop-in overflow-hidden rounded-card border border-border bg-surface shadow-card-hover"
         >
           {panel === "root" && (
@@ -126,7 +158,7 @@ export function SidebarUserMenu({
                 className="flex min-h-[44px] items-center gap-3 px-4 text-sm text-ink transition-colors hover:bg-brand-soft"
               >
                 <User className="h-4 w-4 text-ink-muted" strokeWidth={1.5} aria-hidden="true" />
-                Compte
+                {t("accountMenu.account")}
               </Link>
               <button
                 type="button"
@@ -136,7 +168,7 @@ export function SidebarUserMenu({
               >
                 <span className="flex items-center gap-3">
                   <Globe className="h-4 w-4 text-ink-muted" strokeWidth={1.5} aria-hidden="true" />
-                  Langue
+                  {t("accountMenu.language")}
                 </span>
                 <ChevronRight className="h-4 w-4 text-ink-muted" strokeWidth={1.5} aria-hidden="true" />
               </button>
@@ -148,7 +180,7 @@ export function SidebarUserMenu({
               >
                 <span className="flex items-center gap-3">
                   <SunMedium className="h-4 w-4 text-ink-muted" strokeWidth={1.5} aria-hidden="true" />
-                  Thème
+                  {t("accountMenu.theme")}
                 </span>
                 <ChevronRight className="h-4 w-4 text-ink-muted" strokeWidth={1.5} aria-hidden="true" />
               </button>
@@ -159,17 +191,20 @@ export function SidebarUserMenu({
                 className="flex min-h-[44px] items-center gap-3 px-4 text-sm text-ink transition-colors hover:bg-brand-soft"
               >
                 <CircleHelp className="h-4 w-4 text-ink-muted" strokeWidth={1.5} aria-hidden="true" />
-                Aide
+                {t("accountMenu.help")}
               </Link>
               <div className="border-t border-border pt-1.5">
                 <Link
                   href="/connexion"
-                  onClick={close}
+                  onClick={() => {
+                    clearMockSession();
+                    close();
+                  }}
                   role="menuitem"
                   className="flex min-h-[44px] items-center gap-3 px-4 text-sm font-medium text-danger transition-colors hover:bg-danger/5"
                 >
                   <LogOut className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
-                  Se déconnecter
+                  {t("accountMenu.logout")}
                 </Link>
               </div>
             </div>
@@ -183,9 +218,9 @@ export function SidebarUserMenu({
                 className="flex min-h-[44px] w-full items-center gap-2 border-b border-border px-3 text-sm font-medium text-ink-muted transition-colors hover:text-ink"
               >
                 <ChevronLeft className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
-                {panel === "langue" ? "Langue" : "Thème"}
+                {panel === "langue" ? t("accountMenu.language") : t("accountMenu.theme")}
               </button>
-              <OptionList options={panel === "langue" ? LANGUAGE_OPTIONS : THEME_OPTIONS} />
+              <OptionList options={panel === "langue" ? languageOptions : themeOptions} />
             </div>
           )}
         </div>

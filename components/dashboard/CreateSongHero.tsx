@@ -5,9 +5,12 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, TriangleAlert, Wand2 } from "lucide-react";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { occasionCatalog } from "@/lib/data/mock-dashboard";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { occasionLabel } from "@/lib/i18n/catalog";
 import type { Occasion } from "@/lib/types";
 
 export function CreateSongHero() {
+  const { t } = useLanguage();
   const router = useRouter();
   const [firstName, setFirstName] = useState("");
   const [occasion, setOccasion] = useState<Occasion | null>(null);
@@ -43,13 +46,10 @@ export function CreateSongHero() {
 
         <div className="mt-4">
           <SectionTitle as="h1" size="lg" align="left">
-            Créer une nouvelle chanson
+            {t("dashboard.hero.title")}
           </SectionTitle>
         </div>
-        <p className="mt-2 max-w-md text-body-md leading-relaxed text-ink-muted">
-          Racontez votre histoire, on lui compose une chanson. Le premier
-          essai de chaque chanson est offert. Vous écoutez avant de payer.
-        </p>
+        <p className="mt-2 max-w-md text-body-md leading-relaxed text-ink-muted">{t("dashboard.hero.subtitle")}</p>
 
         <form onSubmit={handleSubmit} className="mt-5 space-y-3">
           <div
@@ -65,8 +65,8 @@ export function CreateSongHero() {
               }}
               onBlur={handleBlur}
               type="text"
-              placeholder="Prénom du destinataire — ex. Fatou"
-              aria-label="Prénom du destinataire"
+              placeholder={t("dashboard.hero.firstNamePlaceholder")}
+              aria-label={t("dashboard.hero.firstNameAriaLabel")}
               aria-invalid={showError}
               aria-describedby={showError ? "prenom-error" : undefined}
               className="w-full flex-1 rounded-control bg-transparent px-3.5 py-3 text-sm text-ink placeholder:text-ink-muted focus:outline-none sm:text-base"
@@ -83,7 +83,7 @@ export function CreateSongHero() {
                   : "cursor-not-allowed bg-brand-soft text-brand"
               }`}
             >
-              Créer sa chanson
+              {t("dashboard.hero.submit")}
               <ArrowRight
                 className="h-4 w-4 transition-transform duration-200 ease-magnetic group-hover:translate-x-1"
                 strokeWidth={1.5}
@@ -99,7 +99,7 @@ export function CreateSongHero() {
               className="flex animate-field-in items-center gap-1.5 text-label-sm text-danger"
             >
               <TriangleAlert className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} aria-hidden="true" />
-              Indiquez un prénom pour continuer.
+              {t("dashboard.hero.firstNameRequired")}
             </p>
           )}
 
@@ -118,7 +118,7 @@ export function CreateSongHero() {
                       : "border-border text-ink-muted hover:border-brand/40 hover:text-ink"
                   }`}
                 >
-                  {item.label}
+                  {occasionLabel(t, item.id)}
                 </button>
               );
             })}

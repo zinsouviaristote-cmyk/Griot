@@ -4,13 +4,15 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { getSongAction } from "@/components/dashboard/songAction";
-import { getOccasionLabel, styleLabels } from "@/lib/data/mock-dashboard";
-import { formatDateFr } from "@/lib/format/date";
+import { formatDate } from "@/lib/format/date";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { occasionLabel, relationshipLabel, styleLabel } from "@/lib/i18n/catalog";
 import type { Song } from "@/lib/types";
 
 export function SongCardMobile({ song }: { song: Song }) {
+  const { t, locale } = useLanguage();
   const router = useRouter();
-  const action = getSongAction(song);
+  const action = getSongAction(song, t);
   const detailHref = `/bibliotheque/${song.id}`;
 
   return (
@@ -21,7 +23,7 @@ export function SongCardMobile({ song }: { song: Song }) {
       onKeyDown={(event) => {
         if (event.key === "Enter") router.push(detailHref);
       }}
-      aria-label={`Voir la chanson de ${song.recipientFirstName}`}
+      aria-label={t("library.item.viewSongAriaLabel", { name: song.recipientFirstName })}
       className="cursor-pointer rounded-card border border-border bg-surface p-4 shadow-card transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-card-hover focus-visible:outline-none focus-visible:shadow-ring-focus"
     >
       <div className="flex items-start justify-between gap-3">
@@ -29,17 +31,17 @@ export function SongCardMobile({ song }: { song: Song }) {
           <p className="truncate font-display text-base font-semibold text-ink">
             {song.recipientFirstName}
           </p>
-          <p className="mt-0.5 text-sm text-ink-muted">{song.relationship}</p>
+          <p className="mt-0.5 text-sm text-ink-muted">{relationshipLabel(t, song.relationship)}</p>
         </div>
         <StatusBadge status={song.status} />
       </div>
 
       <p className="mt-2 text-sm text-ink-muted">
-        {getOccasionLabel(song.occasion)} · {styleLabels[song.style]}
+        {occasionLabel(t, song.occasion)} · {styleLabel(t, song.style)}
       </p>
 
       <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
-        <span className="font-mono text-sm text-ink-muted">{formatDateFr(song.createdAt)}</span>
+        <span className="font-mono text-sm text-ink-muted">{formatDate(song.createdAt, locale)}</span>
         {/* En cours de génération : rien à ouvrir, donc un `span` plutôt qu'un lien —
             un élément non interactif ne doit jamais avoir l'air cliquable. Même
             traitement "désactivé" que partout ailleurs dans l'app : 50% d'opacité

@@ -13,4 +13,4 @@ export function withParams(returnTo: string, params: Record<string, string>): st
 // Détermine le point de retour par défaut d'une page /connexion visitée
 // directement (hors tunnel) — le tableau de bord, jamais /creer, qui n'a de
 // sens qu'accompagné de l'état d'un tunnel en cours.
-export const DEFAULT_RETURN_TO = "/";
+export const DEFAULT_RETURN_TO = "/tableau-de-bord";

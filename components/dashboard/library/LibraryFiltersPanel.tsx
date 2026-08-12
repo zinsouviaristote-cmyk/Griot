@@ -2,15 +2,16 @@
 
 import { useState } from "react";
 import { SlidersHorizontal, X } from "lucide-react";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 import type { SongStatus } from "@/lib/types";
 
-const STATUS_OPTIONS: { status: SongStatus; label: string }[] = [
-  { status: "draft", label: "Brouillon" },
-  { status: "generating", label: "En cours" },
-  { status: "preview_ready", label: "Extrait prêt" },
-  { status: "awaiting_payment", label: "En attente de paiement" },
-  { status: "paid", label: "Payée" },
-  { status: "failed", label: "Échec" },
+const STATUS_OPTIONS: { status: SongStatus; labelKey: string }[] = [
+  { status: "draft", labelKey: "library.status.draft" },
+  { status: "generating", labelKey: "library.status.generating" },
+  { status: "preview_ready", labelKey: "library.status.previewReady" },
+  { status: "awaiting_payment", labelKey: "library.status.awaitingPayment" },
+  { status: "paid", labelKey: "library.status.paid" },
+  { status: "failed", labelKey: "library.status.failed" },
 ];
 
 /**
@@ -26,6 +27,7 @@ export function LibraryFiltersPanel({
   active: Set<SongStatus>;
   onChange: (next: Set<SongStatus>) => void;
 }) {
+  const { t } = useLanguage();
   const [open, setOpen] = useState(false);
 
   function toggle(status: SongStatus) {
@@ -48,20 +50,20 @@ export function LibraryFiltersPanel({
         }`}
       >
         <SlidersHorizontal className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
-        Filtres{active.size > 0 ? ` (${active.size})` : ""}
+        {active.size > 0 ? t("library.filters.buttonWithCount", { count: active.size }) : t("library.filters.button")}
       </button>
 
       {open && (
         <>
           <button
             type="button"
-            aria-label="Fermer le panneau de filtres"
+            aria-label={t("library.filters.close")}
             onClick={() => setOpen(false)}
             className="fixed inset-0 z-40 cursor-default"
           />
           <div className="absolute left-0 top-full z-50 mt-2 w-64 animate-pop-in rounded-card border border-border bg-surface p-3 shadow-card-hover sm:left-auto sm:right-0">
             <div className="flex items-center justify-between px-1">
-              <p className="text-label-sm font-medium uppercase tracking-wide text-ink-muted">État</p>
+              <p className="text-label-sm font-medium uppercase tracking-wide text-ink-muted">{t("library.filters.stateLabel")}</p>
               {active.size > 0 && (
                 <button
                   type="button"
@@ -69,12 +71,12 @@ export function LibraryFiltersPanel({
                   className="flex items-center gap-1 text-xs font-medium text-brand hover:underline"
                 >
                   <X className="h-3 w-3" strokeWidth={1.5} aria-hidden="true" />
-                  Réinitialiser
+                  {t("library.filters.reset")}
                 </button>
               )}
             </div>
             <div className="mt-2 flex flex-col">
-              {STATUS_OPTIONS.map(({ status, label }) => (
+              {STATUS_OPTIONS.map(({ status, labelKey }) => (
                 <label
                   key={status}
                   className="flex min-h-11 cursor-pointer items-center gap-2.5 rounded-control px-2 text-sm text-ink transition-colors hover:bg-page"
@@ -85,7 +87,7 @@ export function LibraryFiltersPanel({
                     onChange={() => toggle(status)}
                     className="h-4 w-4 shrink-0 rounded border-border text-brand focus-visible:outline-none focus-visible:shadow-ring-focus"
                   />
-                  {label}
+                  {t(labelKey)}
                 </label>
               ))}
             </div>

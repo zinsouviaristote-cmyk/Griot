@@ -23,8 +23,9 @@ import { Avatar } from "@/components/ui/Avatar";
 import { useToast } from "@/components/ui/Toast";
 import { hasCountedListen, recordListen } from "@/lib/explorer/listens";
 import { getPublicDisplayName } from "@/lib/data/mock-explorer";
-import { getOccasionLabel, styleLabels } from "@/lib/data/mock-dashboard";
 import { formatDuration } from "@/lib/format/duration";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { occasionLabel, styleLabel } from "@/lib/i18n/catalog";
 import type { PublishedSong } from "@/lib/types";
 
 const LISTEN_THRESHOLD_SECONDS = 5;
@@ -52,20 +53,21 @@ export function FeedScreen({
   onGoPrev: () => void;
   onGoNext: () => void;
 }) {
+  const { t } = useLanguage();
   const player = usePlayer();
   const showToast = useToast();
   const [lyricsOpen, setLyricsOpen] = useState(false);
   const elapsedRef = useRef(0);
   const countedRef = useRef(hasCountedListen(entry.id));
 
-  const displayName = getPublicDisplayName(entry);
+  const displayName = getPublicDisplayName(entry, t);
   const isCurrent = player.current?.id === entry.id;
   const isPlayingHere = isCurrent && player.isPlaying;
 
   const track: PlayerTrack = {
     id: entry.id,
     title: displayName,
-    subtitle: `${getOccasionLabel(entry.occasion)} · ${styleLabels[entry.style]}`,
+    subtitle: `${occasionLabel(t, entry.occasion)} · ${styleLabel(t, entry.style)}`,
     occasion: entry.occasion,
     audioUrl: entry.audioUrl,
     publishedId: entry.id,
@@ -96,21 +98,21 @@ export function FeedScreen({
   async function handleShare() {
     try {
       await navigator.clipboard.writeText(`${window.location.origin}/explorer`);
-      showToast("Lien copié.", "success");
+      showToast(t("explorer.linkCopied"), "success");
     } catch {
-      showToast("Impossible de copier le lien.", "danger");
+      showToast(t("explorer.linkCopyFailed"), "danger");
     }
   }
 
   return (
     <section
       className="relative flex h-full w-full shrink-0 snap-start snap-always overflow-hidden bg-page"
-      aria-label={`${index + 1} sur la file — ${displayName}`}
+      aria-label={t("explorer.screenAriaLabel", { position: index + 1, name: displayName })}
     >
       <div className="flex h-full min-w-0 flex-1 flex-col items-center px-5 pb-2 pt-14 lg:pb-8 lg:pt-10">
         <p className="flex shrink-0 items-center gap-1.5 text-xs font-medium text-ink-muted">
           <Headphones className="h-3.5 w-3.5 animate-breathe" strokeWidth={1.5} aria-hidden="true" />
-          {entry.listens} écoutes
+          {t("explorer.listensCount", { count: entry.listens })}
         </p>
 
         <div className="flex w-full max-w-[300px] flex-1 flex-col items-center justify-center gap-3 py-2 lg:max-w-xs lg:gap-4">
@@ -122,7 +124,7 @@ export function FeedScreen({
             <Avatar initials={entry.authorName.slice(0, 1).toUpperCase()} size="sm" />
             <span className="text-sm font-medium text-ink">{entry.authorName}</span>
             <span className="rounded-full bg-brand-soft px-2.5 py-1 text-xs font-medium text-brand">
-              {styleLabels[entry.style]}
+              {styleLabel(t, entry.style)}
             </span>
           </div>
 
@@ -152,7 +154,7 @@ export function FeedScreen({
               type="button"
               onClick={onGoPrev}
               disabled={isFirst}
-              aria-label="Chanson précédente"
+              aria-label={t("explorer.previousSong")}
               className="flex h-11 w-11 items-center justify-center rounded-full text-ink transition-transform duration-150 ease-magnetic active:scale-90 disabled:opacity-30"
             >
               <SkipBack className="h-5 w-5" strokeWidth={1.5} fill="currentColor" aria-hidden="true" />
@@ -162,7 +164,7 @@ export function FeedScreen({
               type="button"
               onClick={onGoNext}
               disabled={isLast}
-              aria-label="Chanson suivante"
+              aria-label={t("explorer.nextSong")}
               className="flex h-11 w-11 items-center justify-center rounded-full text-ink transition-transform duration-150 ease-magnetic active:scale-90 disabled:opacity-30"
             >
               <SkipForward className="h-5 w-5" strokeWidth={1.5} fill="currentColor" aria-hidden="true" />
@@ -174,7 +176,7 @@ export function FeedScreen({
               type="button"
               onClick={() => player.toggleRepeatOne()}
               aria-pressed={player.repeatOne}
-              aria-label={player.repeatOne ? "Désactiver la répétition" : "Répéter cette chanson"}
+              aria-label={player.repeatOne ? t("explorer.repeatOn") : t("explorer.repeatOff")}
               className={`flex h-11 w-11 items-center justify-center rounded-full transition-colors duration-150 active:scale-90 ${
                 player.repeatOne ? "text-brand" : "text-ink-muted hover:text-ink"
               }`}
@@ -187,7 +189,7 @@ export function FeedScreen({
             <button
               type="button"
               onClick={handleShare}
-              aria-label="Partager le lien"
+              aria-label={t("explorer.shareLink")}
               className="flex h-11 w-11 items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:text-ink active:scale-90"
             >
               <Share2 className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
@@ -203,14 +205,14 @@ export function FeedScreen({
               }`}
             >
               <FileText className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
-              Paroles
+              {t("explorer.lyrics")}
             </button>
 
             <div className="flex items-center gap-1.5">
               <button
                 type="button"
                 onClick={() => player.setVolume(player.volume > 0 ? 0 : 1)}
-                aria-label={player.volume > 0 ? "Couper le son" : "Rétablir le son"}
+                aria-label={player.volume > 0 ? t("explorer.mute") : t("explorer.unmute")}
                 className="flex h-11 w-11 items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:text-ink active:scale-90"
               >
                 {player.volume > 0 ? (
@@ -226,7 +228,7 @@ export function FeedScreen({
                 step={0.05}
                 value={player.volume}
                 onChange={(event) => player.setVolume(Number(event.target.value))}
-                aria-label="Volume"
+                aria-label={t("explorer.volume")}
                 className="hidden w-16 accent-brand sm:block"
               />
             </div>
@@ -273,19 +275,19 @@ export function FeedScreen({
                 className="flex items-center gap-2 font-display text-lg font-semibold text-ink"
               >
                 <FileText className="h-4 w-4 text-brand" strokeWidth={1.5} aria-hidden="true" />
-                Paroles
+                {t("explorer.lyrics")}
               </p>
               <button
                 type="button"
                 onClick={() => setLyricsOpen(false)}
-                aria-label="Fermer les paroles"
+                aria-label={t("explorer.closeLyrics")}
                 className="flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-page hover:text-ink active:scale-90"
               >
                 <X className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
               </button>
             </div>
             <p className="mt-1 text-xs text-ink-muted">
-              {displayName} · {styleLabels[entry.style]}
+              {displayName} · {styleLabel(t, entry.style)}
             </p>
 
             <div className="mt-6 space-y-4">

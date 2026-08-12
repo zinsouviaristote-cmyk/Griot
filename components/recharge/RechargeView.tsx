@@ -7,21 +7,10 @@ import { CreditHistory } from "@/components/recharge/CreditHistory";
 import { CREDIT_PACKS, formatPackEquivalence, packNotes, type CreditPack } from "@/lib/tunnel/types";
 import { mockCheckPaymentStatus, mockInitiatePayment, type PaymentMethod } from "@/lib/payment/mockPayment";
 import { formatFcfa } from "@/lib/format/currency";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 import type { CreditTransaction } from "@/lib/types";
 
 type Phase = "select" | "processing" | "success";
-
-const MOBILE_MONEY_MESSAGES = [
-  "Confirmez la transaction sur votre téléphone…",
-  "En attente de votre confirmation Mobile Money…",
-  "Toujours en attente — vérifiez vos notifications…",
-];
-
-const CARD_MESSAGES = [
-  "Vérification de votre carte…",
-  "Confirmation auprès de votre banque…",
-  "Presque terminé…",
-];
 
 export function RechargeView({
   currentBalance,
@@ -30,12 +19,20 @@ export function RechargeView({
   currentBalance: number;
   transactions: CreditTransaction[];
 }) {
+  const { t, tn } = useLanguage();
   const [selectedPack, setSelectedPack] = useState<CreditPack["id"]>("pack3");
   const [method, setMethod] = useState<PaymentMethod>("mobile_money");
   const [phase, setPhase] = useState<Phase>("select");
   const [messageIndex, setMessageIndex] = useState(0);
   const [historyOpen, setHistoryOpen] = useState(false);
   const historyRef = useRef<HTMLDetailsElement>(null);
+
+  const MOBILE_MONEY_MESSAGES = [
+    t("recharge.mobileMoneyMessage1"),
+    t("recharge.mobileMoneyMessage2"),
+    t("recharge.mobileMoneyMessage3"),
+  ];
+  const CARD_MESSAGES = [t("recharge.cardMessage1"), t("recharge.cardMessage2"), t("recharge.cardMessage3")];
 
   function openHistory() {
     setHistoryOpen(true);
@@ -76,13 +73,11 @@ export function RechargeView({
         <span className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-soft">
           <Sparkles className="h-7 w-7 animate-breathe text-brand" strokeWidth={1.5} aria-hidden="true" />
         </span>
-        <p className="mt-6 font-display text-headline-md text-ink">Confirmation en cours</p>
+        <p className="mt-6 font-display text-headline-md text-ink">{t("recharge.processingTitle")}</p>
         <p key={messageIndex} aria-live="polite" className="mt-2 min-h-[24px] animate-field-in text-body-md text-ink-muted">
           {messages[messageIndex]}
         </p>
-        <p className="mt-6 text-xs text-ink-muted">
-          Ne fermez pas cette page — cela peut prendre jusqu&apos;à quelques minutes.
-        </p>
+        <p className="mt-6 text-xs text-ink-muted">{t("recharge.processingHint")}</p>
       </div>
     );
   }
@@ -93,13 +88,12 @@ export function RechargeView({
         <span className="flex h-16 w-16 items-center justify-center rounded-full bg-success/10 text-success">
           <Check className="h-7 w-7" strokeWidth={1.5} aria-hidden="true" />
         </span>
-        <p className="mt-6 font-display text-headline-md text-ink">Rechargement réussi</p>
+        <p className="mt-6 font-display text-headline-md text-ink">{t("recharge.successTitle")}</p>
         <p className="mt-2 text-body-md text-ink-muted">
-          {packNotes(pack)} Note{packNotes(pack) > 1 ? "s" : ""} ajoutée{packNotes(pack) > 1 ? "s" : ""} —{" "}
-          {currentBalance + packNotes(pack)} au total.
+          {tn("recharge.successBody", packNotes(pack), { total: currentBalance + packNotes(pack) })}
         </p>
-        <ButtonLink href="/" variant="primary" className="mt-8 w-full sm:w-auto">
-          Retour au tableau de bord
+        <ButtonLink href="/tableau-de-bord" variant="primary" className="mt-8 w-full sm:w-auto">
+          {t("recharge.backToDashboard")}
         </ButtonLink>
       </div>
     );
@@ -122,19 +116,21 @@ export function RechargeView({
                 isSelected ? "border-brand bg-brand-soft" : "border-border bg-surface hover:border-brand/40"
               }`}
             >
-              {p.featured && <p className="text-label-sm font-semibold text-brand">★ Le plus choisi</p>}
-              <p className={`font-display text-3xl font-bold text-ink ${p.featured ? "mt-1" : ""}`}>{notes} Notes</p>
-              <p className="text-sm text-ink-muted">{formatPackEquivalence(p)}</p>
+              {p.featured && <p className="text-label-sm font-semibold text-brand">★ {t("recharge.mostChosen")}</p>}
+              <p className={`font-display text-3xl font-bold text-ink ${p.featured ? "mt-1" : ""}`}>
+                {notes} {tn("credits.unit", notes)}
+              </p>
+              <p className="text-sm text-ink-muted">{formatPackEquivalence(p, tn)}</p>
               <p className="mt-3 font-display text-xl font-semibold text-ink">{formatFcfa(p.priceFcfa)}</p>
-              <p className="mt-0.5 text-xs text-ink-muted">{formatFcfa(perSong)} / chanson</p>
+              <p className="mt-0.5 text-xs text-ink-muted">{t("recharge.perSong", { price: formatFcfa(perSong) })}</p>
             </button>
           );
         })}
       </div>
-      <p className="mt-3 text-label-sm text-ink-muted">Les Notes n&apos;expirent jamais.</p>
+      <p className="mt-3 text-label-sm text-ink-muted">{t("recharge.notesNeverExpire")}</p>
 
       <div className="mt-8">
-        <p className="text-label-md uppercase tracking-wide text-ink-muted">Moyen de paiement</p>
+        <p className="text-label-md uppercase tracking-wide text-ink-muted">{t("recharge.paymentMethod")}</p>
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
           <button
             type="button"
@@ -148,8 +144,8 @@ export function RechargeView({
               <Smartphone className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
             </span>
             <span>
-              <span className="block text-sm font-semibold text-ink">Mobile Money</span>
-              <span className="block text-xs text-ink-muted">Orange, MTN, Moov…</span>
+              <span className="block text-sm font-semibold text-ink">{t("recharge.mobileMoney")}</span>
+              <span className="block text-xs text-ink-muted">{t("recharge.mobileMoneyOperators")}</span>
             </span>
           </button>
           <button
@@ -164,15 +160,15 @@ export function RechargeView({
               <CardIcon className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
             </span>
             <span>
-              <span className="block text-sm font-semibold text-ink">Carte bancaire</span>
-              <span className="block text-xs text-ink-muted">Visa, Mastercard</span>
+              <span className="block text-sm font-semibold text-ink">{t("recharge.card")}</span>
+              <span className="block text-xs text-ink-muted">{t("recharge.cardBrands")}</span>
             </span>
           </button>
         </div>
       </div>
 
       <Button onClick={() => setPhase("processing")} className="mt-8 w-full sm:w-auto">
-        Recharger — {formatFcfa(pack.priceFcfa)}
+        {t("recharge.payButton", { price: formatFcfa(pack.priceFcfa) })}
       </Button>
 
       {!historyOpen && (
@@ -181,7 +177,7 @@ export function RechargeView({
           onClick={openHistory}
           className="mt-6 text-xs font-medium text-brand hover:underline"
         >
-          Voir l&apos;historique de mes Notes
+          {t("recharge.viewHistory")}
         </button>
       )}
 
@@ -195,7 +191,7 @@ export function RechargeView({
         className="group mt-6 scroll-mt-8 rounded-feature border border-border bg-surface open:shadow-card"
       >
         <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-5 py-4 text-sm font-semibold text-ink [&::-webkit-details-marker]:hidden">
-          Historique de mes Notes
+          {t("recharge.historyTitle")}
           <ChevronDown
             className="h-4 w-4 shrink-0 text-ink-muted transition-transform duration-200 ease-magnetic group-open:rotate-180"
             strokeWidth={1.5}

@@ -1,10 +1,14 @@
+"use client";
+
 import Link from "next/link";
 import { BarChart3, ChevronRight, LogOut, Megaphone, type LucideIcon } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { CreditCard } from "@/components/dashboard/CreditCard";
+import { clearMockSession } from "@/lib/auth/session";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 interface MenuItem {
-  label: string;
+  labelKey: string;
   href: string;
   icon: LucideIcon;
 }
@@ -13,8 +17,8 @@ interface MenuItem {
 // desktop — Paramètres et Aide restent réservés au menu de l'avatar (voir
 // MobileTopBar), un seul chemin pour chacun.
 const ITEMS: MenuItem[] = [
-  { label: "Statistiques", href: "/statistiques", icon: BarChart3 },
-  { label: "Mes publications", href: "/publications", icon: Megaphone },
+  { labelKey: "dashboard.profileMenu.statistics", href: "/statistiques", icon: BarChart3 },
+  { labelKey: "dashboard.profileMenu.myPublications", href: "/publications", icon: Megaphone },
 ];
 
 /**
@@ -32,6 +36,7 @@ export function ProfileMenu({
   email: string;
   creditBalance: number;
 }) {
+  const { t } = useLanguage();
   return (
     <div>
       <div className="flex items-center gap-3">
@@ -58,7 +63,7 @@ export function ProfileMenu({
               strokeWidth={1.5}
               aria-hidden="true"
             />
-            <span className="flex-1">{item.label}</span>
+            <span className="flex-1">{t(item.labelKey)}</span>
             <ChevronRight className="h-4 w-4 shrink-0 text-ink-muted/60" strokeWidth={1.5} aria-hidden="true" />
           </Link>
         ))}
@@ -66,10 +71,11 @@ export function ProfileMenu({
 
       <Link
         href="/connexion"
+        onClick={() => clearMockSession()}
         className="mt-3 flex min-h-[52px] items-center gap-3 rounded-card border border-border bg-surface px-4 text-sm font-semibold text-danger shadow-card transition-colors hover:bg-danger/5"
       >
         <LogOut className="h-4 w-4 shrink-0" strokeWidth={1.5} aria-hidden="true" />
-        Déconnexion
+        {t("dashboard.profileMenu.logout")}
       </Link>
     </div>
   );

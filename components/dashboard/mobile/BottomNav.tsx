@@ -3,24 +3,26 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Compass, Home, LibraryBig, Plus, UserRound, type LucideIcon } from "lucide-react";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 interface TabItem {
-  label: string;
+  labelKey: string;
   href: string;
   icon: LucideIcon;
 }
 
 const LEFT_TABS: TabItem[] = [
-  { label: "Accueil", href: "/", icon: Home },
-  { label: "Explorer", href: "/explorer", icon: Compass },
+  { labelKey: "dashboard.bottomNav.home", href: "/tableau-de-bord", icon: Home },
+  { labelKey: "dashboard.bottomNav.explore", href: "/explorer", icon: Compass },
 ];
 
 const RIGHT_TABS: TabItem[] = [
-  { label: "Bibliothèque", href: "/bibliotheque", icon: LibraryBig },
-  { label: "Profil", href: "/profil", icon: UserRound },
+  { labelKey: "dashboard.bottomNav.library", href: "/bibliotheque", icon: LibraryBig },
+  { labelKey: "dashboard.bottomNav.profile", href: "/profil", icon: UserRound },
 ];
 
 function TabLink({ item, isActive }: { item: TabItem; isActive: boolean }) {
+  const { t } = useLanguage();
   return (
     <Link
       href={item.href}
@@ -37,7 +39,7 @@ function TabLink({ item, isActive }: { item: TabItem; isActive: boolean }) {
         aria-hidden="true"
       />
       <span className={`text-xs font-medium transition-colors ${isActive ? "text-brand" : "text-ink-muted"}`}>
-        {item.label}
+        {t(item.labelKey)}
       </span>
     </Link>
   );
@@ -49,6 +51,7 @@ function TabLink({ item, isActive }: { item: TabItem; isActive: boolean }) {
  * central « Créer » est surélevé et pose à cheval sur la bordure haute de la barre.
  */
 export function BottomNav() {
+  const { t } = useLanguage();
   const pathname = usePathname();
 
   return (
@@ -66,7 +69,7 @@ export function BottomNav() {
 
         <Link
           href="/creer"
-          aria-label="Créer une chanson"
+          aria-label={t("dashboard.bottomNav.create")}
           className="group absolute left-1/2 top-0 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-brand text-white shadow-card-hover transition-transform duration-200 ease-magnetic hover:scale-110 active:scale-95"
         >
           <Plus

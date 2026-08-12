@@ -1,7 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import { Bell, Music2, Plus } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { AvatarMenu } from "@/components/dashboard/mobile/AvatarMenu";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 export function MobileTopBar({
   creditBalance,
@@ -14,11 +17,12 @@ export function MobileTopBar({
   userName: string;
   userEmail: string;
 }) {
+  const { t } = useLanguage();
   return (
     <header className="fixed inset-x-0 top-0 z-20 flex items-center justify-between border-b border-border bg-page/95 px-4 py-2.5 lg:hidden">
       <Link
-        href="/"
-        aria-label="Accueil Griot"
+        href="/tableau-de-bord"
+        aria-label={t("dashboard.topBar.homeAriaLabel")}
         className="inline-block transition-transform duration-200 ease-magnetic hover:scale-105 active:scale-95"
       >
         <Logo withWordmark={false} />
@@ -43,7 +47,7 @@ export function MobileTopBar({
 
         <button
           type="button"
-          aria-label="Notifications"
+          aria-label={t("dashboard.topBar.notifications")}
           className="group flex h-11 w-11 items-center justify-center rounded-full text-ink-muted transition-all duration-150 ease-magnetic hover:bg-brand-soft/60 active:scale-90"
         >
           <Bell

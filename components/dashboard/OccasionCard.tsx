@@ -3,7 +3,11 @@ import { ArrowUpRight } from "lucide-react";
 import { OCCASION_TONES } from "@/lib/occasionTones";
 import type { OccasionMeta } from "@/lib/types";
 
-export function OccasionCard({ occasion }: { occasion: OccasionMeta }) {
+// `label`/`tagline` n'existent plus sur OccasionMeta lui-même (voir lib/types.ts) :
+// l'appelant (OccasionCarousel) les fournit déjà traduits, à chaque rendu.
+type TranslatedOccasion = OccasionMeta & { label: string; tagline: string };
+
+export function OccasionCard({ occasion }: { occasion: TranslatedOccasion }) {
   const tone = OCCASION_TONES[occasion.id];
 
   return (

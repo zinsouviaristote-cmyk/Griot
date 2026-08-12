@@ -2,11 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Search, X } from "lucide-react";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 // Remplace l'ancienne barre pleine largeur : la bibliothèque a déjà sa propre
 // recherche, celle-ci ne sert qu'à retrouver une chanson depuis n'importe quel
 // écran, sans lui réserver toute la largeur du haut sur chaque page.
 export function HeaderSearch() {
+  const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -39,13 +41,13 @@ export function HeaderSearch() {
           <input
             ref={inputRef}
             type="search"
-            placeholder="Rechercher une chanson…"
+            placeholder={t("dashboard.search.placeholder")}
             className="w-52 bg-transparent text-sm text-ink placeholder:text-ink-muted focus:outline-none"
           />
           <button
             type="button"
             onClick={() => setOpen(false)}
-            aria-label="Fermer la recherche"
+            aria-label={t("dashboard.search.close")}
             className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-brand-soft/60 hover:text-ink"
           >
             <X className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
@@ -55,7 +57,7 @@ export function HeaderSearch() {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          aria-label="Rechercher une chanson"
+          aria-label={t("dashboard.search.open")}
           className="flex h-11 w-11 items-center justify-center rounded-full text-ink-muted transition-all duration-150 ease-magnetic hover:bg-brand-soft/60 active:scale-90"
         >
           <Search className="h-[18px] w-[18px]" strokeWidth={1.5} aria-hidden="true" />

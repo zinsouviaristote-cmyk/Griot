@@ -188,10 +188,10 @@ export const mockPublishedSongs: PublishedSong[] = [
   ...community,
 ];
 
-export function getPublicDisplayName(entry: PublishedSong): string {
+export function getPublicDisplayName(entry: PublishedSong, t: (key: string) => string): string {
   if (entry.publicTitle) return entry.publicTitle;
   if (!entry.hideFirstName) return entry.recipientFirstName;
-  return "Chanson surprise";
+  return t("explorer.surpriseSong");
 }
 
 export function getPublishedEntryForSong(songId: string): PublishedSong | undefined {

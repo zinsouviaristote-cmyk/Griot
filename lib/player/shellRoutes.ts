@@ -7,7 +7,7 @@
 // chemin non reconnu (404 compris) est traité par défaut comme "sans décor",
 // jamais l'inverse, pour ne jamais réserver un espace de sidebar qui n'existe pas.
 const SHELL_PATH_PATTERNS = [
-  /^\/$/,
+  /^\/tableau-de-bord$/,
   /^\/explorer$/,
   /^\/bibliotheque(\/.*)?$/,
   /^\/publications$/,

@@ -1,6 +1,7 @@
 "use client";
 
 import { GoogleMark } from "@/components/auth/GoogleMark";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 // Bouton volontairement neutre — ni le violet de marque, ni un dégradé : un
 // bouton d'identité tierce se reconnaît par sa sobriété, pas par les couleurs
@@ -9,20 +10,21 @@ import { GoogleMark } from "@/components/auth/GoogleMark";
 // de l'état du tunnel à la redirection retour (voir /connexion/google).
 export function GoogleButton({
   returnTo,
-  label = "Continuer avec Google",
+  label,
   className = "",
 }: {
   returnTo: string;
   label?: string;
   className?: string;
 }) {
+  const { t } = useLanguage();
   return (
     <a
       href={`/connexion/google?returnTo=${encodeURIComponent(returnTo)}`}
       className={`flex min-h-11 w-full items-center justify-center gap-2.5 rounded-control border border-border bg-surface text-sm font-semibold text-ink transition-all duration-150 ease-magnetic hover:bg-page active:scale-[0.98] ${className}`}
     >
       <GoogleMark />
-      {label}
+      {label ?? t("auth.continueWithGoogle")}
     </a>
   );
 }

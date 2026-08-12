@@ -7,7 +7,8 @@ import { FeedFiltersPanel } from "@/components/explorer/FeedFiltersPanel";
 import { ButtonLink } from "@/components/ui/Button";
 import { usePlayer, type PlayerTrack } from "@/lib/player/PlayerContext";
 import { getPublicDisplayName } from "@/lib/data/mock-explorer";
-import { getOccasionLabel, styleLabels } from "@/lib/data/mock-dashboard";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { occasionLabel, styleLabel } from "@/lib/i18n/catalog";
 import type { MusicStyle, Occasion, PublishedSong } from "@/lib/types";
 
 // Défilement vertical, un morceau plein écran à la fois — le geste des
@@ -16,6 +17,7 @@ import type { MusicStyle, Occasion, PublishedSong } from "@/lib/types";
 // clavier appellent la même navigation programmatique que les boutons
 // précédent/suivant, pour rester en phase avec la lecture (voir goTo ci-dessous).
 export function ExplorerFeed({ entries }: { entries: PublishedSong[] }) {
+  const { t } = useLanguage();
   const player = usePlayer();
   const [occasionFilter, setOccasionFilter] = useState<Occasion | "toutes">("toutes");
   const [styleFilter, setStyleFilter] = useState<MusicStyle | "tous">("tous");
@@ -38,14 +40,14 @@ export function ExplorerFeed({ entries }: { entries: PublishedSong[] }) {
     () =>
       filtered.map((entry) => ({
         id: entry.id,
-        title: getPublicDisplayName(entry),
-        subtitle: `${getOccasionLabel(entry.occasion)} · ${styleLabels[entry.style]}`,
+        title: getPublicDisplayName(entry, t),
+        subtitle: `${occasionLabel(t, entry.occasion)} · ${styleLabel(t, entry.style)}`,
         occasion: entry.occasion,
         audioUrl: entry.audioUrl,
         publishedId: entry.id,
         likes: entry.likes,
       })),
-    [filtered],
+    [filtered, t],
   );
 
   const clampedIndex = Math.min(activeIndex, Math.max(filtered.length - 1, 0));
@@ -150,7 +152,7 @@ export function ExplorerFeed({ entries }: { entries: PublishedSong[] }) {
         </div>
       ) : (
         <div className="flex h-full w-full flex-col items-center justify-center gap-3 px-6 text-center">
-          <p className="text-sm text-ink-muted">Aucune chanson publiée ne correspond à ces critères.</p>
+          <p className="text-sm text-ink-muted">{t("explorer.noResults")}</p>
           <button
             type="button"
             onClick={() => {
@@ -159,7 +161,7 @@ export function ExplorerFeed({ entries }: { entries: PublishedSong[] }) {
             }}
             className="text-sm font-medium text-brand hover:underline"
           >
-            Réinitialiser les filtres
+            {t("explorer.resetFilters")}
           </button>
         </div>
       )}
@@ -193,7 +195,7 @@ export function ExplorerFeed({ entries }: { entries: PublishedSong[] }) {
         <button
           type="button"
           onClick={() => setFiltersOpen(true)}
-          aria-label="Filtrer par occasion ou style"
+          aria-label={t("explorer.filterAriaLabel")}
           className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full border border-border bg-surface text-ink-muted shadow-card transition-transform duration-150 ease-magnetic hover:scale-105 hover:text-ink active:scale-95"
         >
           <SlidersHorizontal className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
@@ -207,7 +209,7 @@ export function ExplorerFeed({ entries }: { entries: PublishedSong[] }) {
           className="pointer-events-auto !min-h-11 !px-3.5 !py-2 !text-xs shadow-card"
         >
           <Sparkles className="h-3.5 w-3.5 animate-breathe" strokeWidth={1.5} aria-hidden="true" />
-          Créer la mienne
+          {t("explorer.createMine")}
         </ButtonLink>
       </div>
 

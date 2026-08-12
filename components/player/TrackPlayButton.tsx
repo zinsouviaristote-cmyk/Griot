@@ -2,6 +2,7 @@
 
 import { Pause, Play } from "lucide-react";
 import { usePlayer, type PlayerTrack } from "@/lib/player/PlayerContext";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 const SIZE_CLASSES = {
   sm: "h-8 w-8",
@@ -32,6 +33,7 @@ export function TrackPlayButton({
   size?: "sm" | "md" | "lg";
   className?: string;
 }) {
+  const { t } = useLanguage();
   const player = usePlayer();
   const isActive = player.current?.id === track.id;
   const isPlaying = isActive && player.isPlaying;
@@ -47,7 +49,7 @@ export function TrackPlayButton({
     <button
       type="button"
       onClick={handleClick}
-      aria-label={isPlaying ? "Mettre en pause" : `Écouter la chanson de ${track.title}`}
+      aria-label={isPlaying ? t("player.pause") : t("player.playTrack", { title: track.title })}
       className={`flex shrink-0 items-center justify-center rounded-full bg-brand text-white transition-transform duration-150 ease-magnetic hover:brightness-90 active:scale-90 ${SIZE_CLASSES[size]} ${className}`}
     >
       {isPlaying ? (

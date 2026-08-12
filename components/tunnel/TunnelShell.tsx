@@ -15,12 +15,14 @@ import { GenerationStep } from "@/components/tunnel/steps/GenerationStep";
 import { ChoiceStep } from "@/components/tunnel/steps/ChoiceStep";
 import { DeliveryStep } from "@/components/tunnel/steps/DeliveryStep";
 import { PlayerContentSpacer } from "@/components/player/PlayerContentSpacer";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 // Chrome minimal, volontairement en dehors de DashboardShell (pas de sidebar,
 // pas de barre de recherche) : le tunnel est un parcours à part entière, pas un
 // onglet de plus dans le tableau de bord — "le cœur du produit" mérite tout
 // l'écran, sans rien qui détourne l'attention de la question posée.
 export function TunnelShell() {
+  const { t } = useLanguage();
   const { step, canGoBack, goBack, progress } = useTunnel();
 
   // Nettoie l'URL une fois `auth`/`email`/`provider`/`name` consommés par
@@ -41,7 +43,7 @@ export function TunnelShell() {
             type="button"
             onClick={goBack}
             disabled={!canGoBack}
-            aria-label="Étape précédente"
+            aria-label={t("tunnel.shell.previousStep")}
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-ink-muted transition-all duration-150 ease-magnetic hover:bg-brand-soft/60 hover:text-ink active:scale-90 disabled:pointer-events-none disabled:opacity-0"
           >
             <ArrowLeft className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
@@ -53,7 +55,7 @@ export function TunnelShell() {
 
           <Link
             href="/"
-            aria-label="Fermer et revenir au tableau de bord"
+            aria-label={t("tunnel.shell.closeToDashboard")}
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-ink-muted transition-all duration-150 ease-magnetic hover:bg-brand-soft/60 hover:text-ink active:scale-90"
           >
             <X className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />

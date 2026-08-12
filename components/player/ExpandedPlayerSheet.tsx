@@ -9,6 +9,7 @@ import { PlayerProgressBar } from "@/components/player/PlayerProgressBar";
 import { Waveform } from "@/components/player/Waveform";
 import { LikeButton } from "@/components/explorer/LikeButton";
 import { useToast } from "@/components/ui/Toast";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 const CLOSE_THRESHOLD = 90;
 
@@ -19,6 +20,7 @@ const CLOSE_THRESHOLD = 90;
  * affiche déjà tout en permanence.
  */
 export function ExpandedPlayerSheet() {
+  const { t } = useLanguage();
   const player = usePlayer();
   const showToast = useToast();
   const [dragY, setDragY] = useState(0);
@@ -53,9 +55,9 @@ export function ExpandedPlayerSheet() {
   async function handleShare() {
     try {
       await navigator.clipboard.writeText(window.location.href);
-      showToast("Lien copié.", "success");
+      showToast(t("explorer.linkCopied"), "success");
     } catch {
-      showToast("Impossible de copier le lien.", "danger");
+      showToast(t("explorer.linkCopyFailed"), "danger");
     }
   }
 
@@ -73,13 +75,13 @@ export function ExpandedPlayerSheet() {
             type="button"
             onClick={() => player.setExpanded(false)}
             onPointerDown={(event) => event.stopPropagation()}
-            aria-label="Réduire le lecteur"
+            aria-label={t("player.collapse")}
             className="flex h-11 w-11 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-brand-soft/60 active:scale-90"
           >
             <ChevronDown className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
           </button>
           <span className="text-label-sm font-medium uppercase tracking-wide text-ink-muted">
-            En cours de lecture
+            {t("player.nowPlaying")}
           </span>
           <span className="h-11 w-11" aria-hidden="true" />
         </div>
@@ -108,7 +110,7 @@ export function ExpandedPlayerSheet() {
               type="button"
               onClick={() => player.prev()}
               disabled={!player.hasPrev}
-              aria-label="Chanson précédente"
+              aria-label={t("explorer.previousSong")}
               className="flex h-11 w-11 items-center justify-center rounded-full text-ink transition-transform duration-150 ease-magnetic active:scale-90 disabled:opacity-30"
             >
               <SkipBack className="h-5 w-5" strokeWidth={1.5} fill="currentColor" aria-hidden="true" />
@@ -118,7 +120,7 @@ export function ExpandedPlayerSheet() {
               type="button"
               onClick={() => player.next()}
               disabled={!player.hasNext}
-              aria-label="Chanson suivante"
+              aria-label={t("explorer.nextSong")}
               className="flex h-11 w-11 items-center justify-center rounded-full text-ink transition-transform duration-150 ease-magnetic active:scale-90 disabled:opacity-30"
             >
               <SkipForward className="h-5 w-5" strokeWidth={1.5} fill="currentColor" aria-hidden="true" />
@@ -139,7 +141,7 @@ export function ExpandedPlayerSheet() {
             <button
               type="button"
               onClick={handleShare}
-              aria-label="Partager le lien"
+              aria-label={t("explorer.shareLink")}
               className="flex min-h-11 min-w-11 items-center justify-center rounded-full text-ink-muted transition-colors hover:text-brand active:scale-90"
             >
               <Share2 className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />

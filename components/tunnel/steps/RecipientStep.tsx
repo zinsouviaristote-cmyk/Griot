@@ -6,12 +6,15 @@ import { useTunnel } from "@/lib/tunnel/TunnelContext";
 import { RELATIONSHIP_OPTIONS } from "@/lib/tunnel/types";
 import { Button } from "@/components/ui/Button";
 import { mockContacts } from "@/lib/data/mock-contacts";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { relationshipLabel } from "@/lib/i18n/catalog";
 import type { Contact } from "@/lib/types";
 
 // Le prénom est l'élément le plus important de l'écran — c'est le mot que la
 // chanson va chanter — d'où un traitement typographique proche d'un titre,
 // pas un simple champ de formulaire parmi d'autres.
 export function RecipientStep() {
+  const { t } = useLanguage();
   const { data, update, goNext } = useTunnel();
   const canContinue = data.recipientFirstName.trim().length > 0 && data.relationship !== null;
 
@@ -36,7 +39,7 @@ export function RecipientStep() {
         <div className="mb-6">
           <p className="flex items-center gap-1.5 text-label-md uppercase tracking-wide text-ink-muted">
             <UsersRound className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />
-            Ou choisissez parmi vos proches
+            {t("tunnel.recipient.pickFromContacts")}
           </p>
           <div className="mt-2.5 flex flex-wrap gap-2">
             {mockContacts.map((contact) => {
@@ -62,19 +65,21 @@ export function RecipientStep() {
       )}
 
       <label htmlFor="recipient-name" className="text-label-md uppercase tracking-wide text-ink-muted">
-        Son prénom
+        {t("tunnel.recipient.firstNameLabel")}
       </label>
       <input
         id="recipient-name"
         autoFocus
         value={data.recipientFirstName}
         onChange={(event) => update({ recipientFirstName: event.target.value, contactId: null })}
-        placeholder="Fatou"
+        placeholder={t("tunnel.recipient.firstNamePlaceholder")}
         className="mt-3 w-full border-b-2 border-border bg-transparent pb-2 font-display text-4xl font-bold text-ink placeholder:text-ink-muted/30 focus:border-brand focus:outline-none sm:text-5xl"
       />
 
       <p className="mt-10 text-label-md uppercase tracking-wide text-ink-muted">
-        Votre lien avec {data.recipientFirstName.trim() || "cette personne"}
+        {t("tunnel.recipient.relationshipLabelWith", {
+          name: data.recipientFirstName.trim() || t("tunnel.recipient.relationshipDefaultName"),
+        })}
       </p>
       <div className="mt-3 flex flex-wrap gap-2">
         {RELATIONSHIP_OPTIONS.map((relationship) => {
@@ -91,7 +96,7 @@ export function RecipientStep() {
                   : "border-border text-ink-muted hover:border-brand/40 hover:text-ink"
               }`}
             >
-              {relationship}
+              {relationshipLabel(t, relationship)}
             </button>
           );
         })}
@@ -100,7 +105,7 @@ export function RecipientStep() {
       <div className="mt-8 flex flex-wrap gap-5">
         <div className="max-w-[180px]">
           <label htmlFor="recipient-age" className="text-label-md uppercase tracking-wide text-ink-muted">
-            Âge (facultatif)
+            {t("tunnel.recipient.ageLabel")}
           </label>
           <input
             id="recipient-age"
@@ -110,14 +115,14 @@ export function RecipientStep() {
             inputMode="numeric"
             value={data.recipientAge}
             onChange={(event) => update({ recipientAge: event.target.value })}
-            placeholder="Ex. 45"
+            placeholder={t("tunnel.recipient.agePlaceholder")}
             className="mt-2 min-h-11 w-full rounded-control border border-border bg-surface px-3.5 text-sm text-ink placeholder:text-ink-muted focus:border-brand focus:outline-none focus:shadow-ring-focus"
           />
         </div>
 
         <div className="max-w-[220px]">
           <label htmlFor="recipient-birthday" className="text-label-md uppercase tracking-wide text-ink-muted">
-            Sa date d&apos;anniversaire
+            {t("tunnel.recipient.birthdayLabel")}
           </label>
           <input
             id="recipient-birthday"
@@ -128,13 +133,13 @@ export function RecipientStep() {
           />
           <p className="mt-1.5 flex items-center gap-1 text-xs text-ink-muted">
             <Cake className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} aria-hidden="true" />
-            Facultatif — pour vous prévenir l&apos;an prochain.
+            {t("tunnel.recipient.birthdayHint")}
           </p>
         </div>
       </div>
 
       <Button type="submit" disabled={!canContinue} className="mt-10 w-full sm:w-auto">
-        Continuer
+        {t("tunnel.recipient.continue")}
       </Button>
     </form>
   );

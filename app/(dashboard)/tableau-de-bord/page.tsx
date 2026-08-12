@@ -1,3 +1,5 @@
+"use client";
+
 import { CreateSongHero } from "@/components/dashboard/CreateSongHero";
 import { OccasionCarousel } from "@/components/dashboard/OccasionCarousel";
 import { SongsTable } from "@/components/dashboard/SongsTable";
@@ -7,6 +9,7 @@ import { RecentSongsList } from "@/components/dashboard/mobile/RecentSongsList";
 import { Reveal } from "@/components/ui/Reveal";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { mockSongs, mockUser } from "@/lib/data/mock-dashboard";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 // Ajoutez ?vide=1 à l'URL pour prévisualiser l'état d'un tout nouvel utilisateur,
 // sans chanson ni crédit — c'est le premier écran qu'il verra, il mérite le même soin.
@@ -15,6 +18,7 @@ export default function DashboardPage({
 }: {
   searchParams: { vide?: string };
 }) {
+  const { t } = useLanguage();
   const isEmptyPreview = searchParams.vide === "1";
   const songs = isEmptyPreview ? [] : mockSongs;
   const creditBalance = isEmptyPreview ? 0 : mockUser.creditBalance;
@@ -58,7 +62,7 @@ export default function DashboardPage({
             porte son propre Reveal et se révèle à son tour au défilement. */}
         <section className="mt-12">
           <div className="mb-3">
-            <SectionTitle>Dernières chansons</SectionTitle>
+            <SectionTitle>{t("dashboard.latestSongs")}</SectionTitle>
           </div>
           <SongsTable songs={songs} />
         </section>

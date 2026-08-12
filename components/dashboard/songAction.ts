@@ -9,6 +9,8 @@ interface SongAction {
   spin?: boolean;
 }
 
+type Translate = (key: string) => string;
+
 // Reprend le tunnel là où il a du sens de reprendre : prénom + lien toujours
 // connus, occasion connue elle aussi pour un brouillon ou un échec (on sait déjà
 // pour quelle occasion, inutile de le redemander) — direction l'écran 3.
@@ -21,26 +23,26 @@ function resumeTunnelHref(song: Song): string {
   return `/creer?${params.toString()}`;
 }
 
-export function getSongAction(song: Song): SongAction {
+export function getSongAction(song: Song, t: Translate): SongAction {
   switch (song.status) {
     case "draft":
-      return { label: "Continuer", href: resumeTunnelHref(song), icon: Wand2 };
+      return { label: t("library.action.continue"), href: resumeTunnelHref(song), icon: Wand2 };
     case "generating":
       return {
-        label: "En cours…",
+        label: t("library.action.inProgress"),
         href: `/bibliotheque/${song.id}`,
         icon: Loader2,
         disabled: true,
         spin: true,
       };
     case "preview_ready":
-      return { label: "Écouter l'extrait", href: `/bibliotheque/${song.id}`, icon: Play };
+      return { label: t("library.action.listenPreview"), href: `/bibliotheque/${song.id}`, icon: Play };
     case "awaiting_payment":
-      return { label: "Payer", href: `/bibliotheque/${song.id}`, icon: Wand2 };
+      return { label: t("library.action.pay"), href: `/bibliotheque/${song.id}`, icon: Wand2 };
     case "paid":
     case "delivered":
-      return { label: "Télécharger", href: `/bibliotheque/${song.id}`, icon: Download };
+      return { label: t("library.action.download"), href: `/bibliotheque/${song.id}`, icon: Download };
     case "failed":
-      return { label: "Réessayer", href: resumeTunnelHref(song), icon: RotateCcw };
+      return { label: t("library.action.retry"), href: resumeTunnelHref(song), icon: RotateCcw };
   }
 }

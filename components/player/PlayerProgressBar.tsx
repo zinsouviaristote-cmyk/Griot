@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { formatDuration } from "@/lib/format/duration";
 import { usePlayer } from "@/lib/player/PlayerContext";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 /**
  * Barre de progression fine avec les temps de part et d'autre — cliquable et
@@ -10,6 +11,7 @@ import { usePlayer } from "@/lib/player/PlayerContext";
  * `window` qui traînerait après le relâchement).
  */
 export function PlayerProgressBar({ className = "" }: { className?: string }) {
+  const { t } = useLanguage();
   const { currentTime, duration, seekTo } = usePlayer();
   const trackRef = useRef<HTMLDivElement>(null);
   const fraction = duration > 0 ? currentTime / duration : 0;
@@ -38,7 +40,7 @@ export function PlayerProgressBar({ className = "" }: { className?: string }) {
       <div
         ref={trackRef}
         role="slider"
-        aria-label="Progression de la lecture"
+        aria-label={t("player.progressAriaLabel")}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={Math.round(fraction * 100)}

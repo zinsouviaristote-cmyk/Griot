@@ -1,5 +1,6 @@
 import { getSongById } from "@/lib/data/mock-dashboard";
 import { getMyPublishedSongs, getPublicDisplayName } from "@/lib/data/mock-explorer";
+import type { Locale } from "@/lib/i18n/locale";
 import type { Song } from "@/lib/types";
 
 // Repli quand la chanson source n'est plus retrouvable (ne devrait pas arriver
@@ -55,22 +56,26 @@ export interface WeeklyListenPoint {
 // une forme irrégulière plutôt qu'une ligne plate, sans dépendre d'un historique
 // jour par jour qui n'existe pas encore côté données. Somme des parts = 1.
 const WEEKDAY_SHARE = [0.1, 0.16, 0.08, 0.2, 0.13, 0.21, 0.12];
-const WEEKDAY_FORMATTER = new Intl.DateTimeFormat("fr-FR", { weekday: "short" });
+const WEEKDAY_FORMATTERS: Record<Locale, Intl.DateTimeFormat> = {
+  fr: new Intl.DateTimeFormat("fr-FR", { weekday: "short" }),
+  en: new Intl.DateTimeFormat("en-US", { weekday: "short" }),
+};
 
 // Une semaine ne pèse qu'une fraction du cumul accumulé depuis la publication
 // (parfois plusieurs semaines plus tôt) — jamais la totalité de `listens`.
 const WEEKLY_SHARE_OF_LIFETIME = 0.12;
 
-export function getWeeklyListens(): WeeklyListenPoint[] {
+export function getWeeklyListens(locale: Locale = "fr"): WeeklyListenPoint[] {
   const { listens } = getMyStatsTotals();
   const weeklyPool = Math.round(listens * WEEKLY_SHARE_OF_LIFETIME);
   const today = new Date();
+  const formatter = WEEKDAY_FORMATTERS[locale];
   return WEEKDAY_SHARE.map((share, index) => {
     const daysAgo = 6 - index;
     const date = new Date(today);
     date.setDate(date.getDate() - daysAgo);
     return {
-      label: WEEKDAY_FORMATTER.format(date),
+      label: formatter.format(date),
       count: Math.round(weeklyPool * share),
     };
   });
@@ -98,13 +103,13 @@ const ACTIVITY_PATTERN: { type: "like" | "listen"; minutesAgo: number }[] = [
   { type: "like", minutesAgo: 4_200 },
 ];
 
-export function getRecentActivity(): ActivityEntry[] {
+export function getRecentActivity(t: (key: string) => string): ActivityEntry[] {
   const published = getMyPublishedSongs();
   if (published.length === 0) return [];
   return ACTIVITY_PATTERN.map((event, index) => ({
     id: `activity_${index}`,
     type: event.type,
-    displayName: getPublicDisplayName(published[index % published.length]),
+    displayName: getPublicDisplayName(published[index % published.length], t),
     minutesAgo: event.minutesAgo,
   }));
 }

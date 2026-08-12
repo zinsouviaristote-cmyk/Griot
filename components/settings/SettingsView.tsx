@@ -9,31 +9,21 @@ import { Modal } from "@/components/ui/Modal";
 import { Logo } from "@/components/ui/Logo";
 import { GoogleMark } from "@/components/auth/GoogleMark";
 import { ProfilePhotoField } from "@/components/settings/ProfilePhotoField";
+import { clearMockSession } from "@/lib/auth/session";
 import { useToast } from "@/components/ui/Toast";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 import type { DashboardUser } from "@/lib/types";
 
 interface NotificationRow {
   key: "birthday" | "ready" | "payment";
-  label: string;
-  description: string;
+  labelKey: string;
+  descriptionKey: string;
 }
 
 const NOTIFICATION_ROWS: NotificationRow[] = [
-  {
-    key: "birthday",
-    label: "Rappels d'anniversaire",
-    description: "Un rappel quelques jours avant l'anniversaire d'un proche enregistré.",
-  },
-  {
-    key: "ready",
-    label: "Chanson prête",
-    description: "Un message dès que l'extrait de votre chanson est disponible à l'écoute.",
-  },
-  {
-    key: "payment",
-    label: "Confirmation de paiement",
-    description: "Un reçu à chaque recharge ou déblocage de chanson.",
-  },
+  { key: "birthday", labelKey: "settings.notificationRows.birthday.label", descriptionKey: "settings.notificationRows.birthday.description" },
+  { key: "ready", labelKey: "settings.notificationRows.ready.label", descriptionKey: "settings.notificationRows.ready.description" },
+  { key: "payment", labelKey: "settings.notificationRows.payment.label", descriptionKey: "settings.notificationRows.payment.description" },
 ];
 
 function SectionCard({
@@ -68,6 +58,7 @@ export function SettingsView({
   songCount: number;
   publishedCount: number;
 }) {
+  const { t, tn } = useLanguage();
   const showToast = useToast();
 
   const [firstName, setFirstName] = useState(user.firstName);
@@ -86,15 +77,16 @@ export function SettingsView({
 
   function handleSaveProfile(event: React.FormEvent) {
     event.preventDefault();
-    showToast("Profil mis à jour.", "success");
+    showToast(t("settings.profileUpdated"), "success");
   }
 
   function handleSaveNotifications(event: React.FormEvent) {
     event.preventDefault();
-    showToast("Préférences enregistrées.", "success");
+    showToast(t("settings.preferencesSaved"), "success");
   }
 
   function handleDeleteAccount() {
+    clearMockSession();
     setDeleted(true);
     setDeleteOpen(false);
   }
@@ -103,12 +95,10 @@ export function SettingsView({
     return (
       <div className="mx-auto flex max-w-md flex-col items-center py-16 text-center">
         <Logo withWordmark={false} />
-        <p className="mt-6 font-display text-headline-md text-ink">Votre compte a été supprimé</p>
-        <p className="mt-2 text-body-md text-ink-muted">
-          Toutes vos données ont été effacées. Merci d&apos;avoir raconté vos histoires avec Griot.
-        </p>
+        <p className="mt-6 font-display text-headline-md text-ink">{t("settings.accountDeletedTitle")}</p>
+        <p className="mt-2 text-body-md text-ink-muted">{t("settings.accountDeletedBody")}</p>
         <Link href="/" className="mt-8 text-sm font-medium text-brand hover:underline">
-          Retour à l&apos;accueil
+          {t("settings.backToHome")}
         </Link>
       </div>
     );
@@ -116,12 +106,12 @@ export function SettingsView({
 
   return (
     <div className="space-y-6">
-      <SectionCard icon={UserIcon} title="Mon profil">
+      <SectionCard icon={UserIcon} title={t("settings.myProfile")}>
         <ProfilePhotoField initials={user.initials} photoUrl={photoUrl} onChange={setPhotoUrl} />
 
         <form onSubmit={handleSaveProfile} className="mt-5 space-y-4">
           <label className="block">
-            <span className="text-sm font-medium text-ink">Prénom</span>
+            <span className="text-sm font-medium text-ink">{t("settings.firstName")}</span>
             <input
               type="text"
               value={firstName}
@@ -130,43 +120,41 @@ export function SettingsView({
             />
           </label>
           <div>
-            <span className="text-sm font-medium text-ink">Adresse e-mail</span>
+            <span className="text-sm font-medium text-ink">{t("settings.emailAddress")}</span>
             <p className="mt-1.5 flex min-h-11 items-center gap-1.5 rounded-control border border-border bg-page px-3.5 text-sm text-ink-muted">
               <GoogleMark className="h-3.5 w-3.5 shrink-0" />
               {user.email}
             </p>
-            <p className="mt-1.5 text-xs text-ink-muted">
-              Compte Google lié — modifiable uniquement depuis Google.
-            </p>
+            <p className="mt-1.5 text-xs text-ink-muted">{t("settings.googleAccountLinked")}</p>
           </div>
           <Button type="submit" variant="primary">
-            Enregistrer
+            {t("settings.save")}
           </Button>
         </form>
       </SectionCard>
 
-      <SectionCard icon={Bell} title="Notifications">
+      <SectionCard icon={Bell} title={t("settings.notifications")}>
         <form onSubmit={handleSaveNotifications}>
           <div className="divide-y divide-border">
             {NOTIFICATION_ROWS.map((row) => (
               <div key={row.key} className="flex items-center justify-between gap-4 py-2 first:pt-0">
                 <div>
-                  <p className="text-sm font-medium text-ink">{row.label}</p>
-                  <p className="mt-0.5 text-xs text-ink-muted">{row.description}</p>
+                  <p className="text-sm font-medium text-ink">{t(row.labelKey)}</p>
+                  <p className="mt-0.5 text-xs text-ink-muted">{t(row.descriptionKey)}</p>
                 </div>
                 <Toggle
                   checked={notifications[row.key]}
                   onChange={() =>
                     setNotifications((current) => ({ ...current, [row.key]: !current[row.key] }))
                   }
-                  label={row.label}
+                  label={t(row.labelKey)}
                 />
               </div>
             ))}
           </div>
 
           <label className="mt-3 block border-t border-border pt-4">
-            <span className="text-sm font-medium text-ink">Numéro de téléphone (facultatif)</span>
+            <span className="text-sm font-medium text-ink">{t("settings.phoneNumber")}</span>
             <input
               type="tel"
               inputMode="tel"
@@ -175,25 +163,25 @@ export function SettingsView({
               placeholder="07 00 00 00 00"
               className="mt-1.5 w-full min-h-11 rounded-control border border-border bg-page px-3.5 text-sm text-ink focus:border-brand focus:outline-none focus:shadow-ring-focus"
             />
-            <p className="mt-1.5 text-xs text-ink-muted">Pour recevoir votre chanson sur WhatsApp.</p>
+            <p className="mt-1.5 text-xs text-ink-muted">{t("settings.phoneHint")}</p>
           </label>
 
           <Button type="submit" variant="primary" className="mt-4">
-            Enregistrer
+            {t("settings.save")}
           </Button>
         </form>
       </SectionCard>
 
-      <SectionCard icon={UserIcon} title="Compte">
-        <ButtonLink href="/connexion" variant="secondary" className="w-full">
+      <SectionCard icon={UserIcon} title={t("settings.account")}>
+        <ButtonLink href="/connexion" variant="secondary" className="w-full" onClick={() => clearMockSession()}>
           <LogOut className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
-          Se déconnecter
+          {t("settings.logout")}
         </ButtonLink>
 
         <div className="mt-6 flex items-center justify-between gap-4 border-t border-border pt-4">
           <div>
-            <p className="text-xs font-medium text-ink-muted">Supprimer mon compte</p>
-            <p className="mt-0.5 text-xs text-ink-muted">Efface définitivement vos données et votre historique.</p>
+            <p className="text-xs font-medium text-ink-muted">{t("settings.deleteAccountLabel")}</p>
+            <p className="mt-0.5 text-xs text-ink-muted">{t("settings.deleteAccountHint")}</p>
           </div>
           <button
             type="button"
@@ -201,31 +189,27 @@ export function SettingsView({
             className="flex min-h-11 shrink-0 items-center gap-1.5 rounded-control px-3 text-xs font-medium text-ink-muted transition-colors hover:text-danger"
           >
             <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />
-            Supprimer
+            {t("settings.delete")}
           </button>
         </div>
       </SectionCard>
 
       <Modal open={deleteOpen} onClose={() => setDeleteOpen(false)} labelledBy="delete-account-title">
         <p id="delete-account-title" className="font-display text-lg font-semibold text-ink">
-          Supprimer votre compte ?
+          {t("settings.deleteModalTitle")}
         </p>
-        <p className="mt-2 text-sm text-ink-muted">Cette action est définitive. Vous perdrez :</p>
+        <p className="mt-2 text-sm text-ink-muted">{t("settings.deleteModalIntro")}</p>
         <ul className="mt-2 space-y-1 text-sm text-ink">
-          <li>
-            • {songCount} chanson{songCount > 1 ? "s" : ""} créée{songCount > 1 ? "s" : ""}
-          </li>
-          <li>
-            • {user.creditBalance} Note{user.creditBalance > 1 ? "s" : ""} restante{user.creditBalance > 1 ? "s" : ""}
-          </li>
-          <li>
-            • {publishedCount} publication{publishedCount > 1 ? "s" : ""} sur Explorer
-          </li>
-          <li>• Vos informations de compte</li>
+          <li>• {tn("settings.deleteModalSongs", songCount)}</li>
+          <li>• {tn("settings.deleteModalNotes", user.creditBalance)}</li>
+          <li>• {tn("settings.deleteModalPublications", publishedCount)}</li>
+          <li>• {t("settings.deleteModalAccountInfo")}</li>
         </ul>
         <label className="mt-4 block">
           <span className="text-sm font-medium text-ink">
-            Tapez <span className="font-mono font-semibold">SUPPRIMER</span> pour confirmer
+            {t("settings.deleteModalConfirmPromptBefore")}
+            <span className="font-mono font-semibold">{t("settings.deleteModalConfirmWord")}</span>
+            {t("settings.deleteModalConfirmPromptAfter")}
           </span>
           <input
             type="text"
@@ -236,14 +220,14 @@ export function SettingsView({
         </label>
         <div className="mt-5 flex gap-3">
           <Button variant="ghost" onClick={() => setDeleteOpen(false)} className="flex-1">
-            Annuler
+            {t("settings.cancel")}
           </Button>
           <Button
             onClick={handleDeleteAccount}
-            disabled={confirmText !== "SUPPRIMER"}
+            disabled={confirmText !== t("settings.deleteModalConfirmWord")}
             className="flex-1 !bg-danger hover:!brightness-90"
           >
-            Supprimer définitivement
+            {t("settings.deletePermanently")}
           </Button>
         </div>
       </Modal>

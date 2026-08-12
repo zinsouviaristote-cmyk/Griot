@@ -1,8 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import { ChevronRight, Wand2 } from "lucide-react";
-import { styleLabels } from "@/lib/data/mock-dashboard";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { styleLabel } from "@/lib/i18n/catalog";
+import type { MusicStyle } from "@/lib/types";
 
-const STYLE_SAMPLE = `${Object.values(styleLabels).slice(0, 3).join(", ")} et plus`;
+const SAMPLE_STYLE_IDS: MusicStyle[] = ["afrobeat", "coupe_decale", "gospel"];
 
 /**
  * La carte la plus visible de l'écran mobile — toute la surface est cliquable.
@@ -10,6 +14,9 @@ const STYLE_SAMPLE = `${Object.values(styleLabels).slice(0, 3).join(", ")} et pl
  * c'est le seul endroit de l'app qui se permet cette emphase.
  */
 export function PrimaryActionCard({ hasSongs }: { hasSongs: boolean }) {
+  const { t } = useLanguage();
+  const styleSample = `${SAMPLE_STYLE_IDS.map((id) => styleLabel(t, id)).join(", ")} ${t("dashboard.primaryAction.styleSampleSuffix")}`;
+
   return (
     <Link
       href="/creer"
@@ -20,9 +27,9 @@ export function PrimaryActionCard({ hasSongs }: { hasSongs: boolean }) {
       </span>
       <div className="min-w-0 flex-1">
         <p className="font-display text-lg font-semibold text-ink">
-          {hasSongs ? "Créer une chanson" : "Créer ma première chanson"}
+          {hasSongs ? t("dashboard.primaryAction.createSong") : t("dashboard.primaryAction.createFirstSong")}
         </p>
-        <p className="mt-0.5 truncate text-sm text-ink-muted">{STYLE_SAMPLE}</p>
+        <p className="mt-0.5 truncate text-sm text-ink-muted">{styleSample}</p>
       </div>
       <ChevronRight
         className="h-5 w-5 shrink-0 text-brand transition-transform duration-200 ease-magnetic group-hover:translate-x-1"

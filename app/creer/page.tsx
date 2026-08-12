@@ -6,7 +6,7 @@ import { RELATIONSHIP_OPTIONS, type TunnelStep } from "@/lib/tunnel/types";
 import type { Occasion } from "@/lib/types";
 
 export const metadata: Metadata = {
-  title: "Créer une chanson — Griot",
+  title: "Créer une chanson : Griot",
 };
 
 // Arrivée depuis le bloc de création du tableau de bord : prénom + occasion

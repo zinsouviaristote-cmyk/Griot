@@ -3,6 +3,8 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { EMPTY_TUNNEL_DATA, TUNNEL_STEPS, LAST_EDITABLE_STEP_INDEX, type TunnelData, type TunnelStep } from "@/lib/tunnel/types";
 import { useToast } from "@/components/ui/Toast";
+import { getStoredOrDetectedLocale } from "@/lib/i18n/locale";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 const STORAGE_KEY = "griot:tunnel";
 
@@ -70,10 +72,21 @@ export function TunnelProvider({
   resumeAuth?: AuthResumeResult | null;
 }) {
   const [step, setStep] = useState<TunnelStep>(initialStep);
-  const [data, setData] = useState<TunnelData>({ ...EMPTY_TUNNEL_DATA, ...initialData });
+  // La langue de chanson par défaut suit celle de l'interface au moment où le
+  // tunnel démarre (voir lib/i18n/locale.ts) — une détection synchrone plutôt
+  // qu'un effet, pour éviter toute course avec le montage de LanguageProvider
+  // (ses propres effets, plus haut dans l'arbre, se déclenchent après ceux
+  // d'ici). `initialData` reste prioritaire si un appelant fournit déjà une
+  // langue de chanson explicite.
+  const [data, setData] = useState<TunnelData>(() => ({
+    ...EMPTY_TUNNEL_DATA,
+    songLanguage: getStoredOrDetectedLocale(),
+    ...initialData,
+  }));
   const [notesBalance, setNotesBalance] = useState(creditBalance);
   const hydrated = useRef(false);
   const showToast = useToast();
+  const { t } = useLanguage();
 
   // Restauration après montage seulement (jamais pendant le rendu serveur) :
   // même philosophie que Reveal/CountUp ailleurs dans l'app — le premier rendu
@@ -120,9 +133,9 @@ export function TunnelProvider({
     }
 
     if (resumeAuth?.result === "denied") {
-      showToast("Connexion Google annulée — réessayez ou continuez par e-mail.", "default");
+      showToast(t("tunnel.shell.googleCancelled"), "default");
     } else if (resumeAuth?.result === "error") {
-      showToast("La connexion a échoué — vérifiez votre réseau et réessayez.", "danger");
+      showToast(t("tunnel.shell.authFailed"), "danger");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

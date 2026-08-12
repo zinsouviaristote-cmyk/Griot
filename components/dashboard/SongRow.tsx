@@ -5,13 +5,15 @@ import Link from "next/link";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { getSongAction } from "@/components/dashboard/songAction";
 import { Reveal } from "@/components/ui/Reveal";
-import { getOccasionLabel, styleLabels } from "@/lib/data/mock-dashboard";
-import { formatDateFr } from "@/lib/format/date";
+import { formatDate } from "@/lib/format/date";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { occasionLabel, relationshipLabel, styleLabel } from "@/lib/i18n/catalog";
 import type { Song } from "@/lib/types";
 
 export function SongRow({ song, index = 0 }: { song: Song; index?: number }) {
+  const { t, locale } = useLanguage();
   const router = useRouter();
-  const action = getSongAction(song);
+  const action = getSongAction(song, t);
   const detailHref = `/bibliotheque/${song.id}`;
 
   return (
@@ -19,7 +21,7 @@ export function SongRow({ song, index = 0 }: { song: Song; index?: number }) {
       as="tr"
       delayMs={index * 80}
       tabIndex={0}
-      aria-label={`Voir la chanson de ${song.recipientFirstName}`}
+      aria-label={t("library.item.viewSongAriaLabel", { name: song.recipientFirstName })}
       onClick={() => router.push(detailHref)}
       onKeyDown={(event: React.KeyboardEvent) => {
         if (event.key === "Enter") router.push(detailHref);
@@ -28,12 +30,12 @@ export function SongRow({ song, index = 0 }: { song: Song; index?: number }) {
     >
       <td className="py-3.5 pl-5 pr-3 text-sm font-medium text-ink">
         {song.recipientFirstName}
-        <span className="block text-xs font-normal text-ink-muted">{song.relationship}</span>
+        <span className="block text-xs font-normal text-ink-muted">{relationshipLabel(t, song.relationship)}</span>
       </td>
-      <td className="px-3 py-3.5 text-sm text-ink-muted">{getOccasionLabel(song.occasion)}</td>
-      <td className="px-3 py-3.5 text-sm text-ink-muted">{styleLabels[song.style]}</td>
+      <td className="px-3 py-3.5 text-sm text-ink-muted">{occasionLabel(t, song.occasion)}</td>
+      <td className="px-3 py-3.5 text-sm text-ink-muted">{styleLabel(t, song.style)}</td>
       <td className="px-3 py-3.5 font-mono text-xs text-ink-muted">
-        {formatDateFr(song.createdAt)}
+        {formatDate(song.createdAt, locale)}
       </td>
       <td className="px-3 py-3.5">
         <StatusBadge status={song.status} />

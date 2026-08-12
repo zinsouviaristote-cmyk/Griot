@@ -1,3 +1,6 @@
+"use client";
+
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 import type { SongStatus } from "@/lib/types";
 
 // Les boutons et états actifs n'ont qu'un seul violet plein (`brand`). Ici, seule
@@ -5,16 +8,16 @@ import type { SongStatus } from "@/lib/types";
 // design system) distingue les deux statuts "en mouvement" sans inventer de teinte.
 export const STATUS_CONFIG: Record<
   SongStatus,
-  { label: string; text: string; bg: string; dot: string; pulse?: boolean }
+  { labelKey: string; text: string; bg: string; dot: string; pulse?: boolean }
 > = {
   draft: {
-    label: "Brouillon",
+    labelKey: "library.status.draft",
     text: "text-ink-muted",
     bg: "bg-border",
     dot: "bg-ink-muted",
   },
   generating: {
-    label: "En cours",
+    labelKey: "library.status.generating",
     text: "text-brand-light",
     bg: "bg-brand-light/10",
     dot: "bg-brand-light",
@@ -23,31 +26,31 @@ export const STATUS_CONFIG: Record<
     pulse: true,
   },
   preview_ready: {
-    label: "Extrait prêt",
+    labelKey: "library.status.previewReady",
     text: "text-brand",
     bg: "bg-brand/10",
     dot: "bg-brand",
   },
   awaiting_payment: {
-    label: "En attente de paiement",
+    labelKey: "library.status.awaitingPayment",
     text: "text-warning",
     bg: "bg-warning/10",
     dot: "bg-warning",
   },
   paid: {
-    label: "Payée",
+    labelKey: "library.status.paid",
     text: "text-success",
     bg: "bg-success/10",
     dot: "bg-success",
   },
   delivered: {
-    label: "Payée",
+    labelKey: "library.status.paid",
     text: "text-success",
     bg: "bg-success/10",
     dot: "bg-success",
   },
   failed: {
-    label: "Échec",
+    labelKey: "library.status.failed",
     text: "text-danger",
     bg: "bg-danger/10",
     dot: "bg-danger",
@@ -55,6 +58,7 @@ export const STATUS_CONFIG: Record<
 };
 
 export function StatusBadge({ status }: { status: SongStatus }) {
+  const { t } = useLanguage();
   const config = STATUS_CONFIG[status];
   return (
     <span
@@ -66,7 +70,7 @@ export function StatusBadge({ status }: { status: SongStatus }) {
         )}
         <span className={`relative inline-flex h-1.5 w-1.5 rounded-full ${config.dot}`} />
       </span>
-      {config.label}
+      {t(config.labelKey)}
     </span>
   );
 }

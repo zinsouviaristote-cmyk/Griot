@@ -6,24 +6,25 @@ import { BarChart3, Compass, Home, Library, Megaphone, Wand2, type LucideIcon } 
 import { Logo } from "@/components/ui/Logo";
 import { CreditCard } from "@/components/dashboard/CreditCard";
 import { SidebarUserMenu } from "@/components/dashboard/SidebarUserMenu";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 interface NavItem {
-  label: string;
+  labelKey: string;
   href: string;
   icon: LucideIcon;
 }
 
 const DISCOVER_ITEMS: NavItem[] = [
-  { label: "Accueil", href: "/", icon: Home },
-  { label: "Explorer", href: "/explorer", icon: Compass },
-  { label: "Ma bibliothèque", href: "/bibliotheque", icon: Library },
+  { labelKey: "nav.home", href: "/tableau-de-bord", icon: Home },
+  { labelKey: "nav.explore", href: "/explorer", icon: Compass },
+  { labelKey: "nav.library", href: "/bibliotheque", icon: Library },
 ];
 
-const CREATE_ITEMS: NavItem[] = [{ label: "Nouvelle chanson", href: "/creer", icon: Wand2 }];
+const CREATE_ITEMS: NavItem[] = [{ labelKey: "nav.newSong", href: "/creer", icon: Wand2 }];
 
 const ME_ITEMS: NavItem[] = [
-  { label: "Mes publications", href: "/publications", icon: Megaphone },
-  { label: "Statistiques", href: "/statistiques", icon: BarChart3 },
+  { labelKey: "nav.myPublications", href: "/publications", icon: Megaphone },
+  { labelKey: "nav.statistics", href: "/statistiques", icon: BarChart3 },
 ];
 
 function NavSection({
@@ -37,6 +38,7 @@ function NavSection({
   pathname: string;
   onNavigate?: () => void;
 }) {
+  const { t } = useLanguage();
   return (
     <div>
       <p className="px-3 text-xs font-medium uppercase tracking-wide text-ink-muted">{title}</p>
@@ -68,7 +70,7 @@ function NavSection({
                   strokeWidth={1.5}
                   aria-hidden="true"
                 />
-                {item.label}
+                {t(item.labelKey)}
               </Link>
             </li>
           );
@@ -91,12 +93,13 @@ export function SidebarContent({
   userEmail: string;
   onNavigate?: () => void;
 }) {
+  const { t } = useLanguage();
   const pathname = usePathname();
 
   return (
     <div className="flex h-full flex-col gap-6 px-4 py-5">
       <Link
-        href="/"
+        href="/tableau-de-bord"
         onClick={onNavigate}
         className="inline-block px-3 transition-transform duration-200 ease-magnetic hover:scale-[1.03]"
       >
@@ -104,9 +107,9 @@ export function SidebarContent({
       </Link>
 
       <nav className="flex flex-col gap-6 overflow-y-auto">
-        <NavSection title="Découvrir" items={DISCOVER_ITEMS} pathname={pathname} onNavigate={onNavigate} />
-        <NavSection title="Créer" items={CREATE_ITEMS} pathname={pathname} onNavigate={onNavigate} />
-        <NavSection title="Moi" items={ME_ITEMS} pathname={pathname} onNavigate={onNavigate} />
+        <NavSection title={t("nav.discover")} items={DISCOVER_ITEMS} pathname={pathname} onNavigate={onNavigate} />
+        <NavSection title={t("nav.create")} items={CREATE_ITEMS} pathname={pathname} onNavigate={onNavigate} />
+        <NavSection title={t("nav.me")} items={ME_ITEMS} pathname={pathname} onNavigate={onNavigate} />
       </nav>
 
       {/* Absorbe l'espace restant sur un grand écran plutôt que de le laisser filer

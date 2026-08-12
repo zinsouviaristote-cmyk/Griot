@@ -1,3 +1,7 @@
+"use client";
+
+import { useLanguage } from "@/lib/i18n/LanguageContext";
+
 // Écran de chargement à la marque — remplace toute roue générique sur les
 // transitions qui prennent plus d'une demi-seconde (premier chargement,
 // ouverture du tunnel, changement de page lourde). Fond `page`, rien d'autre,
@@ -5,10 +9,11 @@
 // Rendu via les fichiers `loading.tsx` de Next (Suspense de segment) — il
 // s'efface donc de lui-même dès que le contenu réel est prêt à être peint.
 export function LoadingScreen() {
+  const { t } = useLanguage();
   return (
     <div
       role="status"
-      aria-label="Chargement"
+      aria-label={t("common.loadingAriaLabel")}
       className="fixed inset-0 z-50 flex animate-reveal-up items-center justify-center bg-page"
     >
       <svg

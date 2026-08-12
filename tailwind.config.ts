@@ -162,6 +162,21 @@ const config: Config = {
           "0%": { opacity: "0", transform: "translateX(16px)" },
           "100%": { opacity: "1", transform: "translateX(0)" },
         },
+        // Pastilles d'occasion du héros de la landing : dérive très lente et
+        // légère, désynchronisée d'une pastille à l'autre via une durée et un
+        // délai différents posés en style inline, jamais deux fois le même
+        // keyframe défini pour ça.
+        float: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-8px)" },
+        },
+        // Bandeau d'occasions qui défile en boucle infinie sous le héros — le
+        // contenu est dupliqué une fois dans le JSX, ce keyframe ne fait que
+        // glisser d'exactement une moitié de la largeur totale.
+        marquee: {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-50%)" },
+        },
       },
       animation: {
         "reveal-up": "reveal-up 0.5s cubic-bezier(0.25,0.46,0.45,0.94) both",

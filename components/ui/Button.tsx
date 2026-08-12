@@ -42,9 +42,10 @@ export function ButtonLink({
   variant = "primary",
   children,
   className = "",
-}: CommonProps & { href: string }) {
+  onClick,
+}: CommonProps & { href: string; onClick?: () => void }) {
   return (
-    <Link href={href} className={`${BASE} ${VARIANT_CLASSES[variant]} ${className}`}>
+    <Link href={href} onClick={onClick} className={`${BASE} ${VARIANT_CLASSES[variant]} ${className}`}>
       {children}
     </Link>
   );

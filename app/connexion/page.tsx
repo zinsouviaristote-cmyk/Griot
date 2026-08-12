@@ -3,7 +3,7 @@ import { ConnexionView } from "@/components/auth/ConnexionView";
 import { DEFAULT_RETURN_TO } from "@/lib/auth/returnUrl";
 
 export const metadata: Metadata = {
-  title: "Connexion — Griot",
+  title: "Connexion : Griot",
 };
 
 // Hors DashboardShell — comme /creer, cet écran mérite toute l'attention, sans

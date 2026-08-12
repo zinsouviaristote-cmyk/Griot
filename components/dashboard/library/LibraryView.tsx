@@ -7,24 +7,26 @@ import { LibraryFiltersPanel } from "@/components/dashboard/library/LibraryFilte
 import { EmptyState } from "@/components/ui/EmptyState";
 import { getPublishedEntryForSong } from "@/lib/data/mock-explorer";
 import { songsToQueue } from "@/lib/player/songToTrack";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 import type { Song, SongStatus } from "@/lib/types";
 
 type Shortcut = "toutes" | "publiees" | "telechargees";
 type SortMode = "recentes" | "anciennes" | "ecoutees";
 
-const SHORTCUTS: { key: Shortcut; label: string }[] = [
-  { key: "toutes", label: "Toutes" },
-  { key: "publiees", label: "Publiées" },
-  { key: "telechargees", label: "Téléchargées" },
+const SHORTCUTS: { key: Shortcut; labelKey: string }[] = [
+  { key: "toutes", labelKey: "library.shortcuts.all" },
+  { key: "publiees", labelKey: "library.shortcuts.published" },
+  { key: "telechargees", labelKey: "library.shortcuts.downloaded" },
 ];
 
-const SORT_LABELS: Record<SortMode, string> = {
-  recentes: "Plus récentes",
-  anciennes: "Plus anciennes",
-  ecoutees: "Plus écoutées",
+const SORT_LABEL_KEYS: Record<SortMode, string> = {
+  recentes: "library.sort.recent",
+  anciennes: "library.sort.oldest",
+  ecoutees: "library.sort.mostListened",
 };
 
 export function LibraryView({ songs }: { songs: Song[] }) {
+  const { t } = useLanguage();
   const [search, setSearch] = useState("");
   const [shortcut, setShortcut] = useState<Shortcut>("toutes");
   const [statusFilters, setStatusFilters] = useState<Set<SongStatus>>(new Set());
@@ -51,15 +53,15 @@ export function LibraryView({ songs }: { songs: Song[] }) {
   const hasAnySongs = songs.length > 0;
   const hasResults = filtered.length > 0;
   const isFiltering = statusFilters.size > 0 || shortcut !== "toutes" || search.trim() !== "";
-  const queue = useMemo(() => songsToQueue(filtered), [filtered]);
+  const queue = useMemo(() => songsToQueue(filtered, t), [filtered, t]);
 
   if (!hasAnySongs) {
     return (
       <EmptyState
         icon={Music4}
-        title="Votre bibliothèque est vide pour l'instant"
-        description="Chaque chanson que vous créez apparaît ici — un souvenir que vous pouvez réécouter et partager quand vous voulez."
-        actionLabel="Créer ma première chanson"
+        title={t("library.emptyLibrary.title")}
+        description={t("library.emptyLibrary.description")}
+        actionLabel={t("dashboard.primaryAction.createFirstSong")}
         actionHref="/creer"
       />
     );
@@ -77,8 +79,8 @@ export function LibraryView({ songs }: { songs: Song[] }) {
           type="search"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          placeholder="Rechercher par prénom du destinataire…"
-          aria-label="Rechercher par prénom du destinataire"
+          placeholder={t("library.searchPlaceholder")}
+          aria-label={t("library.searchAriaLabel")}
           className="min-h-11 w-full rounded-control border border-border bg-surface py-2.5 pl-10 pr-3 text-sm text-ink placeholder:text-ink-muted transition-all duration-200 focus:border-brand focus:outline-none focus:shadow-ring-focus"
         />
       </label>
@@ -89,19 +91,19 @@ export function LibraryView({ songs }: { songs: Song[] }) {
         <select
           value={sort}
           onChange={(event) => setSort(event.target.value as SortMode)}
-          aria-label="Trier la bibliothèque"
+          aria-label={t("library.sortAriaLabel")}
           className="min-h-11 rounded-full border border-border bg-surface px-3.5 py-2 text-sm font-medium text-ink-muted transition-colors hover:text-ink focus-visible:outline-none focus-visible:shadow-ring-focus"
         >
-          {(Object.keys(SORT_LABELS) as SortMode[]).map((key) => (
+          {(Object.keys(SORT_LABEL_KEYS) as SortMode[]).map((key) => (
             <option key={key} value={key}>
-              {SORT_LABELS[key]}
+              {t(SORT_LABEL_KEYS[key])}
             </option>
           ))}
         </select>
 
         <span className="mx-1 h-5 w-px bg-border" aria-hidden="true" />
 
-        {SHORTCUTS.map(({ key, label }) => (
+        {SHORTCUTS.map(({ key, labelKey }) => (
           <button
             key={key}
             type="button"
@@ -113,7 +115,7 @@ export function LibraryView({ songs }: { songs: Song[] }) {
                 : "border-border bg-surface text-ink-muted hover:border-brand/40 hover:text-ink"
             }`}
           >
-            {label}
+            {t(labelKey)}
           </button>
         ))}
       </div>
@@ -126,7 +128,7 @@ export function LibraryView({ songs }: { songs: Song[] }) {
         </div>
       ) : (
         <div className="mt-6 flex flex-col items-center gap-3 rounded-card border border-dashed border-border bg-surface px-6 py-12 text-center">
-          <p className="text-sm text-ink-muted">Aucune chanson ne correspond à ces critères.</p>
+          <p className="text-sm text-ink-muted">{t("library.noResults.message")}</p>
           {isFiltering && (
             <button
               type="button"
@@ -138,7 +140,7 @@ export function LibraryView({ songs }: { songs: Song[] }) {
               className="flex items-center gap-1.5 text-sm font-medium text-brand hover:underline"
             >
               <X className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />
-              Réinitialiser les filtres
+              {t("library.noResults.resetFilters")}
             </button>
           )}
         </div>

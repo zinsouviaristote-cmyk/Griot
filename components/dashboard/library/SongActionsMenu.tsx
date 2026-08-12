@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { MoreHorizontal, Megaphone, Trash2, Wand2 } from "lucide-react";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 /**
  * Menu « … » d'une ligne de bibliothèque — regroupe les actions secondaires
@@ -26,6 +27,7 @@ export function SongActionsMenu({
   onUnpublish: () => void;
   onDelete: () => void;
 }) {
+  const { t } = useLanguage();
   const [open, setOpen] = useState(false);
 
   return (
@@ -37,7 +39,7 @@ export function SongActionsMenu({
           event.stopPropagation();
           setOpen((v) => !v);
         }}
-        aria-label="Plus d'actions"
+        aria-label={t("library.item.actionsMenu.moreActions")}
         aria-expanded={open}
         className="flex h-11 w-11 items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:bg-page hover:text-ink active:scale-90"
       >
@@ -48,7 +50,7 @@ export function SongActionsMenu({
         <>
           <button
             type="button"
-            aria-label="Fermer le menu"
+            aria-label={t("library.item.actionsMenu.close")}
             onClick={(event) => {
               event.preventDefault();
               event.stopPropagation();
@@ -69,7 +71,7 @@ export function SongActionsMenu({
               className="flex min-h-11 w-full items-center gap-3 px-4 text-left text-sm text-ink transition-colors hover:bg-brand-soft"
             >
               <Megaphone className="h-4 w-4 text-ink-muted" strokeWidth={1.5} aria-hidden="true" />
-              {isPublished ? "Dépublier" : "Publier dans Explorer"}
+              {isPublished ? t("library.item.unpublish") : t("library.item.publishToExplore")}
             </button>
             <Link
               href={redoHref}
@@ -90,7 +92,7 @@ export function SongActionsMenu({
               className="flex min-h-11 w-full items-center gap-3 px-4 text-left text-sm text-danger transition-colors hover:bg-danger/5"
             >
               <Trash2 className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
-              Supprimer
+              {t("library.item.actionsMenu.delete")}
             </button>
           </div>
         </>

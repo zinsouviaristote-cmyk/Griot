@@ -1,3 +1,5 @@
+"use client";
+
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import {
   ActivityListSkeleton,
@@ -6,16 +8,16 @@ import {
   StatCardSkeleton,
   WeeklyChartCardSkeleton,
 } from "@/components/ui/Skeleton";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 export default function StatistiquesLoading() {
+  const { t } = useLanguage();
   return (
     <div>
       <SectionTitle as="h1" size="lg">
-        Statistiques
+        {t("stats.pageTitle")}
       </SectionTitle>
-      <p className="mt-2 max-w-xl text-body-md text-ink-muted">
-        Comment vos chansons publiées voyagent, au-delà de vous.
-      </p>
+      <p className="mt-2 max-w-xl text-body-md text-ink-muted">{t("stats.pageSubtitle")}</p>
 
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
         {Array.from({ length: 5 }, (_, index) => (

@@ -1,19 +1,23 @@
+"use client";
+
 import { Ear, Heart, Radio } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { formatRelativeTimeFr } from "@/lib/format/date";
+import { formatRelativeTime } from "@/lib/format/date";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 import type { ActivityEntry } from "@/lib/data/mock-stats";
 
 // Jamais "qui" a aimé ou écouté (voir LikeButton — Griot ne suit aucune
 // identité côté auditeur), seulement quoi et quand : chaque ligne nomme la
 // chanson, jamais une personne.
 export function RecentActivityList({ entries }: { entries: ActivityEntry[] }) {
+  const { t, locale } = useLanguage();
   if (entries.length === 0) {
     return (
       <EmptyState
         icon={Radio}
-        title="Aucune activité pour l'instant"
-        description="Les likes et écoutes reçus sur vos chansons publiées apparaîtront ici, au fil de l'eau."
-        actionLabel="Publier une chanson"
+        title={t("stats.recentActivity.emptyTitle")}
+        description={t("stats.recentActivity.emptyDescription")}
+        actionLabel={t("stats.recentActivity.emptyAction")}
         actionHref="/bibliotheque"
       />
     );
@@ -36,10 +40,10 @@ export function RecentActivityList({ entries }: { entries: ActivityEntry[] }) {
             )}
           </span>
           <p className="min-w-0 flex-1 truncate text-sm text-ink">
-            {entry.type === "like" ? "Nouveau like sur " : "Nouvelle écoute sur "}
+            {entry.type === "like" ? t("stats.recentActivity.newLikeOn") : t("stats.recentActivity.newListenOn")}{" "}
             <span className="font-medium">« {entry.displayName} »</span>
           </p>
-          <span className="shrink-0 text-xs text-ink-muted">{formatRelativeTimeFr(entry.minutesAgo)}</span>
+          <span className="shrink-0 text-xs text-ink-muted">{formatRelativeTime(entry.minutesAgo, locale)}</span>
         </div>
       ))}
     </div>

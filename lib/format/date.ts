@@ -1,6 +1,10 @@
-export function formatDateFr(iso: string): string {
+import type { Locale } from "@/lib/i18n/locale";
+
+// Jour/mois/année en français, mois/jour/année en anglais — même séparateur
+// `/` dans les deux cas, seul l'ordre des composantes change.
+export function formatDate(iso: string, locale: Locale = "fr"): string {
   const [year, month, day] = iso.split("-");
-  return `${day}/${month}/${year}`;
+  return locale === "en" ? `${month}/${day}/${year}` : `${day}/${month}/${year}`;
 }
 
 // `new Date("YYYY-MM-DD")` parse en UTC minuit : dans un fuseau à décalage négatif,
@@ -18,10 +22,13 @@ export function formatIsoDate(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-const DAY_MONTH_FORMATTER = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long" });
+const DAY_MONTH_FORMATTERS: Record<Locale, Intl.DateTimeFormat> = {
+  fr: new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long" }),
+  en: new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric" }),
+};
 
-export function formatDayMonthFr(date: Date): string {
-  return DAY_MONTH_FORMATTER.format(date);
+export function formatDayMonth(date: Date, locale: Locale = "fr"): string {
+  return DAY_MONTH_FORMATTERS[locale].format(date);
 }
 
 // Seuls le mois et le jour d'un anniversaire comptent — l'année stockée ne sert
@@ -46,7 +53,17 @@ export function getDaysUntil(date: Date, from: Date = new Date()): number {
 // que d'un ordre de grandeur. Un décalage en minutes plutôt qu'une date ISO fixe :
 // les données de démonstration restent justes quel que soit le jour où l'app est
 // ouverte, sans "date de référence" à maintenir à jour.
-export function formatRelativeTimeFr(minutesAgo: number): string {
+export function formatRelativeTime(minutesAgo: number, locale: Locale = "fr"): string {
+  if (locale === "en") {
+    if (minutesAgo < 1) return "just now";
+    if (minutesAgo < 60) return `${Math.round(minutesAgo)} min ago`;
+    const hours = Math.round(minutesAgo / 60);
+    if (hours < 24) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+    const days = Math.round(hours / 24);
+    if (days < 7) return `${days} day${days > 1 ? "s" : ""} ago`;
+    const weeks = Math.round(days / 7);
+    return `${weeks} week${weeks > 1 ? "s" : ""} ago`;
+  }
   if (minutesAgo < 1) return "à l'instant";
   if (minutesAgo < 60) return `il y a ${Math.round(minutesAgo)} min`;
   const hours = Math.round(minutesAgo / 60);

@@ -4,7 +4,7 @@ import { MagicLinkSentView } from "@/components/auth/MagicLinkSentView";
 import { DEFAULT_RETURN_TO } from "@/lib/auth/returnUrl";
 
 export const metadata: Metadata = {
-  title: "Lien envoyé — Griot",
+  title: "Lien envoyé : Griot",
 };
 
 export default function MagicLinkSentPage({
