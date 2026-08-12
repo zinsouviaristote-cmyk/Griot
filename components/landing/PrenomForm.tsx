@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 
@@ -8,43 +8,63 @@ import { ArrowRight } from "lucide-react";
 // détour par une page de formulaire : le prénom saisi ici part directement en
 // paramètre d'URL vers le tunnel (voir app/creer/page.tsx, qui le lit via
 // searchParams.prenom et saute directement à l'écran "destinataire").
-export function PrenomForm({ className = "" }: { className?: string }) {
+//
+// Le bouton reste toujours plein et actif : sur une landing page, un CTA grisé
+// est invisible, donc contre-productif. Un champ vide au clic ne bloque rien,
+// il attire simplement l'attention dessus (focus + secousse discrète).
+//
+// `size="lg"` réservé au héros : c'est l'élément le plus important de la page
+// après le titre, il doit se voir avant tout le reste. Le bloc final garde la
+// taille par défaut, plus discrète en fin de parcours.
+export function PrenomForm({ className = "", size = "md" }: { className?: string; size?: "md" | "lg" }) {
   const router = useRouter();
   const [prenom, setPrenom] = useState("");
-  const isValid = prenom.trim().length > 0;
+  const [attention, setAttention] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    if (!isValid) return;
-    router.push(`/creer?prenom=${encodeURIComponent(prenom.trim())}`);
+    const trimmed = prenom.trim();
+    if (!trimmed) {
+      inputRef.current?.focus();
+      setAttention(true);
+      return;
+    }
+    router.push(`/creer?prenom=${encodeURIComponent(trimmed)}`);
   }
+
+  const isLg = size === "lg";
 
   return (
     <form
       onSubmit={handleSubmit}
-      className={`flex w-full max-w-md flex-col gap-2.5 sm:flex-row sm:gap-3 ${className}`}
+      className={`flex w-full flex-col gap-2.5 sm:flex-row sm:gap-3 ${isLg ? "max-w-lg" : "max-w-md"} ${className}`}
     >
       <label className="block flex-1 text-left">
         <span className="sr-only">Pour qui est cette chanson ?</span>
         <input
+          ref={inputRef}
           type="text"
           value={prenom}
-          onChange={(event) => setPrenom(event.target.value)}
+          onChange={(event) => {
+            setPrenom(event.target.value);
+            if (attention) setAttention(false);
+          }}
+          onAnimationEnd={() => setAttention(false)}
           placeholder="Pour qui est cette chanson ?"
-          className="min-h-11 w-full rounded-control border border-border bg-surface px-4 text-sm text-ink placeholder:text-ink-muted transition-colors focus:border-brand focus:outline-none focus:shadow-ring-focus"
+          className={`w-full rounded-control border border-border bg-surface text-ink placeholder:text-ink-muted transition-colors focus:border-brand focus:outline-none focus:shadow-ring-focus ${
+            isLg ? "min-h-14 px-5 text-base" : "min-h-11 px-4 text-sm"
+          } ${attention ? "animate-attn-shake border-brand" : ""}`}
         />
       </label>
       <button
         type="submit"
-        disabled={!isValid}
-        className={`flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-control px-5 text-sm font-semibold transition-all duration-200 ease-magnetic active:scale-[0.98] ${
-          isValid
-            ? "bg-brand text-white hover:scale-[1.02] hover:brightness-90 hover:shadow-card"
-            : "bg-brand/30 text-white/80 cursor-not-allowed"
+        className={`flex shrink-0 items-center justify-center gap-2 rounded-control bg-brand font-semibold text-white transition-all duration-200 ease-magnetic hover:scale-[1.02] hover:brightness-90 hover:shadow-card active:scale-[0.98] ${
+          isLg ? "min-h-14 px-7 text-base" : "min-h-11 px-5 text-sm"
         }`}
       >
         Créer ma chanson
-        <ArrowRight className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+        <ArrowRight className={isLg ? "h-5 w-5" : "h-4 w-4"} strokeWidth={1.5} aria-hidden="true" />
       </button>
     </form>
   );

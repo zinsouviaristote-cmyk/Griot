@@ -43,7 +43,7 @@ function DrawnCheck({ delayMs }: { delayMs: number }) {
 // rien qui rouvre le doute qu'elle vient de fermer.
 export function TrialSection() {
   return (
-    <section className="px-4 py-10 sm:py-14">
+    <section className="scroll-mt-[var(--nav-clearance)] px-4 py-8 sm:py-10">
       <div className="mx-auto max-w-3xl rounded-feature border border-brand/25 bg-surface p-8 text-center sm:p-14">
         <p className="font-display text-2xl font-bold text-ink sm:text-3xl">Vous n&apos;achetez rien à l&apos;aveugle</p>
 

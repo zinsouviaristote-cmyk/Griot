@@ -9,12 +9,12 @@ const FAQ_ITEMS = [
   {
     question: "Puis-je mettre un prénom dans la chanson ?",
     answer:
-      "Oui — le prénom de la personne à qui la chanson est destinée, et le vôtre si vous le souhaitez, sont tissés directement dans les paroles.",
+      "Oui : le prénom de la personne à qui la chanson est destinée, et le vôtre si vous le souhaitez, sont tissés directement dans les paroles.",
   },
   {
     question: "Pour quelles occasions puis-je créer une chanson ?",
     answer:
-      "Anniversaire, mariage, déclaration d'amour, réussite, hommage, baptême, encouragement — et tout autre moment qui mérite d'être marqué.",
+      "Anniversaire, mariage, déclaration d'amour, réussite, hommage, baptême, encouragement, et tout autre moment qui mérite d'être marqué.",
   },
   {
     question: "Est-ce que je choisis le style musical ?",
@@ -30,7 +30,7 @@ const FAQ_ITEMS = [
   },
   {
     question: "Et si le résultat ne me plaît pas ?",
-    answer: "Vous ne payez que si vous voulez la garder — le premier essai ne coûte rien, sans engagement.",
+    answer: "Vous ne payez que si vous voulez la garder : le premier essai ne coûte rien, sans engagement.",
   },
 ];
 
@@ -81,7 +81,10 @@ export function FaqSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <section id="questions" className="px-4 py-20 sm:py-28">
+    <section
+      id="questions"
+      className="scroll-mt-[var(--nav-clearance)] px-4 pb-8 pt-12 sm:pb-10 sm:pt-16"
+    >
       <div className="mx-auto max-w-2xl">
         <SectionTitle as="h2" size="lg" align="center" animated>
           Questions <span className="text-brand">fréquentes</span>

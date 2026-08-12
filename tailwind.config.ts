@@ -177,6 +177,15 @@ const config: Config = {
           "0%": { transform: "translateX(0)" },
           "100%": { transform: "translateX(-50%)" },
         },
+        // Attire l'œil sur le champ vide sans jamais désactiver le bouton — un
+        // léger refus horizontal, pas un tremblement d'erreur bruyant.
+        "attn-shake": {
+          "0%, 100%": { transform: "translateX(0)" },
+          "20%": { transform: "translateX(-4px)" },
+          "40%": { transform: "translateX(3px)" },
+          "60%": { transform: "translateX(-2px)" },
+          "80%": { transform: "translateX(2px)" },
+        },
       },
       animation: {
         "reveal-up": "reveal-up 0.5s cubic-bezier(0.25,0.46,0.45,0.94) both",
@@ -193,6 +202,7 @@ const config: Config = {
         "wave-bar": "wave-bar 0.9s ease-in-out infinite",
         "draw-wave": "draw-wave 2.8s ease-in-out infinite",
         "step-slide": "step-slide 0.25s ease-out both",
+        "attn-shake": "attn-shake 0.4s ease-in-out both",
       },
       maxWidth: {
         shell: "1440px",

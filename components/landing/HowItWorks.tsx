@@ -30,7 +30,10 @@ export function HowItWorks() {
   const { ref, inView } = useInView<HTMLDivElement>();
 
   return (
-    <section id="comment-ca-marche" className="px-4 py-20 sm:py-28">
+    <section
+      id="comment-ca-marche"
+      className="scroll-mt-[var(--nav-clearance)] px-4 py-10 sm:py-14"
+    >
       <div className="mx-auto max-w-5xl">
         <SectionTitle as="h2" size="lg" align="center" animated>
           Trois minutes, <span className="text-brand">et c&apos;est fait</span>

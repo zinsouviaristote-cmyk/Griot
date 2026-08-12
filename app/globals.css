@@ -5,6 +5,14 @@
 @layer base {
   :root {
     color-scheme: light;
+    /* Hauteur de la pilule de navigation flottante (voir LandingNav) + marge :
+       référence unique pour le scroll-padding global et le scroll-margin de
+       chaque section, pour qu'aucun titre ne puisse atterrir sous la barre. */
+    --nav-clearance: 6.5rem;
+  }
+
+  html {
+    scroll-padding-top: var(--nav-clearance);
   }
 
   body {
