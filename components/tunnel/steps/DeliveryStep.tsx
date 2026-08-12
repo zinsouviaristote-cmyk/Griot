@@ -28,7 +28,12 @@ export function DeliveryStep() {
 
   return (
     <div>
-      <div className="flex flex-col items-center text-center">
+      {/* Seule apparition non liée au défilement de tout le tunnel (voir Reveal,
+          conçu pour du contenu sous la ligne de flottaison) : la chanson terminée
+          est le troisième et dernier moment de récompense du produit, toujours
+          au-dessus de la ligne de flottaison à l'arrivée sur cet écran — animée
+          directement au montage, en cascade douce plutôt qu'au défilement. */}
+      <div className="flex animate-reveal-up flex-col items-center text-center">
         <span className="flex h-14 w-14 items-center justify-center rounded-full bg-success/10 text-success">
           <Check className="h-7 w-7" strokeWidth={1.5} aria-hidden="true" />
         </span>
@@ -41,19 +46,23 @@ export function DeliveryStep() {
       <a
         href={data.audioUrl ?? "#"}
         download={`griot-${data.recipientFirstName || "chanson"}.wav`}
-        className="mt-8 flex min-h-11 w-full items-center justify-center gap-2 rounded-control bg-brand px-5 py-3 text-sm font-semibold text-white transition-all duration-200 ease-magnetic hover:brightness-90 active:scale-[0.98]"
+        style={{ animationDelay: "90ms" }}
+        className="mt-8 flex min-h-11 w-full animate-reveal-up items-center justify-center gap-2 rounded-control bg-brand px-5 py-3 text-sm font-semibold text-white transition-all duration-200 ease-magnetic hover:brightness-90 active:scale-[0.98]"
       >
         <Download className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
         Télécharger le MP3
       </a>
 
-      <div className="mt-6 rounded-card border border-border bg-surface p-5 shadow-card">
+      <div
+        style={{ animationDelay: "180ms" }}
+        className="mt-6 animate-reveal-up rounded-card border border-border bg-surface p-5 shadow-card"
+      >
         <div className="flex items-center justify-between">
           <p className="text-label-md uppercase tracking-wide text-ink-muted">Paroles</p>
           <button
             type="button"
             onClick={handleCopyLyrics}
-            className="flex items-center gap-1.5 text-label-sm font-medium text-brand hover:underline"
+            className="-my-3.5 flex min-h-11 items-center gap-1.5 text-label-sm font-medium text-brand hover:underline"
           >
             {copied ? (
               <Check className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />

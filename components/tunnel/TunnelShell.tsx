@@ -14,6 +14,7 @@ import { LyricsStep } from "@/components/tunnel/steps/LyricsStep";
 import { GenerationStep } from "@/components/tunnel/steps/GenerationStep";
 import { ChoiceStep } from "@/components/tunnel/steps/ChoiceStep";
 import { DeliveryStep } from "@/components/tunnel/steps/DeliveryStep";
+import { PlayerContentSpacer } from "@/components/player/PlayerContentSpacer";
 
 // Chrome minimal, volontairement en dehors de DashboardShell (pas de sidebar,
 // pas de barre de recherche) : le tunnel est un parcours à part entière, pas un
@@ -64,7 +65,7 @@ export function TunnelShell() {
         <div className="mb-8 hidden sm:block">
           <Logo />
         </div>
-        <div key={step} className="animate-reveal-up">
+        <div key={step} className="animate-step-slide">
           {step === "occasion" && <OccasionStep />}
           {step === "recipient" && <RecipientStep />}
           {step === "story" && <StoryStep />}
@@ -74,6 +75,13 @@ export function TunnelShell() {
           {step === "choice" && <ChoiceStep />}
           {step === "delivery" && <DeliveryStep />}
         </div>
+        {/* Réserve, en fin d'écran, l'espace que le lecteur persistant occupe une
+            fois affiché — sans quoi son survol fixe finirait par couvrir un bouton
+            de validation qui n'est pas lui-même sticky (voir OccasionStep,
+            RecipientStep, StyleVoiceStep…). Les écrans à barre sticky (Story,
+            Lyrics) se décalent déjà eux-mêmes au-dessus (voir
+            useMobilePlayerBarVisible) ; ce spacer couvre tous les autres. */}
+        <PlayerContentSpacer />
       </main>
     </div>
   );

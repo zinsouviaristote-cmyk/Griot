@@ -13,6 +13,7 @@ import {
 } from "@/lib/tunnel/types";
 import { Button } from "@/components/ui/Button";
 import { SectionTitle } from "@/components/ui/SectionTitle";
+import { useMobilePlayerBarVisible } from "@/lib/player/useMobilePlayerBarVisible";
 
 type UiMode = "simple" | "avance";
 
@@ -55,6 +56,7 @@ export function StoryStep() {
   const uiMode = uiModeFor(data.storyMode);
   const advancedSubMode = data.storyMode === "paroles_structurees" ? "paroles_structurees" : "paroles_libres";
   const [fullscreen, setFullscreen] = useState(false);
+  const playerBarVisible = useMobilePlayerBarVisible();
 
   // Historique d'annulation propre au champ Avancé — jamais partagé avec
   // Simple, jamais persisté : un simple filet local pour "annuler / rétablir"
@@ -244,7 +246,7 @@ export function StoryStep() {
             role="tab"
             aria-selected={uiMode === mode}
             onClick={() => setUiMode(mode)}
-            className={`min-h-9 rounded-full px-4 text-sm font-medium transition-all duration-150 ease-magnetic ${
+            className={`min-h-11 rounded-full px-4 text-sm font-medium transition-all duration-150 ease-magnetic ${
               uiMode === mode ? "bg-brand text-white shadow-card" : "text-ink-muted hover:text-ink"
             }`}
           >
@@ -294,8 +296,13 @@ export function StoryStep() {
       {/* Sticky plutôt que dans le flux : sur 360px avec le clavier virtuel
           ouvert (et un champ Avancé bien plus haut que l'ancien), le bouton de
           validation doit rester atteignable sans le faire disparaître derrière
-          le clavier — même traitement que LyricsStep. */}
-      <div className="sticky bottom-0 z-10 -mx-4 mt-6 border-t border-border bg-page/95 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:static sm:mx-0 sm:mt-8 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:pb-0">
+          le clavier — même traitement que LyricsStep, décalé au-dessus de la
+          barre compacte du lecteur quand elle est affichée. */}
+      <div
+        className={`sticky z-10 -mx-4 mt-6 border-t border-border bg-page/95 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:static sm:mx-0 sm:mt-8 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:pb-0 ${
+          playerBarVisible ? "bottom-16" : "bottom-0"
+        }`}
+      >
         {continueButton}
       </div>
     </div>

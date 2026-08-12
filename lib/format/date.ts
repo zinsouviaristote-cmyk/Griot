@@ -41,3 +41,18 @@ export function getDaysUntil(date: Date, from: Date = new Date()): number {
   const todayMidnight = new Date(from.getFullYear(), from.getMonth(), from.getDate());
   return Math.round((date.getTime() - todayMidnight.getTime()) / 86_400_000);
 }
+
+// "il y a 2 heures" plutôt qu'un horodatage absolu — Activité récente n'a besoin
+// que d'un ordre de grandeur. Un décalage en minutes plutôt qu'une date ISO fixe :
+// les données de démonstration restent justes quel que soit le jour où l'app est
+// ouverte, sans "date de référence" à maintenir à jour.
+export function formatRelativeTimeFr(minutesAgo: number): string {
+  if (minutesAgo < 1) return "à l'instant";
+  if (minutesAgo < 60) return `il y a ${Math.round(minutesAgo)} min`;
+  const hours = Math.round(minutesAgo / 60);
+  if (hours < 24) return `il y a ${hours} heure${hours > 1 ? "s" : ""}`;
+  const days = Math.round(hours / 24);
+  if (days < 7) return `il y a ${days} jour${days > 1 ? "s" : ""}`;
+  const weeks = Math.round(days / 7);
+  return `il y a ${weeks} semaine${weeks > 1 ? "s" : ""}`;
+}

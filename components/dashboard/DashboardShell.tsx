@@ -3,7 +3,6 @@ import { Sidebar } from "@/components/dashboard/Sidebar";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { MobileTopBar } from "@/components/dashboard/mobile/MobileTopBar";
 import { BottomNav } from "@/components/dashboard/mobile/BottomNav";
-import { PersistentPlayerBar } from "@/components/player/PersistentPlayerBar";
 import { PlayerContentSpacer } from "@/components/player/PlayerContentSpacer";
 
 /**
@@ -50,7 +49,6 @@ export function DashboardShell({
         </main>
       </div>
 
-      <PersistentPlayerBar />
       <BottomNav />
     </div>
   );

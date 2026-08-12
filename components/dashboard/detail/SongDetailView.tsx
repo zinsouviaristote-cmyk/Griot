@@ -5,10 +5,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
+  Cake,
   Check,
   Copy,
   Download,
   Loader2,
+  Pencil,
   RotateCcw,
   Share2,
   Sparkles,
@@ -23,9 +25,10 @@ import { PublishModal, type PublishModalOutput } from "@/components/publish/Publ
 import { TrackHeroPlayer } from "@/components/player/TrackHeroPlayer";
 import type { PlayerTrack } from "@/lib/player/PlayerContext";
 import { getOccasionLabel, mockUser, styleLabels } from "@/lib/data/mock-dashboard";
-import { formatDateFr } from "@/lib/format/date";
+import { formatDateFr, formatDayMonthFr, parseLocalDate } from "@/lib/format/date";
 import { generateUnlockedLyrics, mockDeleteSong, mockPaySong } from "@/lib/data/mockLibraryActions";
 import { getPublishedEntryForSong } from "@/lib/data/mock-explorer";
+import { getContactById } from "@/lib/data/mock-contacts";
 import type { PublishedSong, Song, SongStatus } from "@/lib/types";
 
 function tunnelHref(song: Song, includeOccasion: boolean): string {
@@ -51,6 +54,25 @@ export function SongDetailView({ song }: { song: Song }) {
     () => getPublishedEntryForSong(song.id) ?? null,
   );
   const [publishOpen, setPublishOpen] = useState(false);
+
+  // Seul endroit du produit où cette date se modifie — aucune page de gestion
+  // de contacts : elle vit ici, rattachée à la chanson concernée, et alimente
+  // la carte "Prochaine occasion" du tableau de bord et les rappels.
+  const [birthday, setBirthday] = useState<string | null>(
+    () => getContactById(song.contactId ?? "")?.birthday ?? null,
+  );
+  const [editingBirthday, setEditingBirthday] = useState(false);
+  const [birthdayDraft, setBirthdayDraft] = useState(birthday ?? "");
+
+  function handleSaveBirthday() {
+    setEditingBirthday(false);
+    if (!birthdayDraft) {
+      setBirthday(null);
+      return;
+    }
+    setBirthday(birthdayDraft);
+    showToast(`Nous vous préviendrons avant le prochain anniversaire de ${song.recipientFirstName}.`, "success");
+  }
 
   const isUnlocked = status === "paid" || status === "delivered";
   const isAwaitingPayment = status === "preview_ready" || status === "awaiting_payment";
@@ -117,6 +139,7 @@ export function SongDetailView({ song }: { song: Song }) {
       audioUrl: song.audioUrl ?? "/mock-audio.wav",
       likes: 0,
       listens: 0,
+      downloads: 0,
       publishedAt: new Date().toISOString().slice(0, 10),
       authorName: mockUser.firstName,
       lyrics: song.lyrics ? song.lyrics.split("\n").filter(Boolean) : [],
@@ -136,7 +159,7 @@ export function SongDetailView({ song }: { song: Song }) {
     <div className="mx-auto max-w-2xl">
       <Link
         href="/bibliotheque"
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink"
+        className="-my-3.5 inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink"
       >
         <ArrowLeft className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
         Ma bibliothèque
@@ -150,6 +173,44 @@ export function SongDetailView({ song }: { song: Song }) {
           <span className="text-sm text-ink-muted">
             {getOccasionLabel(song.occasion)} · {styleLabels[song.style]} · {formatDateFr(song.createdAt)}
           </span>
+        </div>
+
+        <div className="mt-3">
+          {editingBirthday ? (
+            <label className="flex flex-wrap items-center gap-2 text-sm text-ink-muted">
+              <Cake className="h-4 w-4 shrink-0" strokeWidth={1.5} aria-hidden="true" />
+              <input
+                type="date"
+                autoFocus
+                value={birthdayDraft}
+                onChange={(event) => setBirthdayDraft(event.target.value)}
+                onBlur={handleSaveBirthday}
+                className="min-h-11 rounded-control border border-border bg-surface px-3 text-sm text-ink focus:border-brand focus:outline-none focus:shadow-ring-focus"
+              />
+              <span className="text-xs text-ink-muted">Pour vous prévenir l&apos;an prochain.</span>
+            </label>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                setBirthdayDraft(birthday ?? "");
+                setEditingBirthday(true);
+              }}
+              className="group -my-3.5 flex min-h-11 items-center gap-1.5 text-sm text-ink-muted transition-colors hover:text-ink"
+            >
+              <Cake className="h-4 w-4 shrink-0" strokeWidth={1.5} aria-hidden="true" />
+              {birthday ? (
+                <span>Anniversaire le {formatDayMonthFr(parseLocalDate(birthday))}</span>
+              ) : (
+                <span className="text-brand">Ajouter sa date d&apos;anniversaire</span>
+              )}
+              <Pencil
+                className="h-3.5 w-3.5 shrink-0 text-ink-muted/60 opacity-0 transition-opacity group-hover:opacity-100"
+                strokeWidth={1.5}
+                aria-hidden="true"
+              />
+            </button>
+          )}
         </div>
       </div>
 
@@ -244,7 +305,7 @@ export function SongDetailView({ song }: { song: Song }) {
                       <button
                         type="button"
                         onClick={handleCopyLyrics}
-                        className="flex items-center gap-1.5 text-label-sm font-medium text-brand hover:underline"
+                        className="-my-3.5 flex min-h-11 items-center gap-1.5 text-label-sm font-medium text-brand hover:underline"
                       >
                         {copied ? (
                           <Check className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />

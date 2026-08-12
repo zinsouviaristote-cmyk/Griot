@@ -47,8 +47,8 @@ export function CreateSongHero() {
           </SectionTitle>
         </div>
         <p className="mt-2 max-w-md text-body-md leading-relaxed text-ink-muted">
-          Racontez votre histoire, on lui compose une chanson. Vous écoutez
-          l&apos;extrait gratuitement avant de payer quoi que ce soit.
+          Racontez votre histoire, on lui compose une chanson. Le premier
+          essai de chaque chanson est offert. Vous écoutez avant de payer.
         </p>
 
         <form onSubmit={handleSubmit} className="mt-5 space-y-3">

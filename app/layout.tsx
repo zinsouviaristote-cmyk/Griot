@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Hanken_Grotesk, Manrope } from "next/font/google";
 import { ToastProvider } from "@/components/ui/Toast";
 import { PlayerProvider } from "@/lib/player/PlayerContext";
+import { PersistentPlayerBar } from "@/components/player/PersistentPlayerBar";
 import "./globals.css";
 
 // Manrope porte les titres (600/700/800) — géométrique, architecturé.
@@ -43,7 +44,10 @@ export default function RootLayout({
     <html lang="fr" className={`${manrope.variable} ${hankenGrotesk.variable}`}>
       <body className="font-sans">
         <ToastProvider>
-          <PlayerProvider>{children}</PlayerProvider>
+          <PlayerProvider>
+            {children}
+            <PersistentPlayerBar />
+          </PlayerProvider>
         </ToastProvider>
       </body>
     </html>

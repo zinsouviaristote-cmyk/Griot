@@ -1,7 +1,5 @@
 import { Cake, Feather, Gem, Heart, Trophy } from "lucide-react";
-import { getNextOccasionFromContacts, mockContacts } from "@/lib/data/mock-contacts";
-import { getMyTotalLikes } from "@/lib/data/mock-explorer";
-import type { DashboardStats, DashboardUser, OccasionMeta, Song } from "@/lib/types";
+import type { DashboardUser, OccasionMeta, Song } from "@/lib/types";
 
 // Module unique de données fictives pour le tableau de bord.
 // Aucun appel réseau, aucune base : à remplacer par les requêtes Supabase en Phase 2
@@ -229,19 +227,3 @@ export const styleLabels: Record<Song["style"], string> = {
   zouk: "Zouk",
 };
 
-// Aïcha a acheté le pack de 5 chansons et en a déjà consommé deux (song_1 livrée,
-// song_2 payée) — il lui en reste 3, cohérent avec mockUser.creditBalance.
-// "Chansons offertes" compte les chansons réellement remises à leur destinataire
-// (livrée ou payée) — pas le total créé, qui inclut brouillons, génération en cours
-// et échecs. "Chansons partagées" compte les partages de lien effectués depuis ces
-// chansons offertes (une même chanson peut être partagée sur plusieurs canaux).
-// nextOccasion vient désormais de Mes proches (mock-contacts.ts) — la date
-// d'anniversaire d'un contact est la seule source de cette carte, plus une
-// valeur figée ici. Fatoumata (18 août) y reste, portée par son propre contact.
-export const dashboardStats: DashboardStats = {
-  creditsRestants: mockUser.creditBalance,
-  chansonsOffertes: mockSongs.filter((s) => s.status === "delivered" || s.status === "paid").length,
-  chansonsPartagees: 4,
-  nextOccasion: getNextOccasionFromContacts(mockContacts),
-  likesRecus: getMyTotalLikes(),
-};

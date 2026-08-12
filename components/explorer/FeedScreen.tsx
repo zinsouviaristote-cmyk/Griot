@@ -116,14 +116,6 @@ export function FeedScreen({
         <div className="flex w-full max-w-[300px] flex-1 flex-col items-center justify-center gap-3 py-2 lg:max-w-xs lg:gap-4">
           <div className="relative w-full max-w-[210px] lg:max-w-[240px]">
             <TrackArt occasion={entry.occasion} className="aspect-square w-full rounded-feature shadow-card-hover" />
-            {isFirst && (
-              <span
-                aria-hidden="true"
-                className="absolute -bottom-4 left-1/2 flex h-8 w-8 -translate-x-1/2 animate-breathe items-center justify-center rounded-full bg-brand text-white shadow-card lg:hidden"
-              >
-                <ChevronDown className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
-              </span>
-            )}
           </div>
 
           <div className="flex items-center gap-2">
@@ -241,31 +233,39 @@ export function FeedScreen({
           </div>
         </div>
 
-        {/* Desktop seulement : sur mobile la place manque, l'invite reste sur
-            la pochette (voir plus haut). */}
-        {isFirst && (
-          <div aria-hidden="true" className="mt-8 hidden justify-center lg:flex">
-            <span className="flex h-9 w-9 animate-breathe items-center justify-center rounded-full bg-brand-soft text-brand">
-              <ChevronDown className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
-            </span>
-          </div>
-        )}
+        {/* Desktop seulement : sur mobile le glissement au doigt suffit (voir
+            snap-y sur le conteneur parent). Visible à chaque morceau — jamais
+            réservée au premier — légèrement animée pour signaler qu'elle se
+            clique, désactivée seulement en fin de file. */}
+        <div className="mt-8 hidden justify-center lg:flex">
+          <button
+            type="button"
+            onClick={onGoNext}
+            disabled={isLast}
+            aria-label="Chanson suivante"
+            className="flex h-9 w-9 animate-breathe items-center justify-center rounded-full bg-brand-soft text-brand transition-transform duration-150 ease-magnetic hover:scale-110 active:scale-95 disabled:animate-none disabled:opacity-30 disabled:pointer-events-none"
+          >
+            <ChevronDown className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+          </button>
+        </div>
       </div>
 
       {lyricsOpen && (
         <>
           {/* Fond assombri, mobile seulement : sur desktop le panneau pousse le
-              contenu plutôt que de le couvrir, rien à obscurcir derrière lui. */}
+              contenu plutôt que de le couvrir, rien à obscurcir derrière lui.
+              z-40/z-50, au-dessus de BottomNav (z-30) : une feuille ouverte doit
+              couvrir la barre basse, jamais rester dessous. */}
           <div
             aria-hidden="true"
             onClick={() => setLyricsOpen(false)}
-            className="fixed inset-0 z-10 bg-ink/40 lg:hidden"
+            className="fixed inset-0 z-40 bg-ink/40 lg:hidden"
           />
           <aside
             role="dialog"
             aria-modal="true"
             aria-labelledby={`lyrics-${entry.id}`}
-            className="fixed inset-x-0 bottom-0 z-20 max-h-[75vh] animate-sheet-up overflow-y-auto rounded-t-feature border-t border-border bg-surface p-6 shadow-card-hover lg:static lg:inset-auto lg:z-auto lg:h-full lg:w-[360px] lg:max-h-none lg:shrink-0 lg:animate-panel-in lg:overflow-y-auto lg:rounded-none lg:border-l lg:border-t-0 lg:px-7 lg:pb-10 lg:pt-16 lg:shadow-none"
+            className="fixed inset-x-0 bottom-0 z-50 max-h-[75vh] animate-sheet-up overflow-y-auto rounded-t-feature border-t border-border bg-surface p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] shadow-card-hover lg:static lg:inset-auto lg:z-auto lg:h-full lg:w-[360px] lg:max-h-none lg:shrink-0 lg:animate-panel-in lg:overflow-y-auto lg:rounded-none lg:border-l lg:border-t-0 lg:px-7 lg:pb-10 lg:pt-16 lg:shadow-none"
           >
             <div className="flex items-center justify-between">
               <p

@@ -85,6 +85,7 @@ export function SongListItem({ song, index = 0, queue }: { song: Song; index?: n
       audioUrl: song.audioUrl ?? "/mock-audio.wav",
       likes: 0,
       listens: 0,
+      downloads: 0,
       publishedAt: new Date().toISOString().slice(0, 10),
       authorName: mockUser.firstName,
       lyrics: song.lyrics ? song.lyrics.split("\n").filter(Boolean) : [],
@@ -140,7 +141,7 @@ export function SongListItem({ song, index = 0, queue }: { song: Song; index?: n
             <div className="flex flex-wrap items-center gap-2">
               <Link
                 href={detailHref}
-                className="truncate font-display text-sm font-semibold text-ink hover:text-brand"
+                className="-my-3.5 inline-flex min-h-11 items-center truncate font-display text-sm font-semibold text-ink hover:text-brand"
               >
                 {song.recipientFirstName}
               </Link>

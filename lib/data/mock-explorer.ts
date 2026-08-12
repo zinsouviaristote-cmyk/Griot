@@ -116,6 +116,9 @@ function seededLikes(index: number): number {
 function seededListens(index: number, likes: number): number {
   return likes + ((index * 29 + 41) % 900) + 30;
 }
+function seededDownloads(index: number, likes: number): number {
+  return Math.round(likes * 0.35) + ((index * 13 + 7) % 40);
+}
 function seededDaysAgo(index: number): number {
   return (index * 3 + 1) % 52;
 }
@@ -137,6 +140,7 @@ const community: PublishedSong[] = COMMUNITY_ENTRIES.map((entry, index) => ({
   audioUrl: "/mock-audio.wav",
   likes: seededLikes(index),
   listens: seededListens(index, seededLikes(index)),
+  downloads: seededDownloads(index, seededLikes(index)),
   publishedAt: isoDaysAgo(seededDaysAgo(index)),
   authorName: authorNameFor(index),
   lyrics: lyricsFor(entry),
@@ -159,6 +163,7 @@ export const mockPublishedSongs: PublishedSong[] = [
     audioUrl: "/mock-audio.wav",
     likes: 128,
     listens: 340,
+    downloads: 58,
     publishedAt: "2026-08-03",
     authorName: "Aïcha",
     lyrics: LYRICS_TEMPLATES.anniversaire("Fatou"),
@@ -175,6 +180,7 @@ export const mockPublishedSongs: PublishedSong[] = [
     audioUrl: "/mock-audio.wav",
     likes: 76,
     listens: 210,
+    downloads: 33,
     publishedAt: "2026-07-29",
     authorName: "Aïcha",
     lyrics: LYRICS_TEMPLATES.reussite("toi"),
@@ -194,8 +200,4 @@ export function getPublishedEntryForSong(songId: string): PublishedSong | undefi
 
 export function getMyPublishedSongs(): PublishedSong[] {
   return mockPublishedSongs.filter((entry) => entry.mine);
-}
-
-export function getMyTotalLikes(): number {
-  return getMyPublishedSongs().reduce((sum, entry) => sum + entry.likes, 0);
 }

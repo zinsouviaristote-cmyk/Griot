@@ -113,11 +113,16 @@ export interface TunnelData {
   occasion: Occasion | null;
   recipientFirstName: string;
   relationship: Relationship | null;
-  // Renseigné quand le destinataire vient de Mes proches (chip choisie à l'écran
-  // 2, ou arrivée via ?proche=) — nul dès que le prénom est retapé à la main,
-  // pour ne jamais lier une chanson au mauvais contact.
+  // Renseigné quand le destinataire est choisi parmi les chips de contacts
+  // connus à l'écran 2 — nul dès que le prénom est retapé à la main, pour ne
+  // jamais lier une chanson au mauvais contact.
   contactId: string | null;
   recipientAge: string;
+  // "YYYY-MM-DD", facultatif — alimente la carte "Prochaine occasion" du
+  // tableau de bord et les rappels, sans jamais passer par une page de gestion
+  // de contacts : cette date reste modifiable depuis la fiche de la chanson
+  // concernée une fois celle-ci créée (voir SongDetailView).
+  recipientBirthday: string;
   story: string;
   // Choisi par la personne (détecté automatiquement à la saisie, modifiable
   // ensuite) — pilote entièrement ce que l'écran "lyrics" fait du texte.
@@ -151,6 +156,7 @@ export const EMPTY_TUNNEL_DATA: TunnelData = {
   relationship: null,
   contactId: null,
   recipientAge: "",
+  recipientBirthday: "",
   story: "",
   storyMode: "raconte",
   style: null,

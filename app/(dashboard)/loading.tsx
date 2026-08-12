@@ -5,7 +5,6 @@ import {
   PrimaryActionCardSkeleton,
   SongCardMobileSkeleton,
   SongRowSkeleton,
-  StatCardSkeleton,
 } from "@/components/ui/Skeleton";
 
 // Rendu automatiquement par Next.js pendant que ce segment de route charge —
@@ -26,12 +25,6 @@ export default function DashboardLoading() {
 
       <div className="hidden lg:block">
         <CreateSongHeroSkeleton />
-
-        <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {Array.from({ length: 4 }, (_, index) => (
-            <StatCardSkeleton key={index} />
-          ))}
-        </div>
 
         <div className="mt-8 flex gap-3.5 overflow-hidden">
           {Array.from({ length: 5 }, (_, index) => (

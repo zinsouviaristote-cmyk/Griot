@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { Check, CreditCard as CardIcon, Smartphone, Sparkles } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Check, ChevronDown, CreditCard as CardIcon, Smartphone, Sparkles } from "lucide-react";
 import { Button, ButtonLink } from "@/components/ui/Button";
+import { CreditHistory } from "@/components/recharge/CreditHistory";
 import { CREDIT_PACKS, formatPackEquivalence, packNotes, type CreditPack } from "@/lib/tunnel/types";
 import { mockCheckPaymentStatus, mockInitiatePayment, type PaymentMethod } from "@/lib/payment/mockPayment";
 import { formatFcfa } from "@/lib/format/currency";
+import type { CreditTransaction } from "@/lib/types";
 
 type Phase = "select" | "processing" | "success";
 
@@ -22,11 +23,24 @@ const CARD_MESSAGES = [
   "Presque terminé…",
 ];
 
-export function RechargeView({ currentBalance }: { currentBalance: number }) {
+export function RechargeView({
+  currentBalance,
+  transactions,
+}: {
+  currentBalance: number;
+  transactions: CreditTransaction[];
+}) {
   const [selectedPack, setSelectedPack] = useState<CreditPack["id"]>("pack3");
   const [method, setMethod] = useState<PaymentMethod>("mobile_money");
   const [phase, setPhase] = useState<Phase>("select");
   const [messageIndex, setMessageIndex] = useState(0);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const historyRef = useRef<HTMLDetailsElement>(null);
+
+  function openHistory() {
+    setHistoryOpen(true);
+    requestAnimationFrame(() => historyRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+  }
 
   const pack = CREDIT_PACKS.find((p) => p.id === selectedPack)!;
   const messages = method === "mobile_money" ? MOBILE_MONEY_MESSAGES : CARD_MESSAGES;
@@ -84,14 +98,9 @@ export function RechargeView({ currentBalance }: { currentBalance: number }) {
           {packNotes(pack)} Note{packNotes(pack) > 1 ? "s" : ""} ajoutée{packNotes(pack) > 1 ? "s" : ""} —{" "}
           {currentBalance + packNotes(pack)} au total.
         </p>
-        <div className="mt-8 flex w-full flex-col gap-3 sm:flex-row">
-          <ButtonLink href="/credits" variant="secondary" className="flex-1">
-            Voir mes Notes
-          </ButtonLink>
-          <ButtonLink href="/" variant="primary" className="flex-1">
-            Retour au tableau de bord
-          </ButtonLink>
-        </div>
+        <ButtonLink href="/" variant="primary" className="mt-8 w-full sm:w-auto">
+          Retour au tableau de bord
+        </ButtonLink>
       </div>
     );
   }
@@ -166,11 +175,37 @@ export function RechargeView({ currentBalance }: { currentBalance: number }) {
         Recharger — {formatFcfa(pack.priceFcfa)}
       </Button>
 
-      <p className="mt-6 text-xs text-ink-muted">
-        <Link href="/credits" className="font-medium text-brand hover:underline">
+      {!historyOpen && (
+        <button
+          type="button"
+          onClick={openHistory}
+          className="mt-6 text-xs font-medium text-brand hover:underline"
+        >
           Voir l&apos;historique de mes Notes
-        </Link>
-      </p>
+        </button>
+      )}
+
+      {/* Remplace l'ancienne page /credits — solde et historique rejoignent
+          Recharger, repliés par défaut : une seule page pour tout ce qui
+          touche aux Notes. */}
+      <details
+        ref={historyRef}
+        open={historyOpen}
+        onToggle={(event) => setHistoryOpen(event.currentTarget.open)}
+        className="group mt-6 scroll-mt-8 rounded-feature border border-border bg-surface open:shadow-card"
+      >
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-5 py-4 text-sm font-semibold text-ink [&::-webkit-details-marker]:hidden">
+          Historique de mes Notes
+          <ChevronDown
+            className="h-4 w-4 shrink-0 text-ink-muted transition-transform duration-200 ease-magnetic group-open:rotate-180"
+            strokeWidth={1.5}
+            aria-hidden="true"
+          />
+        </summary>
+        <div className="border-t border-border px-5 pb-6 pt-5">
+          <CreditHistory balance={currentBalance} transactions={transactions} />
+        </div>
+      </details>
     </div>
   );
 }

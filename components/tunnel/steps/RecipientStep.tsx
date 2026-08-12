@@ -1,7 +1,7 @@
 "use client";
 
 import type { FormEvent } from "react";
-import { UsersRound } from "lucide-react";
+import { Cake, UsersRound } from "lucide-react";
 import { useTunnel } from "@/lib/tunnel/TunnelContext";
 import { RELATIONSHIP_OPTIONS } from "@/lib/tunnel/types";
 import { Button } from "@/components/ui/Button";
@@ -22,7 +22,12 @@ export function RecipientStep() {
   }
 
   function pickContact(contact: Contact) {
-    update({ recipientFirstName: contact.firstName, relationship: contact.relationship, contactId: contact.id });
+    update({
+      recipientFirstName: contact.firstName,
+      relationship: contact.relationship,
+      contactId: contact.id,
+      recipientBirthday: contact.birthday,
+    });
   }
 
   return (
@@ -92,21 +97,40 @@ export function RecipientStep() {
         })}
       </div>
 
-      <div className="mt-8 max-w-[180px]">
-        <label htmlFor="recipient-age" className="text-label-md uppercase tracking-wide text-ink-muted">
-          Âge (facultatif)
-        </label>
-        <input
-          id="recipient-age"
-          type="number"
-          min={0}
-          max={120}
-          inputMode="numeric"
-          value={data.recipientAge}
-          onChange={(event) => update({ recipientAge: event.target.value })}
-          placeholder="Ex. 45"
-          className="mt-2 min-h-11 w-full rounded-control border border-border bg-surface px-3.5 text-sm text-ink placeholder:text-ink-muted focus:border-brand focus:outline-none focus:shadow-ring-focus"
-        />
+      <div className="mt-8 flex flex-wrap gap-5">
+        <div className="max-w-[180px]">
+          <label htmlFor="recipient-age" className="text-label-md uppercase tracking-wide text-ink-muted">
+            Âge (facultatif)
+          </label>
+          <input
+            id="recipient-age"
+            type="number"
+            min={0}
+            max={120}
+            inputMode="numeric"
+            value={data.recipientAge}
+            onChange={(event) => update({ recipientAge: event.target.value })}
+            placeholder="Ex. 45"
+            className="mt-2 min-h-11 w-full rounded-control border border-border bg-surface px-3.5 text-sm text-ink placeholder:text-ink-muted focus:border-brand focus:outline-none focus:shadow-ring-focus"
+          />
+        </div>
+
+        <div className="max-w-[220px]">
+          <label htmlFor="recipient-birthday" className="text-label-md uppercase tracking-wide text-ink-muted">
+            Sa date d&apos;anniversaire
+          </label>
+          <input
+            id="recipient-birthday"
+            type="date"
+            value={data.recipientBirthday}
+            onChange={(event) => update({ recipientBirthday: event.target.value })}
+            className="mt-2 min-h-11 w-full rounded-control border border-border bg-surface px-3.5 text-sm text-ink placeholder:text-ink-muted focus:border-brand focus:outline-none focus:shadow-ring-focus"
+          />
+          <p className="mt-1.5 flex items-center gap-1 text-xs text-ink-muted">
+            <Cake className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} aria-hidden="true" />
+            Facultatif — pour vous prévenir l&apos;an prochain.
+          </p>
+        </div>
       </div>
 
       <Button type="submit" disabled={!canContinue} className="mt-10 w-full sm:w-auto">

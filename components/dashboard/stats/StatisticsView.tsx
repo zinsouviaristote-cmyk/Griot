@@ -1,178 +1,88 @@
-import { Gift, Megaphone, Music4, Sparkles } from "lucide-react";
+import { Download, Ear, Heart, Megaphone, Music4 } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
-import { STATUS_CONFIG } from "@/components/ui/StatusBadge";
+import { PopularSongsList } from "@/components/dashboard/stats/PopularSongsList";
+import { RecentActivityList } from "@/components/dashboard/stats/RecentActivityList";
+import { ReferralCard } from "@/components/dashboard/stats/ReferralCard";
+import { WeeklyListensChart } from "@/components/dashboard/stats/WeeklyListensChart";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { Reveal } from "@/components/ui/Reveal";
-import { CountUp } from "@/components/ui/CountUp";
-import { getOccasionLabel, occasionCatalog } from "@/lib/data/mock-dashboard";
-import { OCCASION_TONES } from "@/lib/occasionTones";
-import type { CreditTransaction, Occasion, PublishedSong, Song, SongStatus } from "@/lib/types";
+import { SectionTitle } from "@/components/ui/SectionTitle";
+import type { ActivityEntry, MyStatsTotals, ReferralStats, WeeklyListenPoint } from "@/lib/data/mock-stats";
+import type { Song } from "@/lib/types";
 
-// Les 7 statuts bruts se regroupent en 6 lignes : paid/delivered partagent déjà
-// le même badge "Payée" partout ailleurs (StatusBadge) — la répartition suit
-// cette même lecture, jamais une distinction que l'utilisateur ne voit nulle part.
-const STATUS_ROWS: { key: string; label: string; statuses: SongStatus[] }[] = [
-  { key: "draft", label: STATUS_CONFIG.draft.label, statuses: ["draft"] },
-  { key: "generating", label: STATUS_CONFIG.generating.label, statuses: ["generating"] },
-  { key: "preview_ready", label: STATUS_CONFIG.preview_ready.label, statuses: ["preview_ready"] },
-  { key: "awaiting_payment", label: STATUS_CONFIG.awaiting_payment.label, statuses: ["awaiting_payment"] },
-  { key: "paid", label: STATUS_CONFIG.paid.label, statuses: ["paid", "delivered"] },
-  { key: "failed", label: STATUS_CONFIG.failed.label, statuses: ["failed"] },
-];
-
-function ProportionRow({
-  label,
-  count,
-  total,
-  dotClassName,
-  barClassName,
-}: {
-  label: string;
-  count: number;
-  total: number;
-  dotClassName: string;
-  barClassName: string;
-}) {
-  const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-  return (
-    <div>
-      <div className="flex items-center justify-between gap-3 text-sm">
-        <span className="flex items-center gap-2 text-ink">
-          <span className={`h-2 w-2 shrink-0 rounded-full ${dotClassName}`} aria-hidden="true" />
-          {label}
-        </span>
-        <span className="font-mono text-xs text-ink-muted">{count}</span>
-      </div>
-      <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-page">
-        <div className={`h-full rounded-full ${barClassName}`} style={{ width: `${pct}%` }} />
-      </div>
-    </div>
-  );
-}
-
+// Cette page ne parle que des chansons publiées — jamais des brouillons, des
+// extraits privés ou des chansons jamais partagées, qui n'ont ni public ni
+// bouche-à-oreille à mesurer. Chaque bloc gère son propre état vide (une
+// invitation à publier), plutôt qu'un graphique ou une liste plate à zéro.
 export function StatisticsView({
-  songs,
-  publishedSongs,
-  creditTransactions,
+  totals,
+  weeklyListens,
+  popularSongs,
+  recentActivity,
+  referral,
 }: {
-  songs: Song[];
-  publishedSongs: PublishedSong[];
-  creditTransactions: CreditTransaction[];
+  totals: MyStatsTotals;
+  weeklyListens: WeeklyListenPoint[];
+  popularSongs: Song[];
+  recentActivity: ActivityEntry[];
+  referral: ReferralStats;
 }) {
-  const totalSongs = songs.length;
-  const chansonsOffertes = songs.filter((s) => s.status === "paid" || s.status === "delivered").length;
-  const notesUtilisees = creditTransactions
-    .filter((t) => t.delta < 0)
-    .reduce((sum, t) => sum + Math.abs(t.delta), 0);
-  const totalLikes = publishedSongs.reduce((sum, p) => sum + p.likes, 0);
-  const totalListens = publishedSongs.reduce((sum, p) => sum + p.listens, 0);
-
-  const occasionCounts = occasionCatalog.map((meta) => ({
-    id: meta.id,
-    count: songs.filter((s) => s.occasion === meta.id).length,
-  }));
-
-  if (totalSongs === 0) {
-    return (
-      <div className="flex flex-col items-center gap-4 rounded-card border border-dashed border-border bg-surface px-6 py-12 text-center">
-        <span className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-soft">
-          <Sparkles className="h-6 w-6 text-brand" strokeWidth={1.5} aria-hidden="true" />
-        </span>
-        <div className="max-w-sm space-y-1.5">
-          <p className="font-display text-lg font-semibold text-ink">Rien à mesurer pour l&apos;instant</p>
-          <p className="text-sm leading-relaxed text-ink-muted">
-            Créez votre première chanson et vos statistiques apparaîtront ici.
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const hasListens = weeklyListens.some((point) => point.count > 0);
 
   return (
     <div>
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
         <Reveal delayMs={0}>
-          <StatCard icon={Music4} label="Chansons créées" value={totalSongs} tone="brand" />
+          <StatCard icon={Ear} label="Écoutes" value={totals.listens} tone="brand" />
         </Reveal>
-        <Reveal delayMs={150}>
-          <StatCard icon={Gift} label="Chansons offertes" value={chansonsOffertes} tone="secondary" />
+        <Reveal delayMs={90}>
+          <StatCard icon={Heart} label="Likes" value={totals.likes} tone="secondary" />
         </Reveal>
-        <Reveal delayMs={300}>
-          <StatCard icon={Sparkles} label="Notes utilisées" value={notesUtilisees} tone="brand" />
+        <Reveal delayMs={180}>
+          <StatCard icon={Download} label="Téléchargements" value={totals.downloads} tone="success" />
         </Reveal>
-        <Reveal delayMs={450}>
-          <StatCard icon={Megaphone} label="Publications actives" value={publishedSongs.length} tone="success" />
+        <Reveal delayMs={270}>
+          <StatCard icon={Music4} label="Temps d'écoute" value={totals.listeningSeconds} tone="brand" variant="duration" />
+        </Reveal>
+        <Reveal delayMs={360}>
+          <StatCard icon={Megaphone} label="Chansons publiées" value={totals.publishedCount} tone="secondary" />
         </Reveal>
       </div>
 
       <Reveal delayMs={80} className="mt-8">
         <div className="rounded-feature border border-border bg-surface p-6 shadow-card">
-          <p className="text-label-md uppercase tracking-wide text-ink-muted">Par état</p>
-          <div className="mt-4 flex flex-col gap-4">
-            {STATUS_ROWS.map((row) => {
-              const count = songs.filter((s) => row.statuses.includes(s.status)).length;
-              const config = STATUS_CONFIG[row.statuses[0]];
-              return (
-                <ProportionRow
-                  key={row.key}
-                  label={row.label}
-                  count={count}
-                  total={totalSongs}
-                  dotClassName={config.dot}
-                  barClassName={config.dot}
-                />
-              );
-            })}
-          </div>
-        </div>
-      </Reveal>
-
-      <Reveal delayMs={120} className="mt-6">
-        <div className="rounded-feature border border-border bg-surface p-6 shadow-card">
-          <p className="text-label-md uppercase tracking-wide text-ink-muted">Par occasion</p>
-          <div className="mt-4 flex flex-col gap-4">
-            {occasionCounts.map(({ id, count }) => (
-              <ProportionRow
-                key={id}
-                label={getOccasionLabel(id as Occasion)}
-                count={count}
-                total={totalSongs}
-                dotClassName={OCCASION_TONES[id as Occasion].dot}
-                barClassName={OCCASION_TONES[id as Occasion].dot}
+          <SectionTitle>Écoutes des 7 derniers jours</SectionTitle>
+          <div className="mt-5">
+            {hasListens ? (
+              <WeeklyListensChart points={weeklyListens} />
+            ) : (
+              <EmptyState
+                icon={Ear}
+                title="Pas encore d'écoutes cette semaine"
+                description="Dès qu'une chanson publiée sera écoutée, la tendance des sept derniers jours apparaîtra ici."
               />
-            ))}
+            )}
           </div>
         </div>
       </Reveal>
 
-      {publishedSongs.length > 0 && (
-        <Reveal delayMs={160} className="mt-6">
-          <div className="rounded-feature border border-border bg-surface p-6 shadow-card">
-            <p className="text-label-md uppercase tracking-wide text-ink-muted">Publications</p>
-            <div className="mt-4 grid grid-cols-2 gap-6 sm:grid-cols-3">
-              <div>
-                <p className="font-display text-3xl font-bold text-ink">
-                  <CountUp target={publishedSongs.length} />
-                </p>
-                <p className="mt-0.5 text-xs text-ink-muted">
-                  publiée{publishedSongs.length > 1 ? "s" : ""}
-                </p>
-              </div>
-              <div>
-                <p className="font-display text-3xl font-bold text-ink">
-                  <CountUp target={totalLikes} />
-                </p>
-                <p className="mt-0.5 text-xs text-ink-muted">likes reçus</p>
-              </div>
-              <div>
-                <p className="font-display text-3xl font-bold text-ink">
-                  <CountUp target={totalListens} />
-                </p>
-                <p className="mt-0.5 text-xs text-ink-muted">écoutes</p>
-              </div>
-            </div>
-          </div>
-        </Reveal>
-      )}
+      <Reveal delayMs={120} className="mt-8">
+        <SectionTitle>Vos chansons populaires</SectionTitle>
+        <div className="mt-5">
+          <PopularSongsList songs={popularSongs} />
+        </div>
+      </Reveal>
+
+      <Reveal delayMs={160} className="mt-8">
+        <SectionTitle>Activité récente</SectionTitle>
+        <div className="mt-5">
+          <RecentActivityList entries={recentActivity} />
+        </div>
+      </Reveal>
+
+      <Reveal delayMs={200} className="mt-8">
+        <ReferralCard stats={referral} />
+      </Reveal>
     </div>
   );
 }

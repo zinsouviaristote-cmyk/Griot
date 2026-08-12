@@ -1,5 +1,4 @@
 import { CreateSongHero } from "@/components/dashboard/CreateSongHero";
-import { StatsGrid } from "@/components/dashboard/StatsGrid";
 import { OccasionCarousel } from "@/components/dashboard/OccasionCarousel";
 import { SongsTable } from "@/components/dashboard/SongsTable";
 import { MobileGreeting } from "@/components/dashboard/mobile/MobileGreeting";
@@ -7,7 +6,7 @@ import { PrimaryActionCard } from "@/components/dashboard/mobile/PrimaryActionCa
 import { RecentSongsList } from "@/components/dashboard/mobile/RecentSongsList";
 import { Reveal } from "@/components/ui/Reveal";
 import { SectionTitle } from "@/components/ui/SectionTitle";
-import { dashboardStats, mockSongs, mockUser } from "@/lib/data/mock-dashboard";
+import { mockSongs, mockUser } from "@/lib/data/mock-dashboard";
 
 // Ajoutez ?vide=1 à l'URL pour prévisualiser l'état d'un tout nouvel utilisateur,
 // sans chanson ni crédit — c'est le premier écran qu'il verra, il mérite le même soin.
@@ -19,9 +18,6 @@ export default function DashboardPage({
   const isEmptyPreview = searchParams.vide === "1";
   const songs = isEmptyPreview ? [] : mockSongs;
   const creditBalance = isEmptyPreview ? 0 : mockUser.creditBalance;
-  const stats = isEmptyPreview
-    ? { creditsRestants: 0, chansonsOffertes: 0, chansonsPartagees: 0, nextOccasion: null, likesRecus: null }
-    : dashboardStats;
 
   return (
     <>
@@ -42,19 +38,15 @@ export default function DashboardPage({
       </div>
 
       {/* Desktop — respirations volontairement inégales entre sections : un
-          intervalle plus large avant les dernières chansons (mt-12, 48px) qu'entre
-          les indicateurs et les occasions (mt-8, 32px) — 1,5x, sous le plafond du
-          double, pour que le rythme se sente sans se remarquer. */}
+          intervalle plus large avant les dernières chansons (mt-12, 48px) qu'avant
+          les occasions (mt-8, 32px) — 1,5x, sous le plafond du double, pour que le
+          rythme se sente sans se remarquer. */}
       <div className="hidden lg:block">
         <Reveal>
           <CreateSongHero />
         </Reveal>
 
         <Reveal delayMs={80} className="mt-8">
-          <StatsGrid stats={stats} />
-        </Reveal>
-
-        <Reveal delayMs={120} className="mt-8">
           <OccasionCarousel />
         </Reveal>
 

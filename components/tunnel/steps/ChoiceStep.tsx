@@ -49,6 +49,9 @@ export function ChoiceStep() {
       <p className="mt-2 text-body-md text-ink-muted">
         Chaque essai reste écoutable — gardez celui que vous préférez, même si ce n&apos;est pas le dernier.
       </p>
+      <p className="mt-1 text-label-sm font-medium text-brand">
+        Le premier essai de chaque chanson est offert. Vous écoutez avant de payer.
+      </p>
 
       <div className="mt-6 flex flex-col gap-4">
         {attempts.map((attempt) => (

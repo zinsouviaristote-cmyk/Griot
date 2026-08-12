@@ -5,16 +5,16 @@ import { ButtonLink } from "@/components/ui/Button";
 /**
  * L'élément le plus important de la sidebar : remplace la carte d'abonnement
  * qu'on trouve d'habitude ici. Un utilisateur qui revient dépenser un crédit
- * doit voir son solde avant tout le reste. Le solde est lui-même un lien vers
- * l'historique des mouvements (/credits) — sinon cette page reste, comme avant,
- * introuvable en dehors du menu de l'avatar.
+ * doit voir son solde avant tout le reste. Toute la carte pointe vers
+ * /recharger — solde, historique et rechargement y vivent tous les trois,
+ * un seul chemin, jamais une page /credits séparée.
  */
 export function CreditCard({ balance }: { balance: number }) {
   const isLow = balance <= 1;
 
   return (
     <div className="rounded-card border border-border bg-surface p-4 shadow-card transition-shadow duration-200 hover:shadow-card-hover">
-      <Link href="/credits" className="group block">
+      <Link href="/recharger" className="group block">
         <div className="flex items-center gap-2 text-ink-muted">
           <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-soft">
             <Sparkle className="h-3.5 w-3.5 animate-pulse text-brand" strokeWidth={1.5} aria-hidden="true" />
@@ -29,7 +29,7 @@ export function CreditCard({ balance }: { balance: number }) {
         <p className="mt-1 text-xs text-ink-muted">
           {isLow
             ? "Il vous en reste peu — rechargez pour ne pas être bloqué."
-            : "Une Note = un essai de génération. Le premier essai de chaque chanson est offert."}
+            : "Une Note = un essai. Le premier essai de chaque chanson est offert. Vous écoutez avant de payer."}
         </p>
       </Link>
       <ButtonLink href="/recharger" variant="primary" className="mt-3.5 w-full">

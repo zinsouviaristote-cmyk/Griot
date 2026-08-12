@@ -147,6 +147,21 @@ const config: Config = {
           "0%, 100%": { transform: "scaleY(0.35)" },
           "50%": { transform: "scaleY(1)" },
         },
+        // Écran de chargement à la marque : le trait ondulé du logo (voir Logo.tsx)
+        // se dessine puis s'efface en boucle lente — `pathLength=1` sur le <path>
+        // ramène sa longueur réelle à 1, donc ce dasharray/dashoffset marche pour
+        // n'importe quel tracé sans mesurer sa longueur en pixels.
+        "draw-wave": {
+          "0%, 8%": { strokeDashoffset: "1" },
+          "50%": { strokeDashoffset: "0" },
+          "92%, 100%": { strokeDashoffset: "-1" },
+        },
+        // Transition entre écrans du tunnel : glissement horizontal léger, pas de
+        // rebond (courbe magnetic déjà utilisée ailleurs, monotone, sans dépassement).
+        "step-slide": {
+          "0%": { opacity: "0", transform: "translateX(16px)" },
+          "100%": { opacity: "1", transform: "translateX(0)" },
+        },
       },
       animation: {
         "reveal-up": "reveal-up 0.5s cubic-bezier(0.25,0.46,0.45,0.94) both",
@@ -161,6 +176,8 @@ const config: Config = {
         "sheet-up": "sheet-up 0.3s cubic-bezier(0.25,0.46,0.45,0.94) both",
         "heart-pop": "heart-pop 0.35s cubic-bezier(0.25,0.46,0.45,0.94) both",
         "wave-bar": "wave-bar 0.9s ease-in-out infinite",
+        "draw-wave": "draw-wave 2.8s ease-in-out infinite",
+        "step-slide": "step-slide 0.25s ease-out both",
       },
       maxWidth: {
         shell: "1440px",

@@ -3,6 +3,7 @@ import { RechargeView } from "@/components/recharge/RechargeView";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { Reveal } from "@/components/ui/Reveal";
 import { mockUser } from "@/lib/data/mock-dashboard";
+import { getCreditTransactionsSortedDesc } from "@/lib/data/mock-credits";
 
 export const metadata: Metadata = {
   title: "Recharger — Griot",
@@ -19,7 +20,7 @@ export default function RechargerPage() {
       </p>
 
       <Reveal delayMs={80} className="mt-6">
-        <RechargeView currentBalance={mockUser.creditBalance} />
+        <RechargeView currentBalance={mockUser.creditBalance} transactions={getCreditTransactionsSortedDesc()} />
       </Reveal>
     </div>
   );

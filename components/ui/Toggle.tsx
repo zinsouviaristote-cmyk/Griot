@@ -19,15 +19,19 @@ export function Toggle({
       aria-checked={checked}
       aria-label={label}
       onClick={onChange}
-      className={`relative h-6 w-11 shrink-0 rounded-full transition-colors duration-200 ${
-        checked ? "bg-brand" : "bg-border"
-      }`}
+      className="flex h-11 w-11 shrink-0 items-center justify-center"
     >
       <span
-        className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-card transition-transform duration-200 ${
-          checked ? "translate-x-[22px]" : "translate-x-0.5"
+        className={`relative h-6 w-11 rounded-full transition-colors duration-200 ${
+          checked ? "bg-brand" : "bg-border"
         }`}
-      />
+      >
+        <span
+          className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-card transition-transform duration-200 ${
+            checked ? "translate-x-[22px]" : "translate-x-0.5"
+          }`}
+        />
+      </span>
     </button>
   );
 }

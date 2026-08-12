@@ -2,18 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  BarChart3,
-  CircleHelp,
-  Compass,
-  Home,
-  Library,
-  Megaphone,
-  Settings,
-  UsersRound,
-  Wand2,
-  type LucideIcon,
-} from "lucide-react";
+import { BarChart3, Compass, Home, Library, Megaphone, Wand2, type LucideIcon } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { CreditCard } from "@/components/dashboard/CreditCard";
 import { SidebarUserMenu } from "@/components/dashboard/SidebarUserMenu";
@@ -28,7 +17,6 @@ const DISCOVER_ITEMS: NavItem[] = [
   { label: "Accueil", href: "/", icon: Home },
   { label: "Explorer", href: "/explorer", icon: Compass },
   { label: "Ma bibliothèque", href: "/bibliotheque", icon: Library },
-  { label: "Mes proches", href: "/proches", icon: UsersRound },
 ];
 
 const CREATE_ITEMS: NavItem[] = [{ label: "Nouvelle chanson", href: "/creer", icon: Wand2 }];
@@ -132,30 +120,6 @@ export function SidebarContent({
 
       <div className="space-y-3 border-t border-border pt-4">
         <CreditCard balance={creditBalance} />
-        <Link
-          href="/parametres"
-          onClick={onNavigate}
-          className="group flex items-center gap-2.5 px-3 py-1.5 text-xs font-medium text-ink-muted transition-colors hover:text-ink"
-        >
-          <Settings
-            className="h-4 w-4 transition-transform duration-200 ease-magnetic group-hover:scale-110 group-hover:rotate-90"
-            strokeWidth={1.5}
-            aria-hidden="true"
-          />
-          Paramètres
-        </Link>
-        <Link
-          href="/aide"
-          onClick={onNavigate}
-          className="group flex items-center gap-2.5 px-3 py-1.5 text-xs font-medium text-ink-muted transition-colors hover:text-ink"
-        >
-          <CircleHelp
-            className="h-4 w-4 transition-transform duration-200 ease-magnetic group-hover:scale-110 group-hover:rotate-12"
-            strokeWidth={1.5}
-            aria-hidden="true"
-          />
-          Besoin d&apos;aide ?
-        </Link>
       </div>
 
       <div className="border-t border-border pt-3">

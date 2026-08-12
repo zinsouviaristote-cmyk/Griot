@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BarChart3, ChevronRight, CircleHelp, LogOut, Megaphone, Settings, type LucideIcon } from "lucide-react";
+import { BarChart3, ChevronRight, LogOut, Megaphone, type LucideIcon } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { CreditCard } from "@/components/dashboard/CreditCard";
 
@@ -9,18 +9,17 @@ interface MenuItem {
   icon: LucideIcon;
 }
 
+// Équivalent, pour un écran sans sidebar, de la seule section « Moi » du bloc
+// desktop — Paramètres et Aide restent réservés au menu de l'avatar (voir
+// MobileTopBar), un seul chemin pour chacun.
 const ITEMS: MenuItem[] = [
-  { label: "Paramètres", href: "/parametres", icon: Settings },
   { label: "Statistiques", href: "/statistiques", icon: BarChart3 },
   { label: "Mes publications", href: "/publications", icon: Megaphone },
-  { label: "Aide", href: "/aide", icon: CircleHelp },
 ];
 
 /**
  * Hub de l'onglet mobile "Profil" — l'équivalent, pour un écran sans sidebar,
- * du bloc « Moi » + bas de sidebar sur desktop. Sans cette page, Paramètres,
- * Statistiques, Mes publications et Aide ne restaient atteignables que par le
- * menu de l'avatar, que personne ne pense à ouvrir.
+ * du bloc « Moi » sur desktop.
  */
 export function ProfileMenu({
   initials,

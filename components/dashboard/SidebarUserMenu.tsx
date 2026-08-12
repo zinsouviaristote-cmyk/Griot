@@ -12,7 +12,6 @@ import {
   MoreHorizontal,
   SunMedium,
   User,
-  Wallet,
 } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 
@@ -57,9 +56,8 @@ function OptionList({ options }: { options: OptionRow[] }) {
 }
 
 // Menu utilisateur ancré en bas de la sidebar desktop — avatar, nom, bouton
-// "…". Vient s'ajouter à Paramètres/Aide juste au-dessus (voir SidebarContent),
-// jamais à leur place : ce menu réunit des raccourcis, ce n'est pas la
-// navigation elle-même.
+// "…". Seul chemin vers Compte/Paramètres et Aide sur ce breakpoint : ils ne
+// vivent nulle part ailleurs dans la sidebar (voir SidebarContent).
 export function SidebarUserMenu({
   initials,
   name,
@@ -129,15 +127,6 @@ export function SidebarUserMenu({
               >
                 <User className="h-4 w-4 text-ink-muted" strokeWidth={1.5} aria-hidden="true" />
                 Compte
-              </Link>
-              <Link
-                href="/credits"
-                onClick={close}
-                role="menuitem"
-                className="flex min-h-[44px] items-center gap-3 px-4 text-sm text-ink transition-colors hover:bg-brand-soft"
-              >
-                <Wallet className="h-4 w-4 text-ink-muted" strokeWidth={1.5} aria-hidden="true" />
-                Mes crédits
               </Link>
               <button
                 type="button"

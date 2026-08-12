@@ -14,8 +14,9 @@ export type SongStatus =
 
 export type Occasion = "anniversaire" | "amour" | "mariage" | "reussite" | "hommage";
 
-// Vocabulaire partagé entre le tunnel (écran destinataire) et Mes proches — un
-// seul endroit pour cette liste fermée, jamais une chaîne libre dupliquée.
+// Vocabulaire du lien avec le destinataire, utilisé par le tunnel (écran
+// destinataire) — un seul endroit pour cette liste fermée, jamais une chaîne
+// libre dupliquée.
 export const RELATIONSHIP_OPTIONS = [
   "ma mère",
   "mon père",
@@ -94,34 +95,6 @@ export interface DashboardUser {
   language: string;
 }
 
-// Un navigateur/appareil où le compte est resté connecté — Paramètres >
-// Sécurité en liste l'historique et permet une déconnexion à distance de tous
-// sauf l'appareil courant (on ne se déconnecte pas soi-même depuis cette liste).
-export interface ConnectedDevice {
-  id: string;
-  label: string;
-  location: string;
-  lastActiveAt: string;
-  current: boolean;
-}
-
-export interface NextOccasion {
-  recipientFirstName: string;
-  occasion: Occasion;
-  date: string;
-}
-
-export interface DashboardStats {
-  creditsRestants: number;
-  chansonsOffertes: number;
-  chansonsPartagees: number;
-  // null pour un compte tout neuf sans historique — voir l'aperçu ?vide=1.
-  nextOccasion: NextOccasion | null;
-  // null tant qu'aucune chanson n'a été publiée — distinct de 0 (publiée mais pas
-  // encore likée) : c'est cette nullité qui décide si la 5e carte apparaît.
-  likesRecus: number | null;
-}
-
 // Une chanson publiée dans Explorer — entité distincte de Song : la publication
 // est un choix explicite et réversible, jamais un attribut permanent de la
 // chanson d'origine. `sourceSongId` relie une publication à une chanson réelle
@@ -139,6 +112,10 @@ export interface PublishedSong {
   audioUrl: string;
   likes: number;
   listens: number;
+  // Téléchargements du MP3 depuis cette publication précisément (Statistiques) —
+  // distinct des téléchargements possibles depuis la bibliothèque privée, jamais
+  // comptés ici : cette page ne parle que de ce que le public a fait.
+  downloads: number;
   publishedAt: string;
   // Le pseudonyme public de l'auteur (celui qui a offert la chanson, pas le
   // destinataire) — affiché avec un avatar d'initiales dans Explorer, jamais

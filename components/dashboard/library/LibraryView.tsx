@@ -79,7 +79,7 @@ export function LibraryView({ songs }: { songs: Song[] }) {
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Rechercher par prénom du destinataire…"
           aria-label="Rechercher par prénom du destinataire"
-          className="w-full rounded-control border border-border bg-surface py-2.5 pl-10 pr-3 text-sm text-ink placeholder:text-ink-muted transition-all duration-200 focus:border-brand focus:outline-none focus:shadow-ring-focus"
+          className="min-h-11 w-full rounded-control border border-border bg-surface py-2.5 pl-10 pr-3 text-sm text-ink placeholder:text-ink-muted transition-all duration-200 focus:border-brand focus:outline-none focus:shadow-ring-focus"
         />
       </label>
 

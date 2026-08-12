@@ -8,6 +8,7 @@ import { isTagLine } from "@/lib/tunnel/lyricsEngine";
 import { REFORMULATE_COUNTER_THRESHOLD, REFORMULATE_LIMIT } from "@/lib/tunnel/types";
 import { Button } from "@/components/ui/Button";
 import { SectionTitle } from "@/components/ui/SectionTitle";
+import { useMobilePlayerBarVisible } from "@/lib/player/useMobilePlayerBarVisible";
 
 function linesFromDraft(draft: string): string[] {
   return draft.split("\n");
@@ -34,6 +35,7 @@ function renderHighlighted(line: string, name: string) {
 
 export function LyricsStep() {
   const { data, update, goNext } = useTunnel();
+  const playerBarVisible = useMobilePlayerBarVisible();
   const [lines, setLines] = useState<string[]>(() => (data.lyricsDraft ? linesFromDraft(data.lyricsDraft) : []));
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [loading, setLoading] = useState(data.lyricsDraft === null);
@@ -205,9 +207,15 @@ export function LyricsStep() {
       </div>
 
       {/* Sticky plutôt que dans le flux : sur 360px avec le clavier ouvert,
-          le bouton de validation doit rester atteignable sans redescendre. */}
-      <div className="sticky bottom-0 z-10 -mx-4 mt-6 border-t border-border bg-page/95 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:static sm:mx-0 sm:mt-8 sm:rounded-feature sm:border sm:bg-surface sm:px-5 sm:py-4 sm:pb-4 sm:shadow-card">
-        <p className="text-xs text-ink-muted">Cet essai est gratuit — écoutez avant de payer quoi que ce soit.</p>
+          le bouton de validation doit rester atteignable sans redescendre.
+          Décalée au-dessus de la barre compacte du lecteur quand elle est
+          affichée — jamais superposées (voir useMobilePlayerBarVisible). */}
+      <div
+        className={`sticky z-10 -mx-4 mt-6 border-t border-border bg-page/95 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:static sm:mx-0 sm:mt-8 sm:rounded-feature sm:border sm:bg-surface sm:px-5 sm:py-4 sm:pb-4 sm:shadow-card ${
+          playerBarVisible ? "bottom-16" : "bottom-0"
+        }`}
+      >
+        <p className="text-xs text-ink-muted">Cet essai est gratuit.</p>
         <Button onClick={handleContinue} className="mt-2 w-full sm:w-auto">
           Générer l&apos;extrait
         </Button>

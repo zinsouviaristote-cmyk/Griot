@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { TunnelProvider, type AuthResumeResult } from "@/lib/tunnel/TunnelContext";
 import { TunnelShell } from "@/components/tunnel/TunnelShell";
 import { occasionCatalog, mockUser } from "@/lib/data/mock-dashboard";
-import { getContactById } from "@/lib/data/mock-contacts";
 import { RELATIONSHIP_OPTIONS, type TunnelStep } from "@/lib/tunnel/types";
 import type { Occasion } from "@/lib/types";
 
@@ -18,9 +17,6 @@ export const metadata: Metadata = {
 // existante : ?lien= pré-remplit le lien avec le destinataire — sans occasion,
 // on repart de l'écran 1 (peut-être une occasion différente cette fois) ; avec
 // occasion connue (cas "Réessayer"), on saute directement à l'histoire.
-// Arrivée depuis "Créer une chanson pour X" sur Mes proches : ?proche=<id> est
-// prioritaire sur prenom/lien — une seule source de vérité (le contact), jamais
-// un risque de désaccord entre deux paramètres qui se contrediraient.
 // ?credits=0 force un solde de Notes à zéro pour prévisualiser l'écran de
 // recharge sur "Écoutez et choisissez" — même convention que ?vide=1 sur le
 // tableau de bord.
@@ -31,7 +27,6 @@ export default function CreerPage({
     prenom?: string;
     occasion?: string;
     lien?: string;
-    proche?: string;
     credits?: string;
     auth?: string;
     email?: string;
@@ -39,17 +34,13 @@ export default function CreerPage({
     name?: string;
   };
 }) {
-  const contact = searchParams.proche ? getContactById(searchParams.proche) : undefined;
-
-  const prenom = contact ? contact.firstName : (searchParams.prenom?.trim() ?? "");
+  const prenom = searchParams.prenom?.trim() ?? "";
   const occasionParam = searchParams.occasion;
   const validOccasion = occasionCatalog.some((o) => o.id === occasionParam) ? (occasionParam as Occasion) : null;
   const lienParam = searchParams.lien;
-  const validRelationship = contact
-    ? contact.relationship
-    : RELATIONSHIP_OPTIONS.includes(lienParam as (typeof RELATIONSHIP_OPTIONS)[number])
-      ? (lienParam as (typeof RELATIONSHIP_OPTIONS)[number])
-      : null;
+  const validRelationship = RELATIONSHIP_OPTIONS.includes(lienParam as (typeof RELATIONSHIP_OPTIONS)[number])
+    ? (lienParam as (typeof RELATIONSHIP_OPTIONS)[number])
+    : null;
 
   // L'occasion arrive avant le destinataire dans le tunnel (écran 1 puis 2) :
   // connaître le contact (prénom + lien) ne permet donc jamais de sauter l'écran
@@ -86,7 +77,6 @@ export default function CreerPage({
         recipientFirstName: prenom,
         occasion: validOccasion,
         relationship: validRelationship,
-        contactId: contact?.id ?? null,
       }}
       creditBalance={creditBalance}
       resumeAuth={resumeAuth}

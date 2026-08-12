@@ -194,7 +194,7 @@ export function ExplorerFeed({ entries }: { entries: PublishedSong[] }) {
           type="button"
           onClick={() => setFiltersOpen(true)}
           aria-label="Filtrer par occasion ou style"
-          className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border border-border bg-surface text-ink-muted shadow-card transition-transform duration-150 ease-magnetic hover:scale-105 hover:text-ink active:scale-95"
+          className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full border border-border bg-surface text-ink-muted shadow-card transition-transform duration-150 ease-magnetic hover:scale-105 hover:text-ink active:scale-95"
         >
           <SlidersHorizontal className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
         </button>
@@ -204,7 +204,7 @@ export function ExplorerFeed({ entries }: { entries: PublishedSong[] }) {
         <ButtonLink
           href="/creer"
           variant="primary"
-          className="pointer-events-auto !min-h-9 !px-3.5 !py-2 !text-xs shadow-card"
+          className="pointer-events-auto !min-h-11 !px-3.5 !py-2 !text-xs shadow-card"
         >
           <Sparkles className="h-3.5 w-3.5 animate-breathe" strokeWidth={1.5} aria-hidden="true" />
           Créer la mienne

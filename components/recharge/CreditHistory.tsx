@@ -1,6 +1,5 @@
 import { Sparkles } from "lucide-react";
 import { CountUp } from "@/components/ui/CountUp";
-import { ButtonLink } from "@/components/ui/Button";
 import { formatDateFr } from "@/lib/format/date";
 import type { CreditMotif, CreditTransaction } from "@/lib/types";
 
@@ -26,30 +25,23 @@ function DeltaLabel({ delta }: { delta: number }) {
   );
 }
 
-export function CreditsView({ balance, transactions }: { balance: number; transactions: CreditTransaction[] }) {
+// Solde et historique, réunis sous les packs de /recharger — plus de page
+// /credits séparée : tout ce qui touche aux Notes vit désormais ici.
+export function CreditHistory({ balance, transactions }: { balance: number; transactions: CreditTransaction[] }) {
   return (
     <div>
-      <div className="flex flex-col items-start justify-between gap-4 rounded-feature border border-border bg-surface p-6 shadow-card sm:flex-row sm:items-center">
-        <div>
-          <div className="flex items-center gap-2">
-            <p className="text-label-sm font-medium uppercase tracking-wide text-ink-muted">Solde actuel</p>
-            <Sparkles className="h-4 w-4 text-brand" strokeWidth={1.5} aria-hidden="true" />
-          </div>
-          <p className="mt-2 font-display text-5xl font-bold text-ink">
-            <CountUp target={balance} />
-          </p>
-          <p className="mt-1 text-sm text-ink-muted">Note{balance > 1 ? "s" : ""} disponible{balance > 1 ? "s" : ""}</p>
-        </div>
-        <ButtonLink href="/recharger" variant="primary">
-          Recharger
-        </ButtonLink>
+      <div className="flex items-center gap-2">
+        <p className="text-label-sm font-medium uppercase tracking-wide text-ink-muted">Solde actuel</p>
+        <Sparkles className="h-4 w-4 text-brand" strokeWidth={1.5} aria-hidden="true" />
       </div>
+      <p className="mt-2 font-display text-4xl font-bold text-ink">
+        <CountUp target={balance} />
+      </p>
+      <p className="mt-1 text-sm text-ink-muted">Note{balance > 1 ? "s" : ""} disponible{balance > 1 ? "s" : ""}</p>
 
       <div className="mt-6">
-        <p className="text-label-md uppercase tracking-wide text-ink-muted">Historique</p>
-
         {/* Desktop */}
-        <div className="mt-3 hidden overflow-hidden rounded-card border border-border bg-surface shadow-card lg:block">
+        <div className="hidden overflow-hidden rounded-card border border-border bg-surface shadow-card lg:block">
           <table className="w-full border-collapse">
             <thead>
               <tr className="border-b border-border bg-page text-left text-xs font-medium uppercase tracking-wide text-ink-muted">
@@ -82,7 +74,7 @@ export function CreditsView({ balance, transactions }: { balance: number; transa
         </div>
 
         {/* Mobile — jamais de tableau à défilement horizontal, des cartes empilées. */}
-        <div className="mt-3 flex flex-col gap-3 lg:hidden">
+        <div className="flex flex-col gap-3 lg:hidden">
           {transactions.map((tx) => (
             <div key={tx.id} className="rounded-card border border-border bg-surface p-3.5 shadow-card">
               <div className="flex items-center justify-between gap-2">

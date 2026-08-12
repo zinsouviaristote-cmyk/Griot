@@ -2,6 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { formatFcfa } from "@/lib/format/currency";
+import { formatListeningDuration } from "@/lib/format/duration";
 
 function easeOutCubic(t: number) {
   return 1 - Math.pow(1 - t, 3);
@@ -10,9 +11,12 @@ function easeOutCubic(t: number) {
 // `variant` (une chaîne sérialisable) plutôt qu'une fonction de formatage :
 // ce composant est rendu depuis un Server Component, qui ne peut pas lui passer
 // de closure en prop à travers la frontière serveur/client.
-const FORMATTERS: Record<"number" | "fcfa", (value: number) => string> = {
+const FORMATTERS: Record<"number" | "fcfa" | "duration", (value: number) => string> = {
   number: (n) => String(n),
   fcfa: formatFcfa,
+  // Secondes cumulées → "20 h 5 min" (Statistiques, "Temps d'écoute") — anime la
+  // valeur brute en secondes, seul le formatage change à chaque image.
+  duration: formatListeningDuration,
 };
 
 type Phase = "static" | "pending" | "animating";
@@ -25,7 +29,7 @@ export function CountUp({
 }: {
   target: number;
   durationMs?: number;
-  variant?: "number" | "fcfa";
+  variant?: "number" | "fcfa" | "duration";
   // Les gros chiffres autonomes (StatCard) veulent le mono ; un compteur glissé dans
   // une phrase (MobileGreeting) veut juste la largeur stable de tabular-nums.
   className?: string;

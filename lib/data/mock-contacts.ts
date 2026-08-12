@@ -1,10 +1,7 @@
-import { formatIsoDate, getNextOccurrence } from "@/lib/format/date";
-import type { Contact, NextOccasion } from "@/lib/types";
+import type { Contact } from "@/lib/types";
 
 // Un contact par destinataire déjà présent dans mockSongs (voir mock-dashboard.ts,
-// qui référence ces id via Song.contactId), plus Fatoumata — nom déjà utilisé par
-// la carte "Prochaine occasion" du tableau de bord avant que celle-ci ne soit
-// calculée dynamiquement : elle doit continuer à s'y retrouver, le 18 août.
+// qui référence ces id via Song.contactId), plus Fatoumata, sans chanson associée.
 export const mockContacts: Contact[] = [
   {
     id: "contact_1",
@@ -74,25 +71,4 @@ export const mockContacts: Contact[] = [
 
 export function getContactById(id: string): Contact | undefined {
   return mockContacts.find((contact) => contact.id === id);
-}
-
-// Alimente la carte "Prochaine occasion" du tableau de bord — un anniversaire de
-// proche est toujours l'occasion "anniversaire", jamais une autre.
-export function getNextOccasionFromContacts(
-  contacts: Contact[],
-  from: Date = new Date(),
-): NextOccasion | null {
-  let closest: { contact: Contact; nextDate: Date } | null = null;
-  for (const contact of contacts) {
-    const nextDate = getNextOccurrence(contact.birthday, from);
-    if (!closest || nextDate < closest.nextDate) {
-      closest = { contact, nextDate };
-    }
-  }
-  if (!closest) return null;
-  return {
-    recipientFirstName: closest.contact.firstName,
-    occasion: "anniversaire",
-    date: formatIsoDate(closest.nextDate),
-  };
 }
