@@ -47,38 +47,69 @@ export function getMyPopularSongs(): Song[] {
   return [...songs].sort((a, b) => b.listens - a.listens);
 }
 
-export interface WeeklyListenPoint {
+export interface ListenPoint {
+  // "YYYY-MM-DD" — utilisé par l'infobulle du graphique, jamais recalculé
+  // depuis `label` (qui, lui, est déjà abrégé et perd l'année).
+  date: string;
   label: string;
   count: number;
 }
 
-// Répartition déterministe sur sept jours (jamais Math.random, voir mock-explorer.ts) —
-// une forme irrégulière plutôt qu'une ligne plate, sans dépendre d'un historique
-// jour par jour qui n'existe pas encore côté données. Somme des parts = 1.
-const WEEKDAY_SHARE = [0.1, 0.16, 0.08, 0.2, 0.13, 0.21, 0.12];
+export const STATS_PERIODS = [7, 30, 90] as const;
+export type StatsPeriod = (typeof STATS_PERIODS)[number];
+
 const WEEKDAY_FORMATTERS: Record<Locale, Intl.DateTimeFormat> = {
   fr: new Intl.DateTimeFormat("fr-FR", { weekday: "short" }),
   en: new Intl.DateTimeFormat("en-US", { weekday: "short" }),
 };
+const DAY_MONTH_FORMATTERS: Record<Locale, Intl.DateTimeFormat> = {
+  fr: new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short" }),
+  en: new Intl.DateTimeFormat("en-US", { day: "numeric", month: "short" }),
+};
+const FULL_DATE_FORMATTERS: Record<Locale, Intl.DateTimeFormat> = {
+  fr: new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long" }),
+  en: new Intl.DateTimeFormat("en-US", { day: "numeric", month: "long" }),
+};
 
-// Une semaine ne pèse qu'une fraction du cumul accumulé depuis la publication
-// (parfois plusieurs semaines plus tôt) — jamais la totalité de `listens`.
-const WEEKLY_SHARE_OF_LIFETIME = 0.12;
+// Part de la période dans le cumul total — plus la période est longue, plus
+// elle en couvre une large fraction (90 jours capture presque tout l'historique
+// d'une chanson récente, 7 jours n'en capture qu'un éclat).
+const PERIOD_SHARE_OF_LIFETIME: Record<StatsPeriod, number> = { 7: 0.12, 30: 0.4, 90: 0.75 };
 
-export function getWeeklyListens(locale: Locale = "fr"): WeeklyListenPoint[] {
+// Forme déterministe (jamais Math.random) mais jamais plate non plus : une
+// oscillation douce + un pic net vers les deux tiers de la période + un creux
+// net vers le premier tiers — le plancher garantit qu'aucun jour ne tombe à
+// zéro, seule promesse qui compte ici ("jamais une ligne droite ni des
+// valeurs à zéro").
+function shareForDay(dayIndex: number, totalDays: number): number {
+  const wave = 0.55 + 0.35 * Math.sin((dayIndex / totalDays) * Math.PI * 2.3 + 0.6);
+  const peakBoost = Math.exp(-(((dayIndex - totalDays * 0.68) / (totalDays * 0.06)) ** 2)) * 0.9;
+  const dip = Math.exp(-(((dayIndex - totalDays * 0.32) / (totalDays * 0.05)) ** 2)) * 0.45;
+  return Math.max(0.12, wave + peakBoost - dip);
+}
+
+export function getListensSeries(period: StatsPeriod, locale: Locale = "fr"): ListenPoint[] {
   const { listens } = getMyStatsTotals();
-  const weeklyPool = Math.round(listens * WEEKLY_SHARE_OF_LIFETIME);
-  const today = new Date();
-  const formatter = WEEKDAY_FORMATTERS[locale];
-  return WEEKDAY_SHARE.map((share, index) => {
-    const daysAgo = 6 - index;
+  const pool = Math.round(listens * PERIOD_SHARE_OF_LIFETIME[period]);
+  const shares = Array.from({ length: period }, (_, index) => shareForDay(index, period));
+  const shareSum = shares.reduce((sum, share) => sum + share, 0);
+  const today = new Date(2026, 7, 9); // 2026-08-09, la date de référence du produit
+  const labelFormatter = period === 7 ? WEEKDAY_FORMATTERS[locale] : DAY_MONTH_FORMATTERS[locale];
+
+  return shares.map((share, index) => {
+    const daysAgo = period - 1 - index;
     const date = new Date(today);
     date.setDate(date.getDate() - daysAgo);
     return {
-      label: formatter.format(date),
-      count: Math.round(weeklyPool * share),
+      date: date.toISOString().slice(0, 10),
+      label: labelFormatter.format(date),
+      count: pool > 0 ? Math.max(1, Math.round((share / shareSum) * pool)) : 0,
     };
   });
+}
+
+export function formatListenDate(isoDate: string, locale: Locale = "fr"): string {
+  return FULL_DATE_FORMATTERS[locale].format(new Date(`${isoDate}T00:00:00`));
 }
 
 export interface ActivityEntry {

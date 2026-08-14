@@ -33,3 +33,18 @@ export function recordLike(publishedSongId: string): boolean {
   }
   return true;
 }
+
+// Symétrique de recordLike — un like doit pouvoir se reprendre. Retourne
+// false si elle n'était pas aimée (rien à faire) ; true si le retrait vient
+// d'avoir lieu.
+export function removeLike(publishedSongId: string): boolean {
+  if (typeof window === "undefined") return false;
+  const liked = readLikedIds();
+  if (!liked.includes(publishedSongId)) return false;
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(liked.filter((id) => id !== publishedSongId)));
+  } catch {
+    return false;
+  }
+  return true;
+}

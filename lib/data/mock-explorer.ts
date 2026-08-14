@@ -143,6 +143,7 @@ const community: PublishedSong[] = COMMUNITY_ENTRIES.map((entry, index) => ({
   downloads: seededDownloads(index, seededLikes(index)),
   publishedAt: isoDaysAgo(seededDaysAgo(index)),
   authorName: authorNameFor(index),
+  imageUrl: null,
   lyrics: lyricsFor(entry),
 }));
 
@@ -166,6 +167,7 @@ export const mockPublishedSongs: PublishedSong[] = [
     downloads: 58,
     publishedAt: "2026-08-03",
     authorName: "Aïcha",
+    imageUrl: null,
     lyrics: LYRICS_TEMPLATES.anniversaire("Fatou"),
   },
   {
@@ -183,6 +185,7 @@ export const mockPublishedSongs: PublishedSong[] = [
     downloads: 33,
     publishedAt: "2026-07-29",
     authorName: "Aïcha",
+    imageUrl: null,
     lyrics: LYRICS_TEMPLATES.reussite("toi"),
   },
   ...community,
@@ -196,6 +199,12 @@ export function getPublicDisplayName(entry: PublishedSong, t: (key: string) => s
 
 export function getPublishedEntryForSong(songId: string): PublishedSong | undefined {
   return mockPublishedSongs.find((entry) => entry.sourceSongId === songId);
+}
+
+// Utilisé par la page publique partagée (voir app/chanson/[id]) — la seule
+// chose qu'un lien envoyé hors de l'app a besoin de résoudre.
+export function getPublishedSongById(id: string): PublishedSong | undefined {
+  return mockPublishedSongs.find((entry) => entry.id === id);
 }
 
 export function getMyPublishedSongs(): PublishedSong[] {

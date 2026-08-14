@@ -87,7 +87,7 @@ export function ExpandedPlayerSheet() {
         </div>
 
         <div className="mx-auto mt-6 w-full max-w-xs flex-1">
-          <TrackArt occasion={current.occasion} className="aspect-square w-full rounded-feature shadow-card-hover" />
+          <TrackArt occasion={current.occasion} imageUrl={current.imageUrl} className="aspect-square w-full rounded-feature shadow-card-hover" />
 
           <div className="mt-8 text-center">
             <p className="font-display text-2xl font-semibold text-ink">{current.title}</p>

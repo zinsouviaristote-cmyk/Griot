@@ -23,8 +23,10 @@ import { Modal } from "@/components/ui/Modal";
 import { useToast } from "@/components/ui/Toast";
 import { PublishModal, type PublishModalOutput } from "@/components/publish/PublishModal";
 import { TrackHeroPlayer } from "@/components/player/TrackHeroPlayer";
+import { SongImageField } from "@/components/dashboard/SongImageField";
 import type { PlayerTrack } from "@/lib/player/PlayerContext";
 import { mockUser } from "@/lib/data/mock-dashboard";
+import { resolveSongArt } from "@/lib/songArt";
 import { formatDate, formatDayMonth, parseLocalDate } from "@/lib/format/date";
 import { formatFcfa } from "@/lib/format/currency";
 import { generateUnlockedLyrics, mockDeleteSong, mockPaySong } from "@/lib/data/mockLibraryActions";
@@ -60,6 +62,7 @@ export function SongDetailView({ song }: { song: Song }) {
     () => getPublishedEntryForSong(song.id) ?? null,
   );
   const [publishOpen, setPublishOpen] = useState(false);
+  const [imageUrl, setImageUrl] = useState(song.imageUrl);
 
   // Seul endroit du produit où cette date se modifie — aucune page de gestion
   // de contacts : elle vit ici, rattachée à la chanson concernée, et alimente
@@ -83,6 +86,8 @@ export function SongDetailView({ song }: { song: Song }) {
   const isUnlocked = status === "paid" || status === "delivered";
   const isAwaitingPayment = status === "preview_ready" || status === "awaiting_payment";
 
+  const resolvedArt = resolveSongArt(imageUrl, mockUser.photoUrl);
+
   const track: PlayerTrack | null = song.audioUrl
     ? {
         id: song.id,
@@ -92,6 +97,7 @@ export function SongDetailView({ song }: { song: Song }) {
         audioUrl: song.audioUrl,
         publishedId: publishedEntry?.id,
         likes: publishedEntry?.likes,
+        imageUrl: resolvedArt,
       }
     : null;
 
@@ -117,8 +123,14 @@ export function SongDetailView({ song }: { song: Song }) {
   }
 
   async function handleShare() {
+    // Publiée : le lien public (voir app/chanson/[id]) est ce qu'un destinataire
+    // sans compte peut réellement ouvrir. Sinon, repli sur le lien de la page
+    // elle-même, seul lien qui existe encore pour cette chanson.
+    const url = publishedEntry
+      ? `${window.location.origin}/chanson/${publishedEntry.id}`
+      : window.location.href;
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      await navigator.clipboard.writeText(url);
       showToast(t("library.item.linkCopied"), "success");
     } catch {
       showToast(t("library.item.linkCopyFailed"), "danger");
@@ -132,7 +144,7 @@ export function SongDetailView({ song }: { song: Song }) {
     router.push("/bibliotheque");
   }
 
-  function handlePublish({ hideFirstName, publicTitle }: PublishModalOutput) {
+  function handlePublish({ hideFirstName, publicTitle, imageUrl: publishedImageUrl }: PublishModalOutput) {
     setPublishedEntry({
       id: `pub_local_${song.id}`,
       sourceSongId: song.id,
@@ -148,6 +160,7 @@ export function SongDetailView({ song }: { song: Song }) {
       downloads: 0,
       publishedAt: new Date().toISOString().slice(0, 10),
       authorName: mockUser.firstName,
+      imageUrl: publishedImageUrl,
       lyrics: song.lyrics ? song.lyrics.split("\n").filter(Boolean) : [],
     });
     setPublishOpen(false);
@@ -217,6 +230,15 @@ export function SongDetailView({ song }: { song: Song }) {
               />
             </button>
           )}
+        </div>
+
+        <div className="mt-5">
+          <SongImageField
+            occasion={song.occasion}
+            imageUrl={imageUrl}
+            fallbackImageUrl={mockUser.photoUrl}
+            onChange={setImageUrl}
+          />
         </div>
       </div>
 
@@ -389,6 +411,8 @@ export function SongDetailView({ song }: { song: Song }) {
         recipientFirstName={song.recipientFirstName}
         occasion={song.occasion}
         style={song.style}
+        songImageUrl={imageUrl}
+        profilePhotoUrl={mockUser.photoUrl}
         onPublish={handlePublish}
       />
 

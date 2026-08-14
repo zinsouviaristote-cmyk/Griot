@@ -55,7 +55,7 @@ export function PersistentPlayerBar() {
         }`}
       >
         <div className="flex w-64 min-w-0 shrink-0 items-center gap-3">
-          <TrackArt occasion={current.occasion} className="h-12 w-12 rounded-control" />
+          <TrackArt occasion={current.occasion} imageUrl={current.imageUrl} className="h-12 w-12 rounded-control" />
           <div className="min-w-0">
             <p className="truncate font-display text-sm font-semibold text-ink">{current.title}</p>
             <p className="truncate text-xs text-ink-muted">{current.subtitle}</p>
@@ -134,7 +134,7 @@ export function PersistentPlayerBar() {
           hasShellChrome ? "bottom-16" : "bottom-0"
         }`}
       >
-        <TrackArt occasion={current.occasion} className="h-10 w-10 shrink-0 rounded-control" />
+        <TrackArt occasion={current.occasion} imageUrl={current.imageUrl} className="h-10 w-10 shrink-0 rounded-control" />
         <div className="min-w-0 flex-1">
           <p className="truncate font-display text-sm font-semibold text-ink">{current.title}</p>
           <p className="truncate text-xs text-ink-muted">{current.subtitle}</p>

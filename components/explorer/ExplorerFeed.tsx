@@ -1,10 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { SlidersHorizontal, Sparkles } from "lucide-react";
+import { SlidersHorizontal } from "lucide-react";
 import { FeedScreen } from "@/components/explorer/FeedScreen";
 import { FeedFiltersPanel } from "@/components/explorer/FeedFiltersPanel";
-import { ButtonLink } from "@/components/ui/Button";
 import { usePlayer, type PlayerTrack } from "@/lib/player/PlayerContext";
 import { getPublicDisplayName } from "@/lib/data/mock-explorer";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
@@ -46,6 +45,8 @@ export function ExplorerFeed({ entries }: { entries: PublishedSong[] }) {
         audioUrl: entry.audioUrl,
         publishedId: entry.id,
         likes: entry.likes,
+        imageUrl: entry.imageUrl,
+        origin: "explorer" as const,
       })),
     [filtered, t],
   );
@@ -189,8 +190,10 @@ export function ExplorerFeed({ entries }: { entries: PublishedSong[] }) {
         </div>
       )}
 
-      {/* Superposition permanente : Explorer reste un argument de vente, jamais
-          une simple galerie qu'on regarde sans repartir vers /creer. */}
+      {/* Seul point de création sur Explorer désormais : le "+" de la barre de
+          navigation basse (voir BottomNav) — plus de bouton dupliqué ici, qui
+          mangeait l'espace de la pochette pour une action déjà accessible
+          partout ailleurs dans l'app. */}
       <div className="pointer-events-none absolute left-4 top-3 z-10 flex items-center gap-2 lg:top-5">
         <button
           type="button"
@@ -200,17 +203,6 @@ export function ExplorerFeed({ entries }: { entries: PublishedSong[] }) {
         >
           <SlidersHorizontal className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
         </button>
-      </div>
-
-      <div className="pointer-events-none absolute right-4 top-3 z-10 lg:top-5">
-        <ButtonLink
-          href="/creer"
-          variant="primary"
-          className="pointer-events-auto !min-h-11 !px-3.5 !py-2 !text-xs shadow-card"
-        >
-          <Sparkles className="h-3.5 w-3.5 animate-breathe" strokeWidth={1.5} aria-hidden="true" />
-          {t("explorer.createMine")}
-        </ButtonLink>
       </div>
 
       <FeedFiltersPanel

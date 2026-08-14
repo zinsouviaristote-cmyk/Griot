@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Heart } from "lucide-react";
-import { hasLiked, recordLike } from "@/lib/explorer/likes";
+import { hasLiked, recordLike, removeLike } from "@/lib/explorer/likes";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 // Toujours rendu "non aimé" côté serveur — l'état réel (par appareil, via
@@ -32,13 +32,20 @@ export function LikeButton({
     }
   }, [publishedSongId, likes]);
 
+  // Réversible : un second appui retire le like et décrémente le compteur —
+  // symétrique dans les deux sens, jamais un geste à sens unique.
   function handleClick(event: React.MouseEvent) {
     event.preventDefault();
     event.stopPropagation();
-    if (liked) return;
-    if (!recordLike(publishedSongId)) return;
-    setLiked(true);
-    setCount((current) => current + 1);
+    if (liked) {
+      if (!removeLike(publishedSongId)) return;
+      setLiked(false);
+      setCount((current) => current - 1);
+    } else {
+      if (!recordLike(publishedSongId)) return;
+      setLiked(true);
+      setCount((current) => current + 1);
+    }
     setPopping(true);
   }
 
@@ -49,15 +56,14 @@ export function LikeButton({
       type="button"
       onClick={handleClick}
       onAnimationEnd={() => setPopping(false)}
-      disabled={liked}
       aria-pressed={liked}
       aria-label={liked ? t("explorer.likeButton.liked") : t("explorer.likeButton.like")}
-      className={`flex min-h-11 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors duration-150 ${
+      className={`flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors duration-150 ${
         liked ? "text-brand" : "text-ink-muted hover:text-brand"
-      } disabled:cursor-default`}
+      }`}
     >
       <Heart
-        className={`${iconSize} ${popping ? "animate-heart-pop" : ""}`}
+        className={`${iconSize} ${popping ? (liked ? "animate-heart-pop" : "animate-heart-unpop") : ""}`}
         strokeWidth={1.5}
         fill={liked ? "currentColor" : "none"}
         aria-hidden="true"

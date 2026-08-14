@@ -6,11 +6,13 @@ import { Check, Copy, Download, Share2 } from "lucide-react";
 import { useTunnel } from "@/lib/tunnel/TunnelContext";
 import { useToast } from "@/components/ui/Toast";
 import { PublishModal } from "@/components/publish/PublishModal";
+import { SongImageField } from "@/components/dashboard/SongImageField";
+import { mockUser } from "@/lib/data/mock-dashboard";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 export function DeliveryStep() {
   const { t } = useLanguage();
-  const { data } = useTunnel();
+  const { data, update } = useTunnel();
   const showToast = useToast();
   const [copied, setCopied] = useState(false);
   const [publishOpen, setPublishOpen] = useState(false);
@@ -46,6 +48,20 @@ export function DeliveryStep() {
           })}
         </p>
       </div>
+
+      {data.occasion && (
+        <div
+          style={{ animationDelay: "60ms" }}
+          className="mt-6 flex animate-reveal-up justify-center"
+        >
+          <SongImageField
+            occasion={data.occasion}
+            imageUrl={data.imageUrl}
+            fallbackImageUrl={mockUser.photoUrl}
+            onChange={(imageUrl) => update({ imageUrl })}
+          />
+        </div>
+      )}
 
       <a
         href={data.audioUrl ?? "#"}
@@ -123,6 +139,8 @@ export function DeliveryStep() {
           recipientFirstName={data.recipientFirstName || t("tunnel.delivery.readyForFallback")}
           occasion={data.occasion}
           style={data.style}
+          songImageUrl={data.imageUrl}
+          profilePhotoUrl={mockUser.photoUrl}
           onPublish={() => {
             setPublishOpen(false);
             setPublished(true);

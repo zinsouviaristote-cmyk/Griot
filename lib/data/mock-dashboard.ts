@@ -13,6 +13,7 @@ export const mockUser: DashboardUser = {
   email: "aicha.k@example.com",
   creditBalance: 6,
   phone: "07 00 00 00 00",
+  photoUrl: null,
 };
 
 // Les occasions se distinguent par leur icône et une nuance propre — toujours
@@ -100,6 +101,7 @@ export const mockSongs: Song[] = [
     lyrics: FATOU_LYRICS,
     contactId: "contact_1",
     listens: 24,
+    imageUrl: null,
   },
   {
     id: "song_2",
@@ -114,6 +116,7 @@ export const mockSongs: Song[] = [
     lyrics: MOUSSA_LYRICS,
     contactId: "contact_2",
     listens: 17,
+    imageUrl: null,
   },
   {
     id: "song_3",
@@ -128,6 +131,7 @@ export const mockSongs: Song[] = [
     lyrics: null,
     contactId: "contact_3",
     listens: 5,
+    imageUrl: null,
   },
   {
     id: "song_4",
@@ -142,6 +146,7 @@ export const mockSongs: Song[] = [
     lyrics: null,
     contactId: "contact_4",
     listens: 2,
+    imageUrl: null,
   },
   {
     id: "song_5",
@@ -156,6 +161,7 @@ export const mockSongs: Song[] = [
     lyrics: null,
     contactId: "contact_5",
     listens: 0,
+    imageUrl: null,
   },
   {
     id: "song_6",
@@ -170,6 +176,7 @@ export const mockSongs: Song[] = [
     lyrics: null,
     contactId: "contact_6",
     listens: 0,
+    imageUrl: null,
   },
   {
     id: "song_7",
@@ -184,6 +191,7 @@ export const mockSongs: Song[] = [
     lyrics: null,
     contactId: "contact_7",
     listens: 0,
+    imageUrl: null,
   },
 ];
 

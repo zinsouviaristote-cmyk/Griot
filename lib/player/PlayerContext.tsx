@@ -10,6 +10,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { usePathname } from "next/navigation";
 import type { Occasion } from "@/lib/types";
 
 // Un seul lecteur, un seul <audio> réel pour toute l'application — c'est ce qui
@@ -27,6 +28,15 @@ export interface PlayerTrack {
   // public) ou une icône statique (rien à aimer tant que ce n'est pas publié).
   publishedId?: string;
   likes?: number;
+  // Pochette déjà résolue (voir resolveSongArt, lib/songArt.ts) — jamais
+  // recalculée ici : `null`/absente veut dire "dégradé d'occasion".
+  imageUrl?: string | null;
+  // Marque une piste lancée DEPUIS Explorer — jamais posé sur une piste lancée
+  // depuis la bibliothèque ou la fiche d'une chanson, même si celle-ci est par
+  // ailleurs publiée. C'est ce qui permet de couper l'audio et de faire
+  // disparaître le lecteur dès qu'on quitte Explorer (voir l'effet plus bas) :
+  // une piste qui appartient à l'utilisateur, elle, a le droit de le suivre.
+  origin?: "explorer";
 }
 
 interface PlayerState {
@@ -45,6 +55,7 @@ interface PlayerState {
 interface PlayerContextValue extends PlayerState {
   play: (track: PlayerTrack, queue?: PlayerTrack[]) => void;
   toggle: () => void;
+  stop: () => void;
   seekTo: (fraction: number) => void;
   next: () => void;
   prev: () => void;
@@ -149,6 +160,20 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     else audio.pause();
   }, []);
 
+  // Coupe net et vide `current` — contrairement à une pause, le lecteur
+  // persistant disparaît complètement (il se cache dès que `current` est nul).
+  // Utilisé quand on quitte Explorer avec une piste d'Explorer en cours : rien
+  // ne doit continuer à jouer, ni rester affiché, hors de la page.
+  const stop = useCallback(() => {
+    const audio = audioRef.current;
+    if (audio) {
+      audio.pause();
+      audio.removeAttribute("src");
+      audio.load();
+    }
+    setState((s) => ({ ...s, current: null, queue: [], isPlaying: false, currentTime: 0, duration: 0 }));
+  }, []);
+
   const seekTo = useCallback((fraction: number) => {
     const audio = audioRef.current;
     if (!audio || !audio.duration) return;
@@ -186,6 +211,17 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     setState((s) => ({ ...s, repeatOne: !s.repeatOne }));
   }, []);
 
+  // La lecture d'Explorer est confinée à Explorer : dès que la route change et
+  // que ce n'est plus "/explorer", une piste d'origine Explorer encore en
+  // cours est coupée. Une piste de la bibliothèque/fiche chanson n'a pas ce
+  // marqueur `origin` — elle n'est jamais concernée, elle suit l'utilisateur
+  // partout, comme prévu.
+  const pathname = usePathname();
+  useEffect(() => {
+    if (pathname === "/explorer") return;
+    if (stateRef.current.current?.origin === "explorer") stop();
+  }, [pathname, stop]);
+
   const index = state.queue.findIndex((t) => t.id === state.current?.id);
   const hasNext = index >= 0 && index < state.queue.length - 1;
   const hasPrev = index > 0;
@@ -195,6 +231,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       ...state,
       play,
       toggle,
+      stop,
       seekTo,
       next,
       prev,
@@ -204,7 +241,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       hasNext,
       hasPrev,
     }),
-    [state, play, toggle, seekTo, next, prev, setVolume, setExpanded, toggleRepeatOne, hasNext, hasPrev],
+    [state, play, toggle, stop, seekTo, next, prev, setVolume, setExpanded, toggleRepeatOne, hasNext, hasPrev],
   );
 
   return (

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Check, Globe } from "lucide-react";
+import { Check, Globe, Menu, X } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import type { Locale } from "@/lib/i18n/locale";
@@ -83,6 +83,93 @@ function LanguageSwitcher() {
   );
 }
 
+// Seul point d'accès mobile au sélecteur de langue et à "Se connecter" — tous
+// deux masqués sous `sm` ailleurs dans cette barre (la pilule mobile doit
+// rester compacte). "Commencer" reste hors du menu, toujours visible : c'est
+// l'action principale, jamais cachée derrière un tap supplémentaire. Les
+// liens de section (#comment-ca-marche, #questions) n'y figurent pas non
+// plus — un menu mobile court, seulement ce qui fait avancer.
+function MobileMenu() {
+  const { t, locale, setLocale } = useLanguage();
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function handlePointerDown(event: PointerEvent) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+    function handleKey(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
+    window.addEventListener("pointerdown", handlePointerDown);
+    window.addEventListener("keydown", handleKey);
+    return () => {
+      window.removeEventListener("pointerdown", handlePointerDown);
+      window.removeEventListener("keydown", handleKey);
+    };
+  }, [open]);
+
+  return (
+    <div ref={containerRef} className="relative sm:hidden">
+      <button
+        type="button"
+        onClick={() => setOpen((current) => !current)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
+        className="flex h-11 w-11 items-center justify-center rounded-control text-ink-muted transition-colors duration-150 hover:bg-brand-soft/60 hover:text-ink"
+      >
+        {open ? <X className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" /> : <Menu className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />}
+      </button>
+
+      {open && (
+        <div
+          role="menu"
+          aria-label="Menu"
+          className="fixed right-4 top-[84px] z-50 w-64 max-w-[calc(100vw-2rem)] animate-pop-in overflow-hidden rounded-card border border-border bg-surface shadow-card-hover"
+        >
+          <div className="px-4 py-3">
+            <p className="text-label-sm font-medium uppercase tracking-wide text-ink-muted">
+              {t("accountMenu.language")}
+            </p>
+            <div className="mt-2 flex gap-1.5">
+              {(["fr", "en"] as Locale[]).map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  role="menuitemradio"
+                  aria-checked={locale === option}
+                  onClick={() => setLocale(option)}
+                  className={`flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-control text-xs font-medium transition-colors ${
+                    locale === option ? "bg-brand text-white" : "bg-page text-ink-muted hover:text-ink"
+                  }`}
+                >
+                  {locale === option && <Check className="h-3 w-3" strokeWidth={2} aria-hidden="true" />}
+                  {t(option === "fr" ? "accountMenu.languageFrench" : "accountMenu.languageEnglish")}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="border-t border-border py-1.5">
+            <Link
+              href="/connexion"
+              role="menuitem"
+              onClick={() => setOpen(false)}
+              className="flex min-h-11 items-center px-4 text-sm font-medium text-ink transition-colors hover:bg-brand-soft"
+            >
+              Se connecter
+            </Link>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Transparente en haut de page, devient une pilule blanche flottante et
 // recentrée dès qu'on défile — jamais de fond opaque plein écran, qui
 // pèserait visuellement sur le héros avant même d'avoir défilé.
@@ -132,6 +219,7 @@ export function LandingNav() {
           >
             Se connecter
           </Link>
+          <MobileMenu />
           <Link
             href="/creer"
             className="flex min-h-11 items-center rounded-control bg-brand px-4 text-sm font-semibold text-white transition-all duration-200 ease-magnetic hover:scale-[1.02] hover:brightness-90 active:scale-[0.98]"

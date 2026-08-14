@@ -5,12 +5,11 @@ import { StatCard } from "@/components/dashboard/StatCard";
 import { PopularSongsList } from "@/components/dashboard/stats/PopularSongsList";
 import { RecentActivityList } from "@/components/dashboard/stats/RecentActivityList";
 import { ReferralCard } from "@/components/dashboard/stats/ReferralCard";
-import { WeeklyListensChart } from "@/components/dashboard/stats/WeeklyListensChart";
-import { EmptyState } from "@/components/ui/EmptyState";
+import { ListensChart } from "@/components/dashboard/stats/ListensChart";
 import { Reveal } from "@/components/ui/Reveal";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import type { ActivityEntry, MyStatsTotals, ReferralStats, WeeklyListenPoint } from "@/lib/data/mock-stats";
+import type { ActivityEntry, MyStatsTotals, ReferralStats } from "@/lib/data/mock-stats";
 import type { Song } from "@/lib/types";
 
 // Cette page ne parle que des chansons publiées — jamais des brouillons, des
@@ -19,19 +18,17 @@ import type { Song } from "@/lib/types";
 // invitation à publier), plutôt qu'un graphique ou une liste plate à zéro.
 export function StatisticsView({
   totals,
-  weeklyListens,
   popularSongs,
   recentActivity,
   referral,
 }: {
   totals: MyStatsTotals;
-  weeklyListens: WeeklyListenPoint[];
   popularSongs: Song[];
   recentActivity: ActivityEntry[];
   referral: ReferralStats;
 }) {
   const { t } = useLanguage();
-  const hasListens = weeklyListens.some((point) => point.count > 0);
+  const hasListens = totals.listens > 0;
 
   return (
     <div>
@@ -55,13 +52,9 @@ export function StatisticsView({
 
       <Reveal delayMs={80} className="mt-8">
         <div className="rounded-feature border border-border bg-surface p-6 shadow-card">
-          <SectionTitle>{t("stats.weeklyChart.title")}</SectionTitle>
+          <SectionTitle>{t("stats.listensChart.title")}</SectionTitle>
           <div className="mt-5">
-            {hasListens ? (
-              <WeeklyListensChart points={weeklyListens} />
-            ) : (
-              <EmptyState icon={Ear} title={t("stats.weeklyChart.emptyTitle")} description={t("stats.weeklyChart.emptyDescription")} />
-            )}
+            <ListensChart hasListens={hasListens} />
           </div>
         </div>
       </Reveal>

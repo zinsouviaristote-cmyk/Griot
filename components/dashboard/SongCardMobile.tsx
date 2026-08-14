@@ -3,7 +3,10 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { TrackArt } from "@/components/player/TrackArt";
 import { getSongAction } from "@/components/dashboard/songAction";
+import { mockUser } from "@/lib/data/mock-dashboard";
+import { resolveSongArt } from "@/lib/songArt";
 import { formatDate } from "@/lib/format/date";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { occasionLabel, relationshipLabel, styleLabel } from "@/lib/i18n/catalog";
@@ -27,11 +30,18 @@ export function SongCardMobile({ song }: { song: Song }) {
       className="cursor-pointer rounded-card border border-border bg-surface p-4 shadow-card transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-card-hover focus-visible:outline-none focus-visible:shadow-ring-focus"
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="truncate font-display text-base font-semibold text-ink">
-            {song.recipientFirstName}
-          </p>
-          <p className="mt-0.5 text-sm text-ink-muted">{relationshipLabel(t, song.relationship)}</p>
+        <div className="flex min-w-0 items-center gap-3">
+          <TrackArt
+            occasion={song.occasion}
+            imageUrl={resolveSongArt(song.imageUrl, mockUser.photoUrl)}
+            className="h-11 w-11 rounded-control"
+          />
+          <div className="min-w-0">
+            <p className="truncate font-display text-base font-semibold text-ink">
+              {song.recipientFirstName}
+            </p>
+            <p className="mt-0.5 text-sm text-ink-muted">{relationshipLabel(t, song.relationship)}</p>
+          </div>
         </div>
         <StatusBadge status={song.status} />
       </div>

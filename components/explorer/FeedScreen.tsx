@@ -11,7 +11,6 @@ import {
   SkipForward,
   Volume2,
   VolumeX,
-  X,
 } from "lucide-react";
 import { usePlayer, type PlayerTrack } from "@/lib/player/PlayerContext";
 import { TrackArt } from "@/components/player/TrackArt";
@@ -19,6 +18,7 @@ import { TrackPlayButton } from "@/components/player/TrackPlayButton";
 import { PlayerProgressBar } from "@/components/player/PlayerProgressBar";
 import { Waveform } from "@/components/player/Waveform";
 import { LikeButton } from "@/components/explorer/LikeButton";
+import { LyricsSheet } from "@/components/explorer/LyricsSheet";
 import { Avatar } from "@/components/ui/Avatar";
 import { useToast } from "@/components/ui/Toast";
 import { hasCountedListen, recordListen } from "@/lib/explorer/listens";
@@ -72,6 +72,8 @@ export function FeedScreen({
     audioUrl: entry.audioUrl,
     publishedId: entry.id,
     likes: entry.likes,
+    imageUrl: entry.imageUrl,
+    origin: "explorer",
   };
 
   // Écoute comptée après 5 secondes de lecture EFFECTIVE, cumulées même si la
@@ -97,7 +99,7 @@ export function FeedScreen({
 
   async function handleShare() {
     try {
-      await navigator.clipboard.writeText(`${window.location.origin}/explorer`);
+      await navigator.clipboard.writeText(`${window.location.origin}/chanson/${entry.id}`);
       showToast(t("explorer.linkCopied"), "success");
     } catch {
       showToast(t("explorer.linkCopyFailed"), "danger");
@@ -117,7 +119,7 @@ export function FeedScreen({
 
         <div className="flex w-full max-w-[300px] flex-1 flex-col items-center justify-center gap-3 py-2 lg:max-w-xs lg:gap-4">
           <div className="relative w-full max-w-[210px] lg:max-w-[240px]">
-            <TrackArt occasion={entry.occasion} className="aspect-square w-full rounded-feature shadow-card-hover" />
+            <TrackArt occasion={entry.occasion} imageUrl={entry.imageUrl} className="aspect-square w-full rounded-feature shadow-card-hover" />
           </div>
 
           <div className="flex items-center gap-2">
@@ -171,13 +173,13 @@ export function FeedScreen({
             </button>
           </div>
 
-          <div className="flex items-center justify-center gap-3 sm:gap-5">
+          <div className="flex items-center justify-center gap-2.5 sm:gap-5">
             <button
               type="button"
               onClick={() => player.toggleRepeatOne()}
               aria-pressed={player.repeatOne}
               aria-label={player.repeatOne ? t("explorer.repeatOn") : t("explorer.repeatOff")}
-              className={`flex h-11 w-11 items-center justify-center rounded-full transition-colors duration-150 active:scale-90 ${
+              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors duration-150 active:scale-90 ${
                 player.repeatOne ? "text-brand" : "text-ink-muted hover:text-ink"
               }`}
             >
@@ -190,7 +192,7 @@ export function FeedScreen({
               type="button"
               onClick={handleShare}
               aria-label={t("explorer.shareLink")}
-              className="flex h-11 w-11 items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:text-ink active:scale-90"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:text-ink active:scale-90"
             >
               <Share2 className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
             </button>
@@ -200,7 +202,7 @@ export function FeedScreen({
               onClick={() => setLyricsOpen((open) => !open)}
               aria-pressed={lyricsOpen}
               aria-expanded={lyricsOpen}
-              className={`flex min-h-11 items-center gap-1.5 rounded-full px-2 text-xs font-medium transition-colors duration-150 active:scale-90 ${
+              className={`flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-2 text-xs font-medium transition-colors duration-150 active:scale-90 ${
                 lyricsOpen ? "text-brand" : "text-ink-muted hover:text-ink"
               }`}
             >
@@ -208,12 +210,12 @@ export function FeedScreen({
               {t("explorer.lyrics")}
             </button>
 
-            <div className="flex items-center gap-1.5">
+            <div className="flex shrink-0 items-center gap-1.5">
               <button
                 type="button"
                 onClick={() => player.setVolume(player.volume > 0 ? 0 : 1)}
                 aria-label={player.volume > 0 ? t("explorer.mute") : t("explorer.unmute")}
-                className="flex h-11 w-11 items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:text-ink active:scale-90"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:text-ink active:scale-90"
               >
                 {player.volume > 0 ? (
                   <Volume2 className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
@@ -253,56 +255,7 @@ export function FeedScreen({
       </div>
 
       {lyricsOpen && (
-        <>
-          {/* Fond assombri, mobile seulement : sur desktop le panneau pousse le
-              contenu plutôt que de le couvrir, rien à obscurcir derrière lui.
-              z-40/z-50, au-dessus de BottomNav (z-30) : une feuille ouverte doit
-              couvrir la barre basse, jamais rester dessous. */}
-          <div
-            aria-hidden="true"
-            onClick={() => setLyricsOpen(false)}
-            className="fixed inset-0 z-40 bg-ink/40 lg:hidden"
-          />
-          <aside
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={`lyrics-${entry.id}`}
-            className="fixed inset-x-0 bottom-0 z-50 max-h-[75vh] animate-sheet-up overflow-y-auto rounded-t-feature border-t border-border bg-surface p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] shadow-card-hover lg:static lg:inset-auto lg:z-auto lg:h-full lg:w-[360px] lg:max-h-none lg:shrink-0 lg:animate-panel-in lg:overflow-y-auto lg:rounded-none lg:border-l lg:border-t-0 lg:px-7 lg:pb-10 lg:pt-16 lg:shadow-none"
-          >
-            <div className="flex items-center justify-between">
-              <p
-                id={`lyrics-${entry.id}`}
-                className="flex items-center gap-2 font-display text-lg font-semibold text-ink"
-              >
-                <FileText className="h-4 w-4 text-brand" strokeWidth={1.5} aria-hidden="true" />
-                {t("explorer.lyrics")}
-              </p>
-              <button
-                type="button"
-                onClick={() => setLyricsOpen(false)}
-                aria-label={t("explorer.closeLyrics")}
-                className="flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-page hover:text-ink active:scale-90"
-              >
-                <X className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
-              </button>
-            </div>
-            <p className="mt-1 text-xs text-ink-muted">
-              {displayName} · {styleLabel(t, entry.style)}
-            </p>
-
-            <div className="mt-6 space-y-4">
-              {entry.lyrics.map((line, lineIndex) => (
-                <p
-                  key={lineIndex}
-                  style={{ animationDelay: `${lineIndex * 90}ms` }}
-                  className="animate-reveal-up text-base leading-relaxed text-ink"
-                >
-                  {line}
-                </p>
-              ))}
-            </div>
-          </aside>
-        </>
+        <LyricsSheet entry={entry} displayName={displayName} onClose={() => setLyricsOpen(false)} />
       )}
     </section>
   );

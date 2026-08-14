@@ -62,6 +62,11 @@ export interface Song {
   // Nombre de lectures de l'extrait ou de la chanson complète, tous appareils
   // confondus — 0 tant qu'aucun audio n'existe (draft, generating, failed).
   listens: number;
+  // Pochette téléversée par l'utilisateur (recadrée en carré) — voir
+  // resolveSongArt (components/player/SongArt.tsx) pour l'ordre de priorité
+  // complet : cette image d'abord, sinon la photo de profil, sinon le
+  // dégradé d'occasion. Jamais de rectangle gris.
+  imageUrl: string | null;
 }
 
 export interface Contact {
@@ -94,6 +99,11 @@ export interface DashboardUser {
   // Facultatif : sert uniquement aux rappels et à la livraison WhatsApp (voir
   // Paramètres > Notifications), plus jamais un identifiant de connexion.
   phone: string | null;
+  // Photo de profil (voir ProfilePhotoField) — sert aussi de pochette de
+  // repli pour une chanson sans image propre (voir resolveSongArt). Publier
+  // une chanson qui l'utilise rend ce visage visible publiquement dans
+  // Explorer : PublishModal doit le signaler et proposer le dégradé à la place.
+  photoUrl: string | null;
 }
 
 // Une chanson publiée dans Explorer — entité distincte de Song : la publication
@@ -120,8 +130,16 @@ export interface PublishedSong {
   publishedAt: string;
   // Le pseudonyme public de l'auteur (celui qui a offert la chanson, pas le
   // destinataire) — affiché avec un avatar d'initiales dans Explorer, jamais
-  // une photo (voir occasionTones.ts pour la même règle sur les pochettes).
+  // une photo : distinct de la pochette (voir imageUrl), qui elle peut en
+  // porter une.
   authorName: string;
+  // Pochette résolue et figée AU MOMENT de la publication — la propre image de
+  // la chanson, ou une copie de la photo de profil si l'auteur l'a autorisé
+  // (voir l'avertissement de PublishModal), ou `null` pour retomber sur le
+  // dégradé d'occasion. Jamais recalculée après coup : si l'auteur change sa
+  // photo de profil plus tard, une publication existante ne doit pas se mettre
+  // à afficher un visage qu'elle n'a jamais montré au moment de publier.
+  imageUrl: string | null;
   // Courtes lignes de paroles, pour l'aperçu (première ligne) et la
   // surimpression "Paroles" du lecteur immersif d'Explorer.
   lyrics: string[];

@@ -156,6 +156,10 @@ export interface TunnelData {
   // paire ne change plus après le choix.
   audioUrl: string | null;
   lyrics: string | null;
+  // Pochette téléversée à l'écran de livraison (voir SongImageField) — même
+  // ordre de priorité que partout ailleurs (voir lib/songArt.ts) : cette image
+  // d'abord, sinon la photo de profil, sinon le dégradé d'occasion.
+  imageUrl: string | null;
   selectedPack: CreditPack["id"];
 }
 
@@ -179,6 +183,7 @@ export const EMPTY_TUNNEL_DATA: TunnelData = {
   selectedAttemptId: null,
   audioUrl: null,
   lyrics: null,
+  imageUrl: null,
   selectedPack: "pack3",
 };
 

@@ -48,7 +48,8 @@ function TabLink({ item, isActive }: { item: TabItem; isActive: boolean }) {
 /**
  * Barre de navigation basse, fixe — le shell d'app remplace complètement la sidebar
  * sur mobile (voir DashboardShell : la sidebar est `hidden` sous `lg`). Le bouton
- * central « Créer » est surélevé et pose à cheval sur la bordure haute de la barre.
+ * central « Créer » vit désormais sur la même ligne que les autres onglets, jamais
+ * surélevé au-dessus de la barre : posé à cheval sur la bordure, il gênait.
  */
 export function BottomNav() {
   const { t } = useLanguage();
@@ -56,28 +57,28 @@ export function BottomNav() {
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-30 lg:hidden">
-      <div className="relative border-t border-border bg-surface pb-[env(safe-area-inset-bottom)]">
+      <div className="border-t border-border bg-surface pb-[env(safe-area-inset-bottom)]">
         <div className="grid h-16 grid-cols-5 items-center px-1">
           {LEFT_TABS.map((item) => (
             <TabLink key={item.href} item={item} isActive={pathname === item.href} />
           ))}
-          <div aria-hidden="true" />
+          <div className="flex items-center justify-center">
+            <Link
+              href="/creer"
+              aria-label={t("dashboard.bottomNav.create")}
+              className="group flex h-11 w-11 items-center justify-center rounded-full bg-brand text-white shadow-card transition-transform duration-200 ease-magnetic hover:scale-110 active:scale-95"
+            >
+              <Plus
+                className="h-5 w-5 transition-transform duration-300 ease-magnetic group-hover:rotate-90"
+                strokeWidth={2}
+                aria-hidden="true"
+              />
+            </Link>
+          </div>
           {RIGHT_TABS.map((item) => (
             <TabLink key={item.href} item={item} isActive={pathname === item.href} />
           ))}
         </div>
-
-        <Link
-          href="/creer"
-          aria-label={t("dashboard.bottomNav.create")}
-          className="group absolute left-1/2 top-0 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-brand text-white shadow-card-hover transition-transform duration-200 ease-magnetic hover:scale-110 active:scale-95"
-        >
-          <Plus
-            className="h-6 w-6 transition-transform duration-300 ease-magnetic group-hover:rotate-90"
-            strokeWidth={2}
-            aria-hidden="true"
-          />
-        </Link>
       </div>
     </nav>
   );

@@ -15,6 +15,7 @@ import { TrackPlayButton } from "@/components/player/TrackPlayButton";
 import { SongActionsMenu } from "@/components/dashboard/library/SongActionsMenu";
 import { getSongAction } from "@/components/dashboard/songAction";
 import { mockUser } from "@/lib/data/mock-dashboard";
+import { resolveSongArt } from "@/lib/songArt";
 import { formatDate } from "@/lib/format/date";
 import { formatDuration } from "@/lib/format/duration";
 import { mockDeleteSong } from "@/lib/data/mockLibraryActions";
@@ -54,6 +55,8 @@ export function SongListItem({ song, index = 0, queue }: { song: Song; index?: n
   const action = getSongAction(song, t);
   const isUnlocked = song.status === "paid" || song.status === "delivered";
 
+  const resolvedArt = resolveSongArt(song.imageUrl, mockUser.photoUrl);
+
   const track: PlayerTrack | null = song.audioUrl
     ? {
         id: song.id,
@@ -63,6 +66,7 @@ export function SongListItem({ song, index = 0, queue }: { song: Song; index?: n
         audioUrl: song.audioUrl,
         publishedId: publishedEntry?.id,
         likes: publishedEntry?.likes,
+        imageUrl: resolvedArt,
       }
     : null;
 
@@ -75,7 +79,7 @@ export function SongListItem({ song, index = 0, queue }: { song: Song; index?: n
     }
   }
 
-  function handlePublish({ hideFirstName, publicTitle }: PublishModalOutput) {
+  function handlePublish({ hideFirstName, publicTitle, imageUrl }: PublishModalOutput) {
     setPublishedEntry({
       id: `pub_local_${song.id}`,
       sourceSongId: song.id,
@@ -91,6 +95,7 @@ export function SongListItem({ song, index = 0, queue }: { song: Song; index?: n
       downloads: 0,
       publishedAt: new Date().toISOString().slice(0, 10),
       authorName: mockUser.firstName,
+      imageUrl,
       lyrics: song.lyrics ? song.lyrics.split("\n").filter(Boolean) : [],
     });
     setPublishOpen(false);
@@ -122,7 +127,7 @@ export function SongListItem({ song, index = 0, queue }: { song: Song; index?: n
       <div className="group relative rounded-card border border-border bg-surface p-3 shadow-card transition-shadow duration-200 hover:shadow-card-hover lg:pr-36">
         <div className="flex gap-3">
           <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-control">
-            <TrackArt occasion={song.occasion} className="h-full w-full" />
+            <TrackArt occasion={song.occasion} imageUrl={resolvedArt} className="h-full w-full" />
             {song.durationSeconds != null && (
               <span className="absolute bottom-1 right-1 rounded bg-ink/70 px-1 py-0.5 font-mono text-[10px] leading-none text-white">
                 {formatDuration(song.durationSeconds)}
@@ -230,6 +235,8 @@ export function SongListItem({ song, index = 0, queue }: { song: Song; index?: n
         recipientFirstName={song.recipientFirstName}
         occasion={song.occasion}
         style={song.style}
+        songImageUrl={song.imageUrl}
+        profilePhotoUrl={mockUser.photoUrl}
         onPublish={handlePublish}
       />
 

@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ArrowRight } from "lucide-react";
 import { PrenomForm } from "@/components/landing/PrenomForm";
 import { PhoneMockup } from "@/components/landing/PhoneMockup";
+import { ButtonLink } from "@/components/ui/Button";
 
 const ROTATING_WORDS = [
   "son anniversaire",
@@ -64,7 +66,17 @@ export function Hero() {
             Racontez son histoire. Recevez une chanson chantée, prête à offrir.
           </p>
 
-          <div className="mt-5 flex w-full justify-center lg:justify-start">
+          {/* Mobile : un seul geste, direct vers le tunnel — le prénom s'y demande
+              une étape plus tard (écran destinataire), jamais perdu en route.
+              Desktop : le champ reste, plus rapide sur un clavier physique. */}
+          <div className="mt-6 w-full lg:hidden">
+            <ButtonLink href="/creer" variant="primary" className="!min-h-14 w-full !text-base !font-bold shadow-card">
+              Créer ma chanson
+              <ArrowRight className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
+            </ButtonLink>
+          </div>
+
+          <div className="mt-5 hidden w-full justify-center lg:flex lg:justify-start">
             <PrenomForm size="lg" />
           </div>
 

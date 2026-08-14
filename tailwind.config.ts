@@ -143,6 +143,13 @@ const config: Config = {
           "35%": { transform: "scale(1.35)" },
           "100%": { transform: "scale(1)" },
         },
+        // Symétrique de heart-pop pour le retrait d'un like — se contracte
+        // au lieu de grossir, jamais le même mouvement joué à l'envers.
+        "heart-unpop": {
+          "0%": { transform: "scale(1)" },
+          "35%": { transform: "scale(0.75)" },
+          "100%": { transform: "scale(1)" },
+        },
         "wave-bar": {
           "0%, 100%": { transform: "scaleY(0.35)" },
           "50%": { transform: "scaleY(1)" },
@@ -199,6 +206,7 @@ const config: Config = {
         "panel-in": "panel-in 0.35s cubic-bezier(0.25,0.46,0.45,0.94) both",
         "sheet-up": "sheet-up 0.3s cubic-bezier(0.25,0.46,0.45,0.94) both",
         "heart-pop": "heart-pop 0.35s cubic-bezier(0.25,0.46,0.45,0.94) both",
+        "heart-unpop": "heart-unpop 0.3s cubic-bezier(0.25,0.46,0.45,0.94) both",
         "wave-bar": "wave-bar 0.9s ease-in-out infinite",
         "draw-wave": "draw-wave 2.8s ease-in-out infinite",
         "step-slide": "step-slide 0.25s ease-out both",

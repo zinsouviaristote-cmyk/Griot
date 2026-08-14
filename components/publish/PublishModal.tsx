@@ -12,6 +12,10 @@ import type { MusicStyle, Occasion } from "@/lib/types";
 export interface PublishModalOutput {
   hideFirstName: boolean;
   publicTitle: string | null;
+  // Pochette à figer sur la publication (voir PublishedSong.imageUrl) — déjà
+  // résolue ici, jamais recalculée ailleurs : `null` veut dire "dégradé
+  // d'occasion", explicitement choisi ou faute d'image disponible.
+  imageUrl: string | null;
 }
 
 // Utilisée depuis la fiche d'une chanson (bibliothèque) et depuis l'écran de
@@ -23,6 +27,8 @@ export function PublishModal({
   recipientFirstName,
   occasion,
   style,
+  songImageUrl,
+  profilePhotoUrl,
   onPublish,
 }: {
   open: boolean;
@@ -30,14 +36,22 @@ export function PublishModal({
   recipientFirstName: string;
   occasion: Occasion;
   style: MusicStyle;
+  // La chanson a-t-elle sa propre pochette, et l'auteur a-t-il une photo de
+  // profil ? Décide si l'avertissement "votre visage devient visible" a lieu
+  // d'être : seulement quand la pochette de repli serait un vrai visage.
+  songImageUrl: string | null;
+  profilePhotoUrl: string | null;
   onPublish: (output: PublishModalOutput) => void;
 }) {
   const { t } = useLanguage();
   const [hideFirstName, setHideFirstName] = useState(false);
   const [publicTitle, setPublicTitle] = useState("");
+  const wouldExposeProfilePhoto = !songImageUrl && !!profilePhotoUrl;
+  const [useProfilePhoto, setUseProfilePhoto] = useState(true);
 
   function handlePublish() {
-    onPublish({ hideFirstName, publicTitle: publicTitle.trim() || null });
+    const imageUrl = songImageUrl ?? (wouldExposeProfilePhoto && useProfilePhoto ? profilePhotoUrl : null);
+    onPublish({ hideFirstName, publicTitle: publicTitle.trim() || null, imageUrl });
   }
 
   return (
@@ -95,6 +109,23 @@ export function PublishModal({
           className="mt-1.5 w-full min-h-11 rounded-control border border-border bg-surface px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-muted/60 focus-visible:outline-none focus-visible:shadow-ring-focus"
         />
       </label>
+
+      {wouldExposeProfilePhoto && (
+        <div className="mt-4 rounded-card border border-warning/30 bg-warning/10 p-3.5">
+          <div className="flex items-start gap-2.5">
+            <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-warning" strokeWidth={1.5} aria-hidden="true" />
+            <p className="text-sm text-ink">{t("publish.profilePhotoWarning")}</p>
+          </div>
+          <div className="mt-3 flex items-center justify-between gap-3 border-t border-warning/20 pt-3">
+            <span className="text-sm font-medium text-ink">{t("publish.useProfilePhoto")}</span>
+            <Toggle
+              checked={useProfilePhoto}
+              onChange={() => setUseProfilePhoto((current) => !current)}
+              label={t("publish.useProfilePhoto")}
+            />
+          </div>
+        </div>
+      )}
 
       <div className="mt-4 flex items-start gap-2.5 rounded-card border border-warning/30 bg-warning/10 p-3.5">
         <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-warning" strokeWidth={1.5} aria-hidden="true" />
