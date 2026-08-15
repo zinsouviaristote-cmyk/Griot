@@ -164,6 +164,15 @@ function MobileMenu() {
               Se connecter
             </Link>
           </div>
+
+          <div className="border-t border-border py-1.5">
+            <Link
+              href="/creer"
+              className="flex min-h-11 items-center px-4 text-sm font-medium text-brand transition-colors hover:bg-brand-soft"
+            >
+              Commencer
+            </Link>
+          </div>
         </div>
       )}
     </div>
@@ -220,12 +229,6 @@ export function LandingNav() {
             Se connecter
           </Link>
           <MobileMenu />
-          <Link
-            href="/creer"
-            className="flex min-h-11 items-center rounded-control bg-brand px-4 text-sm font-semibold text-white transition-all duration-200 ease-magnetic hover:scale-[1.02] hover:brightness-90 active:scale-[0.98]"
-          >
-            Commencer
-          </Link>
         </div>
       </nav>
     </div>
