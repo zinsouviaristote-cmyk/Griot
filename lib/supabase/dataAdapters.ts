@@ -1,0 +1,359 @@
+import { createClient } from "@/lib/supabase/client";
+import { mockUser, mockSongs } from "@/lib/data/mock-dashboard";
+import { mockContacts } from "@/lib/data/mock-contacts";
+import { mockPublishedSongs } from "@/lib/data/mock-explorer";
+import { mockCreditTransactions } from "@/lib/data/mock-credits";
+import type { Song, Contact, DashboardUser, PublishedSong, CreditTransaction, Occasion, MusicStyle, SongStatus, Relationship } from "@/lib/types";
+
+interface DBProfile {
+  id: string;
+  first_name: string;
+  email: string;
+  phone: string | null;
+  photo_url: string | null;
+  credit_balance: number;
+}
+
+interface DBCreditTransaction {
+  id: string;
+  created_at: string;
+  motif: "achat" | "essai" | "remboursement";
+  label_key: string;
+  label_params: Record<string, string | number> | null;
+  delta: number;
+  balance_after: number;
+}
+
+interface DBContact {
+  id: string;
+  first_name: string;
+  relationship: string;
+  birthday: string;
+  phone: string | null;
+  note: string | null;
+}
+
+interface DBSong {
+  id: string;
+  recipient_first_name: string;
+  relationship: string;
+  occasion: string;
+  style: string;
+  status: string;
+  created_at: string;
+  duration_seconds: number | null;
+  audio_path: string | null;
+  preview_audio_path: string | null;
+  lyrics: string | null;
+  contact_id: string | null;
+  listens_count: number;
+  image_url: string | null;
+}
+
+interface DBPublishedSong {
+  id: string;
+  user_id: string;
+  source_song_id: string | null;
+  recipient_first_name: string;
+  hide_first_name: boolean;
+  public_title: string | null;
+  occasion: string;
+  style: string;
+  audio_url: string;
+  image_url: string | null;
+  lyrics: string[] | null;
+  likes_count: number;
+  listens_count: number;
+  downloads_count: number;
+  published_at: string;
+}
+
+// ==========================================
+// ADAPTATEURS PROFIL UTILISATEUR & NOTES
+// ==========================================
+
+export async function fetchUserProfile(): Promise<DashboardUser> {
+  try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return mockUser;
+    }
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single();
+
+    if (error || !data) {
+      return {
+        firstName: user.user_metadata?.full_name || user.email?.split("@")[0] || "Aïcha",
+        initials: (user.email?.slice(0, 2) || "AK").toUpperCase(),
+        email: user.email || "aicha.k@example.com",
+        creditBalance: 0,
+        phone: null,
+        photoUrl: user.user_metadata?.avatar_url || null,
+      };
+    }
+
+    const profile = data as unknown as DBProfile;
+    const name = profile.first_name || "Aïcha";
+    return {
+      firstName: name,
+      initials: name.slice(0, 2).toUpperCase(),
+      email: profile.email,
+      creditBalance: profile.credit_balance,
+      phone: profile.phone,
+      photoUrl: profile.photo_url,
+    };
+  } catch {
+    return mockUser;
+  }
+}
+
+export async function fetchCreditTransactions(): Promise<CreditTransaction[]> {
+  try {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("credit_transactions")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error || !data || data.length === 0) {
+      return mockCreditTransactions;
+    }
+
+    const transactions = data as unknown as DBCreditTransaction[];
+    return transactions.map((t) => ({
+      id: t.id,
+      date: t.created_at.split("T")[0],
+      motif: t.motif,
+      labelKey: t.label_key,
+      labelParams: t.label_params || undefined,
+      delta: t.delta,
+      balanceAfter: t.balance_after,
+    }));
+  } catch {
+    return mockCreditTransactions;
+  }
+}
+
+// ==========================================
+// ADAPTATEURS CONTACTS / DESTINATAIRES
+// ==========================================
+
+export async function fetchUserContacts(): Promise<Contact[]> {
+  try {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("contacts")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error || !data || data.length === 0) {
+      return mockContacts;
+    }
+
+    const contacts = data as unknown as DBContact[];
+    return contacts.map((c) => ({
+      id: c.id,
+      firstName: c.first_name,
+      relationship: c.relationship as Relationship,
+      birthday: c.birthday,
+      phone: c.phone,
+      note: c.note,
+    }));
+  } catch {
+    return mockContacts;
+  }
+}
+
+export async function saveUserContact(contact: Omit<Contact, "id"> & { id?: string }): Promise<Contact> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("Authentification requise pour enregistrer un proche.");
+  }
+
+  if (contact.id) {
+    const { data, error } = await supabase
+      .from("contacts")
+      .update({
+        first_name: contact.firstName,
+        relationship: contact.relationship,
+        birthday: contact.birthday,
+        phone: contact.phone,
+        note: contact.note,
+      })
+      .eq("id", contact.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    const c = data as unknown as DBContact;
+    return {
+      id: c.id,
+      firstName: c.first_name,
+      relationship: c.relationship as Relationship,
+      birthday: c.birthday,
+      phone: c.phone,
+      note: c.note,
+    };
+  } else {
+    const { data, error } = await supabase
+      .from("contacts")
+      .insert({
+        user_id: user.id,
+        first_name: contact.firstName,
+        relationship: contact.relationship,
+        birthday: contact.birthday,
+        phone: contact.phone,
+        note: contact.note,
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    const c = data as unknown as DBContact;
+    return {
+      id: c.id,
+      firstName: c.first_name,
+      relationship: c.relationship as Relationship,
+      birthday: c.birthday,
+      phone: c.phone,
+      note: c.note,
+    };
+  }
+}
+
+// ==========================================
+// ADAPTATEURS CHANSONS & TUNNEL
+// ==========================================
+
+export async function fetchUserSongs(): Promise<Song[]> {
+  try {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("songs")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error || !data || data.length === 0) {
+      return mockSongs;
+    }
+
+    const songs = data as unknown as DBSong[];
+    return songs.map((s) => ({
+      id: s.id,
+      recipientFirstName: s.recipient_first_name,
+      relationship: s.relationship,
+      occasion: s.occasion as Occasion,
+      style: s.style as MusicStyle,
+      status: s.status as SongStatus,
+      createdAt: s.created_at.split("T")[0],
+      durationSeconds: s.duration_seconds,
+      audioUrl: s.audio_path || s.preview_audio_path || null,
+      lyrics: s.lyrics,
+      contactId: s.contact_id,
+      listens: s.listens_count,
+      imageUrl: s.image_url,
+    }));
+  } catch {
+    return mockSongs;
+  }
+}
+
+export async function createSongDraft(song: {
+  recipientFirstName: string;
+  relationship: string;
+  occasion: string;
+  style: string;
+  contactId?: string | null;
+  storyPrompt?: string;
+}): Promise<Song> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("Authentification requise pour créer un brouillon.");
+  }
+
+  const { data, error } = await supabase
+    .from("songs")
+    .insert({
+      user_id: user.id,
+      recipient_first_name: song.recipientFirstName,
+      relationship: song.relationship,
+      occasion: song.occasion,
+      style: song.style,
+      contact_id: song.contactId || null,
+      story_prompt: song.storyPrompt || null,
+      status: "draft",
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+
+  const s = data as unknown as DBSong;
+  return {
+    id: s.id,
+    recipientFirstName: s.recipient_first_name,
+    relationship: s.relationship,
+    occasion: s.occasion as Occasion,
+    style: s.style as MusicStyle,
+    status: s.status as SongStatus,
+    createdAt: s.created_at.split("T")[0],
+    durationSeconds: s.duration_seconds,
+    audioUrl: s.audio_path || s.preview_audio_path || null,
+    lyrics: s.lyrics,
+    contactId: s.contact_id,
+    listens: s.listens_count,
+    imageUrl: s.image_url,
+  };
+}
+
+// ==========================================
+// ADAPTATEURS EXPLORER & PUBLICATIONS
+// ==========================================
+
+export async function fetchPublishedExplorerSongs(): Promise<PublishedSong[]> {
+  try {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("published_songs")
+      .select("*")
+      .order("published_at", { ascending: false });
+
+    if (error || !data || data.length === 0) {
+      return mockPublishedSongs;
+    }
+
+    const { data: { user } } = await supabase.auth.getUser();
+
+    const publications = data as unknown as DBPublishedSong[];
+    return publications.map((p) => ({
+      id: p.id,
+      sourceSongId: p.source_song_id,
+      mine: user ? p.user_id === user.id : false,
+      recipientFirstName: p.recipient_first_name,
+      hideFirstName: p.hide_first_name,
+      publicTitle: p.public_title,
+      occasion: p.occasion as Occasion,
+      style: p.style as MusicStyle,
+      audioUrl: p.audio_url,
+      likes: p.likes_count,
+      listens: p.listens_count,
+      downloads: p.downloads_count,
+      publishedAt: p.published_at.split("T")[0],
+      authorName: "Griot",
+      imageUrl: p.image_url,
+      lyrics: p.lyrics || [],
+    }));
+  } catch {
+    return mockPublishedSongs;
+  }
+}

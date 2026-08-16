@@ -1,23 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { Mail } from "lucide-react";
-import { mockSendMagicLink } from "@/lib/tunnel/mockAdapters";
+import { Mail, CheckCircle2 } from "lucide-react";
+import { sendMagicLink } from "@/lib/auth/session";
 import { useToast } from "@/components/ui/Toast";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// Sans mot de passe : un lien à usage unique envoyé par e-mail, seule
-// alternative à Google dans ce produit. /connexion/lien-envoye fait office de
-// boîte mail tant que l'envoi réel n'est pas branché (Phase 2) — son bouton de
-// test simule le clic sur le lien reçu, pour que ce chemin reste vérifiable
-// de bout en bout dès maintenant.
 export function MagicLinkForm({ returnTo }: { returnTo: string }) {
   const { t } = useLanguage();
   const showToast = useToast();
   const [email, setEmail] = useState("");
   const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
   const isValid = EMAIL_PATTERN.test(email.trim());
 
   async function handleSubmit(event: React.FormEvent) {
@@ -25,13 +21,28 @@ export function MagicLinkForm({ returnTo }: { returnTo: string }) {
     if (!isValid || sending) return;
     setSending(true);
     try {
-      await mockSendMagicLink(email.trim());
-      const params = new URLSearchParams({ email: email.trim(), returnTo });
-      window.location.href = `/connexion/lien-envoye?${params.toString()}`;
-    } catch {
+      await sendMagicLink(email.trim(), returnTo);
+      setSent(true);
+      showToast(t("auth.linkSentToast") || "Lien magique envoyé par e-mail !", "success");
+    } catch (err: unknown) {
       setSending(false);
-      showToast(t("auth.linkSendFailed"), "danger");
+      const message = err instanceof Error ? err.message : t("auth.linkSendFailed");
+      showToast(message, "danger");
     }
+  }
+
+  if (sent) {
+    return (
+      <div className="rounded-control border border-brand/20 bg-brand/5 p-4 text-center">
+        <CheckCircle2 className="mx-auto h-8 w-8 text-brand" />
+        <p className="mt-2 text-sm font-semibold text-ink">
+          Lien magique envoyé !
+        </p>
+        <p className="mt-1 text-xs text-ink-muted leading-relaxed">
+          Un lien de connexion a été envoyé à <strong>{email}</strong>. Cliquez dessus dans votre boîte e-mail pour accéder directement à Griot.
+        </p>
+      </div>
+    );
   }
 
   return (

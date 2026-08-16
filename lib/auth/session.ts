@@ -1,21 +1,58 @@
-// Phase 1 : aucune session serveur réelle — seulement un cookie posé au
-// moment où le flux de connexion simulé (Google ou lien magique) aboutit.
-// Il sert un seul but : permettre à "/" (la landing) de distinguer un
-// premier visiteur d'une personne déjà entrée, pour la renvoyer directement
-// vers son tableau de bord plutôt que de lui remontrer la page publique.
-// Remplacé par un vrai cookie de session signé côté serveur en Phase 2.
+import { createClient } from "@/lib/supabase/client";
+
 export const SESSION_COOKIE_NAME = "griot_session";
 
-const SESSION_MAX_AGE_SECONDS = 30 * 24 * 60 * 60;
+// Connexion via Google OAuth (sans mot de passe)
+export async function signInWithGoogle(redirectTo?: string) {
+  const supabase = createClient();
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const callbackUrl = `${origin}/auth/callback${redirectTo ? `?next=${encodeURIComponent(redirectTo)}` : ""}`;
 
-export function markMockSessionActive(): void {
-  if (typeof document === "undefined") return;
-  document.cookie = `${SESSION_COOKIE_NAME}=1; path=/; max-age=${SESSION_MAX_AGE_SECONDS}; SameSite=Lax`;
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: callbackUrl,
+    },
+  });
+
+  if (error) {
+    throw error;
+  }
 }
 
-// Posé à côté de chaque lien « Se déconnecter » — sans ça, "/" continuerait à
-// voir le cookie et renverrait aussitôt vers le tableau de bord, rendant la
-// déconnexion (et le logo de /connexion vers la landing) sans effet visible.
+// Connexion via Lien Magique Email (sans mot de passe)
+export async function sendMagicLink(email: string, redirectTo?: string) {
+  const supabase = createClient();
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const callbackUrl = `${origin}/auth/callback${redirectTo ? `?next=${encodeURIComponent(redirectTo)}` : ""}`;
+
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      emailRedirectTo: callbackUrl,
+    },
+  });
+
+  if (error) {
+    throw error;
+  }
+}
+
+// Déconnexion
+export async function signOutUser() {
+  const supabase = createClient();
+  await supabase.auth.signOut();
+  if (typeof document !== "undefined") {
+    document.cookie = `${SESSION_COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax`;
+  }
+}
+
+// Fonctions de compatibilité de session locale pour le préchargement SSR
+export function markMockSessionActive(): void {
+  if (typeof document === "undefined") return;
+  document.cookie = `${SESSION_COOKIE_NAME}=1; path=/; max-age=${30 * 24 * 60 * 60}; SameSite=Lax`;
+}
+
 export function clearMockSession(): void {
   if (typeof document === "undefined") return;
   document.cookie = `${SESSION_COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax`;
