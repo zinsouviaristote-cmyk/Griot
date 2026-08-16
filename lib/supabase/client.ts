@@ -2,18 +2,8 @@ import { createBrowserClient } from "@supabase/ssr";
 import type { Database } from "./types";
 
 export function createClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://cjssioxqjpubbqkifhko.supabase.co";
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "sb_publishable_c-3Vhx-6X2cE1LrskKyh4g_eBhFHQtQ";
 
-  if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes("placeholder-project")) {
-    console.warn(
-      "ATTENTION: NEXT_PUBLIC_SUPABASE_URL ou NEXT_PUBLIC_SUPABASE_ANON_KEY non définies ou invalides. " +
-      "Vérifiez votre fichier .env.local (en local) ou les variables d'environnement sur Vercel Dashboard."
-    );
-  }
-
-  return createBrowserClient<Database>(
-    supabaseUrl || "https://cjssioxqjpubbqkifhko.supabase.co",
-    supabaseAnonKey || "placeholder-anon-key"
-  );
+  return createBrowserClient<Database>(supabaseUrl, supabaseAnonKey);
 }
