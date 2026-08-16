@@ -492,3 +492,53 @@ BEGIN
   VALUES (auth.uid(), p_song_id, p_published_song_id);
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ------------------------------------------
+-- 11. ESPACE ADMINISTRATEUR (GRIOT ADMIN)
+-- ------------------------------------------
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT FALSE;
+
+-- Identification de l'administrateur principal
+UPDATE public.profiles SET is_admin = TRUE WHERE email = 'zinsouviaristote@gmail.com';
+
+CREATE OR REPLACE FUNCTION public.get_admin_stats()
+RETURNS JSONB AS $$
+DECLARE
+  v_user_id UUID := auth.uid();
+  v_user_email TEXT;
+  v_is_admin BOOLEAN := FALSE;
+  v_total_songs INT;
+  v_total_users INT;
+  v_total_revenue INT;
+  v_total_notes_sold INT;
+  v_total_listens INT;
+  v_total_publications INT;
+BEGIN
+  IF v_user_id IS NOT NULL THEN
+    SELECT email INTO v_user_email FROM auth.users WHERE id = v_user_id;
+    SELECT is_admin INTO v_is_admin FROM public.profiles WHERE id = v_user_id;
+  END IF;
+
+  -- Seul l'administrateur autorisé (zinsouviaristote@gmail.com ou is_admin = TRUE) accède aux statistiques globales
+  IF NOT COALESCE(v_is_admin, FALSE) AND COALESCE(v_user_email, '') != 'zinsouviaristote@gmail.com' THEN
+    RAISE EXCEPTION 'ACCES_REFUSE_NON_ADMIN';
+  END IF;
+
+  SELECT COUNT(*) INTO v_total_songs FROM public.songs;
+  SELECT COUNT(*) INTO v_total_users FROM public.profiles;
+  SELECT COALESCE(SUM(amount_fcfa), 0) INTO v_total_revenue FROM public.payments WHERE status = 'completed';
+  SELECT COALESCE(SUM(delta), 0) INTO v_total_notes_sold FROM public.credit_transactions WHERE motif = 'achat';
+  SELECT COALESCE(SUM(listens_count), 0) INTO v_total_listens FROM public.songs;
+  SELECT COUNT(*) INTO v_total_publications FROM public.published_songs;
+
+  RETURN jsonb_build_object(
+    'total_songs', v_total_songs,
+    'total_users', v_total_users,
+    'total_revenue_fcfa', v_total_revenue,
+    'total_notes_sold', v_total_notes_sold,
+    'total_listens', v_total_listens,
+    'total_publications', v_total_publications
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+

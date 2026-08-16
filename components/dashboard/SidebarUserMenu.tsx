@@ -12,6 +12,7 @@ import {
   MoreHorizontal,
   SunMedium,
   User,
+  ShieldCheck,
 } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { clearMockSession } from "@/lib/auth/session";
@@ -159,6 +160,15 @@ export function SidebarUserMenu({
               >
                 <User className="h-4 w-4 text-ink-muted" strokeWidth={1.5} aria-hidden="true" />
                 {t("accountMenu.account")}
+              </Link>
+              <Link
+                href="/admin"
+                onClick={close}
+                role="menuitem"
+                className="flex min-h-[44px] items-center gap-3 px-4 text-sm font-semibold text-brand transition-colors hover:bg-brand-soft"
+              >
+                <ShieldCheck className="h-4 w-4 text-brand" strokeWidth={1.5} aria-hidden="true" />
+                Administration
               </Link>
               <button
                 type="button"

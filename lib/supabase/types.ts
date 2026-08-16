@@ -389,6 +389,10 @@ export interface Database {
       }
     }
     Functions: {
+      get_admin_stats: {
+        Args: Record<string, unknown>
+        Returns: Json
+      }
       request_song_generation: {
         Args: {
           p_song_id: string
