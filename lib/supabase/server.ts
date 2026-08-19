@@ -5,10 +5,10 @@ import type { Database } from "./types";
 export async function createClient() {
   const cookieStore = await cookies();
 
-  const supabaseUrl =
+  const supabaseUrl = 
     process.env.NEXT_PUBLIC_SUPABASE_URL || "https://ejssioxqjpubbqkifhko.supabase.co";
-
-  const supabaseAnonKey =
+  
+  const supabaseAnonKey = 
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
 
   return createServerClient<Database>(

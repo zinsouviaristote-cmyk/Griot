@@ -7,7 +7,6 @@ export async function GET(request: Request) {
   const next = searchParams.get("next") ?? "/tableau-de-bord";
 
   if (code) {
-    // 1. Déterminer l'URL de base exacte
     const forwardedHost = request.headers.get("x-forwarded-host");
     const isLocalEnv = process.env.NODE_ENV === "development";
     const baseUrl =
@@ -15,16 +14,17 @@ export async function GET(request: Request) {
         ? `https://${forwardedHost}`
         : origin;
 
-    // 2. Préparer la réponse de redirection
+    // Crée la réponse de redirection en amont
     const response = NextResponse.redirect(`${baseUrl}${next}`);
 
-    // 3. Initialiser le client Supabase serveur avec la gestion des cookies de la réponse
+    // Initialiser le client serveur
     const supabase = await createClient();
 
+    // Échanger le code contre la session
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      // Cookie personnalisé si nécessaire
+      // Synchronise le cookie custom 'griot_session'
       response.cookies.set("griot_session", "1", {
         path: "/",
         maxAge: 30 * 24 * 60 * 60,

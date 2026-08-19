@@ -2,11 +2,17 @@ import { createClient } from "@/lib/supabase/client";
 
 export const SESSION_COOKIE_NAME = "griot_session";
 
+// Helper pour calculer une URL de callback propre et valide
+function getCallbackUrl(redirectTo?: string) {
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const target = redirectTo && redirectTo.startsWith("/") ? redirectTo : "/tableau-de-bord";
+  return `${origin}/auth/callback?next=${encodeURIComponent(target)}`;
+}
+
 // Connexion via Google OAuth (sans mot de passe)
 export async function signInWithGoogle(redirectTo?: string) {
   const supabase = createClient();
-  const origin = typeof window !== "undefined" ? window.location.origin : "";
-  const callbackUrl = `${origin}/auth/callback${redirectTo ? `?next=${encodeURIComponent(redirectTo)}` : ""}`;
+  const callbackUrl = getCallbackUrl(redirectTo);
 
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",
@@ -23,8 +29,7 @@ export async function signInWithGoogle(redirectTo?: string) {
 // Connexion via Lien Magique Email (sans mot de passe)
 export async function sendMagicLink(email: string, redirectTo?: string) {
   const supabase = createClient();
-  const origin = typeof window !== "undefined" ? window.location.origin : "";
-  const callbackUrl = `${origin}/auth/callback${redirectTo ? `?next=${encodeURIComponent(redirectTo)}` : ""}`;
+  const callbackUrl = getCallbackUrl(redirectTo);
 
   const { error } = await supabase.auth.signInWithOtp({
     email,
