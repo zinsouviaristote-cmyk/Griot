@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Check, ChevronDown, Smartphone } from "lucide-react";
+import { ChevronDown, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { CreditHistory } from "@/components/recharge/CreditHistory";
 import { CREDIT_PACKS, formatPackEquivalence, packNotes, type CreditPack } from "@/lib/tunnel/types";
@@ -76,9 +76,10 @@ export function RechargeView({
 
       // Redirection vers le guichet Chariow
       window.location.href = data.checkoutUrl;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setErrorMsg(err.message || "Impossible d'initier le paiement");
+      const errorMessage = err instanceof Error ? err.message : "Impossible d'initier le paiement";
+      setErrorMsg(errorMessage);
       setLoading(false);
     }
   };

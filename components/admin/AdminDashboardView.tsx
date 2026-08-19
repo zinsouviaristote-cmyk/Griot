@@ -55,7 +55,7 @@ export function AdminDashboardView() {
             </div>
             <div className="mt-1.5 h-1 w-20 rounded-full bg-brand" />
             <p className="mt-2 text-sm text-ink-muted">
-              Vue globale de l'activité du site, des revenus générés et des statistiques de création musicale.
+              Vue globale de l&apos;activité du site, des revenus générés et des statistiques de création musicale.
             </p>
           </div>
 
@@ -82,7 +82,7 @@ export function AdminDashboardView() {
           <div className="rounded-feature border border-danger/20 bg-danger/5 p-6 text-center shadow-card">
             <h2 className="font-display text-title-md font-semibold text-danger">Accès Réservé</h2>
             <p className="mt-2 text-sm text-ink-muted">
-              Cet espace est réservé à l'administrateur principal de Griot (zinsouviaristote@gmail.com). Vous pouvez créer vos chansons depuis le tableau de bord standard.
+              Cet espace est réservé à l&apos;administrateur principal de Griot (zinsouviaristote@gmail.com). Vous pouvez créer vos chansons depuis le tableau de bord standard.
             </p>
             <Link
               href="/tableau-de-bord"
@@ -98,7 +98,7 @@ export function AdminDashboardView() {
               {/* Revenus Totaux */}
               <div className="rounded-feature border border-border bg-surface p-6 shadow-card transition-all duration-200 hover:border-brand/30">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold uppercase tracking-wider text-ink-muted">Chiffre d'Affaires</span>
+                  <span className="text-xs font-semibold uppercase tracking-wider text-ink-muted">Chiffre d&apos;Affaires</span>
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand/10 text-brand">
                     <DollarSign className="h-5 w-5" />
                   </div>
