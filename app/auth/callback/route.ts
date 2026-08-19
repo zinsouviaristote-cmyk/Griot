@@ -1,34 +1,45 @@
-import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { NextResponse, type NextRequest } from "next/server";
+import { createServerClient } from "@supabase/ssr";
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
+export async function GET(request: NextRequest) {
+  const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const next = searchParams.get("next") ?? "/tableau-de-bord";
 
-  // Reconstitution dynamique de l'hôte réel (Vercel ou Localhost)
+  // Reconstitution exacte de l'hôte public sur Vercel (HTTPS)
   const forwardedHost = request.headers.get("x-forwarded-host");
-  const forwardedProto = request.headers.get("x-forwarded-proto") ?? "https";
   const isLocalEnv = process.env.NODE_ENV === "development";
 
   const baseUrl = isLocalEnv
-    ? new URL(request.url).origin
+    ? origin
     : forwardedHost
-    ? `${forwardedProto}://${forwardedHost}`
+    ? `https://${forwardedHost}`
     : "https://griot-six.vercel.app";
 
-  if (code) {
-    // 1. Await sur la création du client serveur
-    const supabase = await createClient();
+  const response = NextResponse.redirect(`${baseUrl}${next}`);
 
-    // 2. Échange du code contre la session
+  if (code) {
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              request.cookies.set({ name, value, ...options });
+              response.cookies.set({ name, value, ...options });
+            });
+          },
+        },
+      }
+    );
+
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      // 3. Création de la réponse de redirection
-      const response = NextResponse.redirect(`${baseUrl}${next}`);
-
-      // 4. Synchronisation du cookie de session
       response.cookies.set("griot_session", "1", {
         path: "/",
         maxAge: 30 * 24 * 60 * 60,
@@ -40,6 +51,5 @@ export async function GET(request: Request) {
     }
   }
 
-  // En cas d'échec ou d'absence de code
   return NextResponse.redirect(`${baseUrl}/connexion?error=AuthCallbackError`);
 }
