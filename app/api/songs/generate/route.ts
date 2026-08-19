@@ -3,8 +3,10 @@ import { createClient } from "@/lib/supabase/server";
 
 export async function POST(request: Request) {
   try {
-    // 💡 Ajout du `await` devant createClient()
+    // 💡 Ajout du await ici
     const supabase = await createClient();
+    
+    // Désormais supabase est le SupabaseClient résolu, donc supabase.auth fonctionne
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
@@ -18,7 +20,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "PARAMETRES_MANQUANTS" }, { status: 400 });
     }
 
-    // Exécution de la RPC d'autorité d'essai / déduction de Note
     const { data, error } = await supabase.rpc("request_song_generation", {
       p_song_id: songId,
       p_prompt: prompt || "",
