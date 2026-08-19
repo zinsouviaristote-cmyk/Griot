@@ -75,7 +75,7 @@ export function AdminDashboardView() {
           <div className="flex min-h-[300px] items-center justify-center rounded-feature border border-border bg-surface shadow-card">
             <div className="flex items-center gap-3 text-sm text-ink-muted">
               <div className="h-5 w-5 animate-spin rounded-full border-2 border-brand border-t-transparent" />
-              Chargement des données d'administration...
+              Chargement des données d&apos;administration...
             </div>
           </div>
         ) : !isAdmin ? (
@@ -195,7 +195,7 @@ export function AdminDashboardView() {
                 >
                   <div>
                     <p className="font-semibold text-ink text-sm">Créer une musique</p>
-                    <p className="text-xs text-ink-muted mt-0.5">Comme n'importe quel utilisateur</p>
+                    <p className="text-xs text-ink-muted mt-0.5">Comme n&apos;importe quel utilisateur</p>
                   </div>
                   <ArrowUpRight className="h-4 w-4 text-brand" />
                 </Link>
