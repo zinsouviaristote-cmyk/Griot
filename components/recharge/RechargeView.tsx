@@ -1,116 +1,101 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Check, ChevronDown, CreditCard as CardIcon, Smartphone, Sparkles } from "lucide-react";
-import { Button, ButtonLink } from "@/components/ui/Button";
+import { useRef, useState } from "react";
+import { Check, ChevronDown, Smartphone } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 import { CreditHistory } from "@/components/recharge/CreditHistory";
 import { CREDIT_PACKS, formatPackEquivalence, packNotes, type CreditPack } from "@/lib/tunnel/types";
-import { mockCheckPaymentStatus, mockInitiatePayment, type PaymentMethod } from "@/lib/payment/mockPayment";
 import { formatFcfa } from "@/lib/format/currency";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import type { CreditTransaction } from "@/lib/types";
 
-type Phase = "select" | "processing" | "success";
+// Récupération dynamique des Product IDs par index dans le tableau (0 = Pack 1, 1 = Pack 2, 2 = Pack 3)
+const CHARIOW_KEYS = [
+  process.env.NEXT_PUBLIC_CHARIOW_PACK1,
+  process.env.NEXT_PUBLIC_CHARIOW_PACK2,
+  process.env.NEXT_PUBLIC_CHARIOW_PACK3,
+];
 
 export function RechargeView({
   currentBalance,
   transactions,
+  user,
 }: {
   currentBalance: number;
   transactions: CreditTransaction[];
+  user?: { id: string; email: string; name?: string; phone?: string };
 }) {
   const { t, tn } = useLanguage();
-  const [selectedPack, setSelectedPack] = useState<CreditPack["id"]>("pack3");
-  const [method, setMethod] = useState<PaymentMethod>("mobile_money");
-  const [phase, setPhase] = useState<Phase>("select");
-  const [messageIndex, setMessageIndex] = useState(0);
+
+  // On sélectionne par défaut le pack au milieu (Pack 2 / Creator) ou le premier
+  const [selectedPackId, setSelectedPackId] = useState<CreditPack["id"]>(
+    CREDIT_PACKS[1]?.id || CREDIT_PACKS[0]?.id
+  );
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const historyRef = useRef<HTMLDetailsElement>(null);
 
-  const MOBILE_MONEY_MESSAGES = [
-    t("recharge.mobileMoneyMessage1"),
-    t("recharge.mobileMoneyMessage2"),
-    t("recharge.mobileMoneyMessage3"),
-  ];
-  const CARD_MESSAGES = [t("recharge.cardMessage1"), t("recharge.cardMessage2"), t("recharge.cardMessage3")];
+  // Trouve l'index exact du pack sélectionné (0, 1 ou 2)
+  const selectedIndex = CREDIT_PACKS.findIndex((p) => p.id === selectedPackId);
+  const pack = CREDIT_PACKS[selectedIndex] || CREDIT_PACKS[0];
 
-  function openHistory() {
-    setHistoryOpen(true);
-    requestAnimationFrame(() => historyRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
-  }
+  const handlePay = async () => {
+    setLoading(true);
+    setErrorMsg(null);
 
-  const pack = CREDIT_PACKS.find((p) => p.id === selectedPack)!;
-  const messages = method === "mobile_money" ? MOBILE_MONEY_MESSAGES : CARD_MESSAGES;
+    // Récupère l'ID Chariow correspondant à la position du pack
+    const productId = CHARIOW_KEYS[selectedIndex];
 
-  useEffect(() => {
-    if (phase !== "processing") return;
-    let cancelled = false;
-    let attempt = 0;
-
-    async function poll() {
-      await mockInitiatePayment(method, selectedPack);
-      while (!cancelled) {
-        const status = await mockCheckPaymentStatus(attempt);
-        if (cancelled) return;
-        if (status === "confirmed") {
-          setPhase("success");
-          return;
-        }
-        attempt += 1;
-        setMessageIndex(attempt % messages.length);
-      }
+    if (!productId) {
+      setErrorMsg(`L'identifiant Chariow pour le Pack N°${selectedIndex + 1} n'est pas configuré dans le .env`);
+      setLoading(false);
+      return;
     }
-    poll();
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase]);
 
-  if (phase === "processing") {
-    return (
-      <div className="mx-auto flex max-w-md flex-col items-center py-12 text-center">
-        <span className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-soft">
-          <Sparkles className="h-7 w-7 animate-breathe text-brand" strokeWidth={1.5} aria-hidden="true" />
-        </span>
-        <p className="mt-6 font-display text-headline-md text-ink">{t("recharge.processingTitle")}</p>
-        <p key={messageIndex} aria-live="polite" className="mt-2 min-h-[24px] animate-field-in text-body-md text-ink-muted">
-          {messages[messageIndex]}
-        </p>
-        <p className="mt-6 text-xs text-ink-muted">{t("recharge.processingHint")}</p>
-      </div>
-    );
-  }
+    try {
+      const response = await fetch("/api/payments/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId: productId,
+          userId: user?.id || "guest_user",
+          email: user?.email || "client@griot.com",
+          firstName: user?.name || "Utilisateur",
+          phone: user?.phone || "",
+          packId: pack.id,
+          notesAmount: packNotes(pack),
+        }),
+      });
 
-  if (phase === "success") {
-    return (
-      <div className="mx-auto flex max-w-md flex-col items-center py-12 text-center">
-        <span className="flex h-16 w-16 items-center justify-center rounded-full bg-success/10 text-success">
-          <Check className="h-7 w-7" strokeWidth={1.5} aria-hidden="true" />
-        </span>
-        <p className="mt-6 font-display text-headline-md text-ink">{t("recharge.successTitle")}</p>
-        <p className="mt-2 text-body-md text-ink-muted">
-          {tn("recharge.successBody", packNotes(pack), { total: currentBalance + packNotes(pack) })}
-        </p>
-        <ButtonLink href="/tableau-de-bord" variant="primary" className="mt-8 w-full sm:w-auto">
-          {t("recharge.backToDashboard")}
-        </ButtonLink>
-      </div>
-    );
-  }
+      const data = await response.json();
+
+      if (!response.ok || !data.checkoutUrl) {
+        throw new Error(data.error || "Erreur lors de la création du paiement");
+      }
+
+      // Redirection vers le guichet Chariow
+      window.location.href = data.checkoutUrl;
+    } catch (err: any) {
+      console.error(err);
+      setErrorMsg(err.message || "Impossible d'initier le paiement");
+      setLoading(false);
+    }
+  };
 
   return (
     <div>
+      {/* Sélection du Pack */}
       <div className="grid gap-3 sm:grid-cols-3">
         {CREDIT_PACKS.map((p) => {
-          const isSelected = selectedPack === p.id;
+          const isSelected = selectedPackId === p.id;
           const notes = packNotes(p);
           const perSong = p.priceFcfa / p.songs;
           return (
             <button
               key={p.id}
               type="button"
-              onClick={() => setSelectedPack(p.id)}
+              onClick={() => setSelectedPackId(p.id)}
               aria-pressed={isSelected}
               className={`rounded-card border-2 p-5 text-left transition-all duration-150 ease-magnetic active:scale-[0.98] ${
                 isSelected ? "border-brand bg-brand-soft" : "border-border bg-surface hover:border-brand/40"
@@ -127,63 +112,26 @@ export function RechargeView({
           );
         })}
       </div>
-      <p className="mt-3 text-label-sm text-ink-muted">{t("recharge.notesNeverExpire")}</p>
 
-      <div className="mt-8">
-        <p className="text-label-md uppercase tracking-wide text-ink-muted">{t("recharge.paymentMethod")}</p>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          <button
-            type="button"
-            onClick={() => setMethod("mobile_money")}
-            aria-pressed={method === "mobile_money"}
-            className={`flex items-center gap-3 rounded-card border-2 p-4 text-left transition-all duration-150 ease-magnetic active:scale-[0.98] ${
-              method === "mobile_money" ? "border-brand bg-brand-soft" : "border-border bg-surface hover:border-brand/40"
-            }`}
-          >
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-soft text-brand">
-              <Smartphone className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
-            </span>
-            <span>
-              <span className="block text-sm font-semibold text-ink">{t("recharge.mobileMoney")}</span>
-              <span className="block text-xs text-ink-muted">{t("recharge.mobileMoneyOperators")}</span>
-            </span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setMethod("carte")}
-            aria-pressed={method === "carte"}
-            className={`flex items-center gap-3 rounded-card border-2 p-4 text-left transition-all duration-150 ease-magnetic active:scale-[0.98] ${
-              method === "carte" ? "border-brand bg-brand-soft" : "border-border bg-surface hover:border-brand/40"
-            }`}
-          >
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-soft text-brand">
-              <CardIcon className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
-            </span>
-            <span>
-              <span className="block text-sm font-semibold text-ink">{t("recharge.card")}</span>
-              <span className="block text-xs text-ink-muted">{t("recharge.cardBrands")}</span>
-            </span>
-          </button>
+      {/* Information Paiement Chariow */}
+      <div className="mt-8 flex items-center gap-3 rounded-card border border-border bg-surface p-4">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-soft text-brand">
+          <Smartphone className="h-5 w-5" strokeWidth={1.5} />
+        </span>
+        <div>
+          <p className="text-sm font-semibold text-ink">Paiement sécurisé via Chariow</p>
+          <p className="text-xs text-ink-muted">MTN Mobile Money, Moov, Wave, Carte Bancaire</p>
         </div>
       </div>
 
-      <Button onClick={() => setPhase("processing")} className="mt-8 w-full sm:w-auto">
-        {t("recharge.payButton", { price: formatFcfa(pack.priceFcfa) })}
+      {errorMsg && <p className="mt-3 text-sm font-medium text-red-600">{errorMsg}</p>}
+
+      {/* Bouton Payer */}
+      <Button onClick={handlePay} disabled={loading} className="mt-8 w-full sm:w-auto">
+        {loading ? "Chargement du paiement..." : t("recharge.payButton", { price: formatFcfa(pack.priceFcfa) })}
       </Button>
 
-      {!historyOpen && (
-        <button
-          type="button"
-          onClick={openHistory}
-          className="mt-6 text-xs font-medium text-brand hover:underline"
-        >
-          {t("recharge.viewHistory")}
-        </button>
-      )}
-
-      {/* Remplace l'ancienne page /credits — solde et historique rejoignent
-          Recharger, repliés par défaut : une seule page pour tout ce qui
-          touche aux Notes. */}
+      {/* Historique des crédits */}
       <details
         ref={historyRef}
         open={historyOpen}
