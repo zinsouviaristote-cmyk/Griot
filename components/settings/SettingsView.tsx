@@ -13,6 +13,7 @@ import { ProfilePhotoField } from "@/components/settings/ProfilePhotoField";
 import { signOutUser } from "@/lib/auth/session";
 import { useToast } from "@/components/ui/Toast";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { updateUserProfile } from "@/lib/supabase/dataAdapters";
 import type { DashboardUser } from "@/lib/types";
 
 interface NotificationRow {
@@ -61,7 +62,9 @@ export function SettingsView({
   const showToast = useToast();
 
   const [firstName, setFirstName] = useState(user.firstName);
-  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(user.photoUrl);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoChanged, setPhotoChanged] = useState(false);
   const [phone, setPhone] = useState(user.phone ?? "");
 
   const [notifications, setNotifications] = useState<Record<NotificationRow["key"], boolean>>({
@@ -75,14 +78,31 @@ export function SettingsView({
   const [confirmText, setConfirmText] = useState("");
   const [deleted, setDeleted] = useState(false);
 
-  function handleSaveProfile(event: React.FormEvent) {
+  async function handleSaveProfile(event: React.FormEvent) {
     event.preventDefault();
-    showToast(t("settings.profileUpdated"), "success");
+    try {
+      await updateUserProfile({
+        firstName,
+        phone,
+        photoFile,
+        photoUrl: photoChanged ? photoUrl : undefined,
+      });
+      setPhotoFile(null);
+      setPhotoChanged(false);
+      showToast(t("settings.profileUpdated"), "success");
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : t("settings.profileUpdateFailed"), "danger");
+    }
   }
 
-  function handleSaveNotifications(event: React.FormEvent) {
+  async function handleSaveNotifications(event: React.FormEvent) {
     event.preventDefault();
-    showToast(t("settings.preferencesSaved"), "success");
+    try {
+      await updateUserProfile({ firstName, phone, photoFile: null });
+      showToast(t("settings.preferencesSaved"), "success");
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : t("settings.profileUpdateFailed"), "danger");
+    }
   }
 
   async function handleDeleteAccount() {
@@ -112,7 +132,15 @@ export function SettingsView({
   return (
     <div className="space-y-6">
       <SectionCard icon={UserIcon} title={t("settings.myProfile")}>
-        <ProfilePhotoField initials={user.initials} photoUrl={photoUrl} onChange={setPhotoUrl} />
+        <ProfilePhotoField
+          initials={user.initials}
+          photoUrl={photoUrl}
+          onChange={(url, file) => {
+            setPhotoUrl(url);
+            setPhotoFile(file);
+            setPhotoChanged(true);
+          }}
+        />
 
         <form onSubmit={handleSaveProfile} className="mt-5 space-y-4">
           <label className="block">

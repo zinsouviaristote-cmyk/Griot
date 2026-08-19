@@ -445,6 +445,7 @@ export const en: DeepDictionary<typeof fr> = {
     googleAccountLinked: "Linked Google account: only editable from Google.",
     save: "Save",
     profileUpdated: "Profile updated.",
+    profileUpdateFailed: "Your information couldn't be saved. Please try again.",
     accountDeletedToast: "Your account has been deleted.",
     accountDeleteFailed: "Account deletion failed. Please try again.",
     notifications: "Notifications",

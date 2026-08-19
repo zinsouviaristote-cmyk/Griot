@@ -113,6 +113,55 @@ export async function fetchUserProfile(): Promise<DashboardUser> {
   }
 }
 
+export async function updateUserProfile({
+  firstName,
+  phone,
+  photoFile,
+  photoUrl,
+}: {
+  firstName: string;
+  phone: string;
+  photoFile: File | null;
+  photoUrl?: string | null;
+}): Promise<void> {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) throw new Error("Authentification requise pour modifier le profil.");
+
+  let storedPhotoUrl = photoUrl;
+  if (photoFile) {
+    if (!photoFile.type.startsWith("image/")) throw new Error("Le fichier doit être une image.");
+    if (photoFile.size > 5 * 1024 * 1024) throw new Error("La photo doit faire moins de 5 Mo.");
+
+    const extension = photoFile.name.split(".").pop()?.toLowerCase() || "jpg";
+    const path = `${user.id}/${crypto.randomUUID()}.${extension}`;
+    const { error: uploadError } = await supabase.storage.from("profile-photos").upload(path, photoFile, {
+      cacheControl: "3600",
+      contentType: photoFile.type,
+      upsert: false,
+    });
+
+    if (uploadError) throw uploadError;
+    storedPhotoUrl = supabase.storage.from("profile-photos").getPublicUrl(path).data.publicUrl;
+  }
+
+  const updates: {
+    first_name: string;
+    phone: string | null;
+    photo_url?: string | null;
+  } = {
+    first_name: firstName.trim(),
+    phone: phone.trim() || null,
+  };
+  if (photoUrl !== undefined || photoFile) updates.photo_url = storedPhotoUrl ?? null;
+
+  const { error } = await supabase.from("profiles").update(updates).eq("id", user.id);
+  if (error) throw error;
+}
+
 export async function fetchCreditTransactions(): Promise<CreditTransaction[]> {
   try {
     const supabase = createClient();

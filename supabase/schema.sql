@@ -64,6 +64,34 @@ CREATE POLICY "L'utilisateur modifie ses infos de profil sans toucher au solde"
     AND credit_balance = (SELECT credit_balance FROM public.profiles WHERE id = auth.uid())
   );
 
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('profile-photos', 'profile-photos', TRUE)
+ON CONFLICT (id) DO UPDATE SET public = TRUE;
+
+DROP POLICY IF EXISTS "Utilisateur ajoute sa photo de profil" ON storage.objects;
+CREATE POLICY "Utilisateur ajoute sa photo de profil"
+  ON storage.objects FOR INSERT TO authenticated
+  WITH CHECK (
+    bucket_id = 'profile-photos'
+    AND (storage.foldername(name))[1] = (SELECT auth.uid()::text)
+  );
+
+DROP POLICY IF EXISTS "Utilisateur modifie sa photo de profil" ON storage.objects;
+CREATE POLICY "Utilisateur modifie sa photo de profil"
+  ON storage.objects FOR UPDATE TO authenticated
+  USING (
+    bucket_id = 'profile-photos'
+    AND (storage.foldername(name))[1] = (SELECT auth.uid()::text)
+  );
+
+DROP POLICY IF EXISTS "Utilisateur supprime sa photo de profil" ON storage.objects;
+CREATE POLICY "Utilisateur supprime sa photo de profil"
+  ON storage.objects FOR DELETE TO authenticated
+  USING (
+    bucket_id = 'profile-photos'
+    AND (storage.foldername(name))[1] = (SELECT auth.uid()::text)
+  );
+
 -- Déclencheur automatique à l'inscription (Google OAuth / Magic Link)
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$

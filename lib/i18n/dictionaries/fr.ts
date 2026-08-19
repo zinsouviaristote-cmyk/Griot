@@ -444,6 +444,7 @@ export const fr = {
     googleAccountLinked: "Compte Google lié : modifiable uniquement depuis Google.",
     save: "Enregistrer",
     profileUpdated: "Profil mis à jour.",
+    profileUpdateFailed: "Les informations n'ont pas pu être enregistrées. Réessayez.",
     accountDeletedToast: "Votre compte a été supprimé.",
     accountDeleteFailed: "La suppression du compte a échoué. Réessayez.",
     notifications: "Notifications",

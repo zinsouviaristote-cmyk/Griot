@@ -5,13 +5,8 @@ import { Camera } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
-import { useToast } from "@/components/ui/Toast";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
-// Téléversement + recadrage carré simple (zoom centré, pas de repositionnement
-// libre) — la seule action de "Mon profil" que les gens veulent vraiment faire.
-// Rien n'est envoyé nulle part en phase 1 : l'URL objet vit en mémoire, comme
-// le reste des états optimistes du produit.
 export function ProfilePhotoField({
   initials,
   photoUrl,
@@ -19,12 +14,12 @@ export function ProfilePhotoField({
 }: {
   initials: string;
   photoUrl: string | null;
-  onChange: (url: string | null) => void;
+  onChange: (url: string | null, file: File | null) => void;
 }) {
   const { t } = useLanguage();
   const inputRef = useRef<HTMLInputElement>(null);
-  const showToast = useToast();
   const [pendingUrl, setPendingUrl] = useState<string | null>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [zoom, setZoom] = useState(1);
 
   function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
@@ -32,25 +27,26 @@ export function ProfilePhotoField({
     event.target.value = "";
     if (!file) return;
     setZoom(1);
+    setPendingFile(file);
     setPendingUrl(URL.createObjectURL(file));
   }
 
   function handleCancelCrop() {
     if (pendingUrl) URL.revokeObjectURL(pendingUrl);
+    setPendingFile(null);
     setPendingUrl(null);
   }
 
   function handleConfirmCrop() {
     if (photoUrl) URL.revokeObjectURL(photoUrl);
-    onChange(pendingUrl);
+    onChange(pendingUrl, pendingFile);
     setPendingUrl(null);
-    showToast(t("settings.photo.photoUpdated"), "success");
+    setPendingFile(null);
   }
 
   function handleRemove() {
     if (photoUrl) URL.revokeObjectURL(photoUrl);
-    onChange(null);
-    showToast(t("settings.photo.photoRemoved"), "default");
+    onChange(null, null);
   }
 
   return (
