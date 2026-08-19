@@ -50,12 +50,12 @@ export function AdminDashboardView() {
             <div className="flex items-center gap-2">
               <ShieldCheck className="h-6 w-6 text-brand" />
               <h1 className="font-display text-headline-md font-bold text-ink">
-                Espace Administration
+                Espace Admin
               </h1>
             </div>
             <div className="mt-1.5 h-1 w-20 rounded-full bg-brand" />
             <p className="mt-2 text-sm text-ink-muted">
-              Vue globale de l&apos;activité du site, des revenus générés et des statistiques de création musicale.
+              Vue globale de l&apos;activité du site, les revenus générés et des statistiques de création musicale.
             </p>
           </div>
 
