@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import { ParametresPageBody } from "@/components/settings/ParametresPageBody";
-import { mockSongs, mockUser } from "@/lib/data/mock-dashboard";
+import { mockSongs } from "@/lib/data/mock-dashboard";
 import { getMyPublishedSongs } from "@/lib/data/mock-explorer";
+import { fetchServerUserProfile } from "@/lib/supabase/serverDataAdapters";
 
 export const metadata: Metadata = {
   title: "Paramètres : Griot",
 };
 
-export default function ParametresPage() {
-  return (
-    <ParametresPageBody user={mockUser} songCount={mockSongs.length} publishedCount={getMyPublishedSongs().length} />
-  );
+export default async function ParametresPage() {
+  const user = await fetchServerUserProfile();
+  return <ParametresPageBody user={user} songCount={mockSongs.length} publishedCount={getMyPublishedSongs().length} />;
 }

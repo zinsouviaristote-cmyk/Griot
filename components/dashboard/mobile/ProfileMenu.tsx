@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { BarChart3, ChevronRight, LogOut, Megaphone, type LucideIcon } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { CreditCard } from "@/components/dashboard/CreditCard";
-import { clearMockSession } from "@/lib/auth/session";
+import { LogoutConfirmModal } from "@/components/auth/LogoutConfirmModal";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 interface MenuItem {
@@ -37,6 +38,7 @@ export function ProfileMenu({
   creditBalance: number;
 }) {
   const { t } = useLanguage();
+  const [logoutOpen, setLogoutOpen] = useState(false);
   return (
     <div>
       <div className="flex items-center gap-3">
@@ -69,14 +71,15 @@ export function ProfileMenu({
         ))}
       </nav>
 
-      <Link
-        href="/connexion"
-        onClick={() => clearMockSession()}
-        className="mt-3 flex min-h-[52px] items-center gap-3 rounded-card border border-border bg-surface px-4 text-sm font-semibold text-danger shadow-card transition-colors hover:bg-danger/5"
+      <button
+        type="button"
+        onClick={() => setLogoutOpen(true)}
+        className="mt-3 flex min-h-[52px] w-full items-center gap-3 rounded-card border border-border bg-surface px-4 text-left text-sm font-semibold text-danger shadow-card transition-colors hover:bg-danger/5"
       >
         <LogOut className="h-4 w-4 shrink-0" strokeWidth={1.5} aria-hidden="true" />
         {t("dashboard.profileMenu.logout")}
-      </Link>
+      </button>
+      <LogoutConfirmModal open={logoutOpen} onClose={() => setLogoutOpen(false)} />
     </div>
   );
 }

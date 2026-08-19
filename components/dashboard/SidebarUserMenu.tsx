@@ -15,11 +15,13 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
-import { clearMockSession } from "@/lib/auth/session";
+import { LogoutConfirmModal } from "@/components/auth/LogoutConfirmModal";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import type { Locale } from "@/lib/i18n/locale";
 
 type Panel = "root" | "langue" | "theme";
+
+const ADMIN_EMAIL = "zinsouviaristote@gmail.com";
 
 interface OptionRow {
   key: string;
@@ -74,8 +76,10 @@ export function SidebarUserMenu({
 }) {
   const { t, locale, setLocale } = useLanguage();
   const [open, setOpen] = useState(false);
+  const [logoutOpen, setLogoutOpen] = useState(false);
   const [panel, setPanel] = useState<Panel>("root");
   const containerRef = useRef<HTMLDivElement>(null);
+  const isAdmin = email.trim().toLowerCase() === ADMIN_EMAIL;
 
   const languageOptions: OptionRow[] = [
     {
@@ -161,15 +165,17 @@ export function SidebarUserMenu({
                 <User className="h-4 w-4 text-ink-muted" strokeWidth={1.5} aria-hidden="true" />
                 {t("accountMenu.account")}
               </Link>
-              <Link
-                href="/admin"
-                onClick={close}
-                role="menuitem"
-                className="flex min-h-[44px] items-center gap-3 px-4 text-sm font-semibold text-brand transition-colors hover:bg-brand-soft"
-              >
-                <ShieldCheck className="h-4 w-4 text-brand" strokeWidth={1.5} aria-hidden="true" />
-                Administration
-              </Link>
+              {isAdmin && (
+                <Link
+                  href="/admin"
+                  onClick={close}
+                  role="menuitem"
+                  className="flex min-h-[44px] items-center gap-3 px-4 text-sm font-semibold text-brand transition-colors hover:bg-brand-soft"
+                >
+                  <ShieldCheck className="h-4 w-4 text-brand" strokeWidth={1.5} aria-hidden="true" />
+                  Administration
+                </Link>
+              )}
               <button
                 type="button"
                 onClick={() => setPanel("langue")}
@@ -204,18 +210,18 @@ export function SidebarUserMenu({
                 {t("accountMenu.help")}
               </Link>
               <div className="border-t border-border pt-1.5">
-                <Link
-                  href="/connexion"
+                <button
+                  type="button"
                   onClick={() => {
-                    clearMockSession();
                     close();
+                    setLogoutOpen(true);
                   }}
                   role="menuitem"
-                  className="flex min-h-[44px] items-center gap-3 px-4 text-sm font-medium text-danger transition-colors hover:bg-danger/5"
+                  className="flex min-h-[44px] w-full items-center gap-3 px-4 text-left text-sm font-medium text-danger transition-colors hover:bg-danger/5"
                 >
                   <LogOut className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
                   {t("accountMenu.logout")}
-                </Link>
+                </button>
               </div>
             </div>
           )}
@@ -235,6 +241,7 @@ export function SidebarUserMenu({
           )}
         </div>
       )}
+      <LogoutConfirmModal open={logoutOpen} onClose={() => setLogoutOpen(false)} />
     </div>
   );
 }

@@ -1,16 +1,21 @@
 import type { ReactNode } from "react";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import { mockUser } from "@/lib/data/mock-dashboard";
+import { DashboardUserProvider } from "@/lib/auth/DashboardUserContext";
+import { fetchServerUserProfile } from "@/lib/supabase/serverDataAdapters";
 
-export default function DashboardLayout({ children }: { children: ReactNode }) {
+export default async function DashboardLayout({ children }: { children: ReactNode }) {
+  const user = await fetchServerUserProfile();
+
   return (
-    <DashboardShell
-      creditBalance={mockUser.creditBalance}
-      userInitials={mockUser.initials}
-      userName={mockUser.firstName}
-      userEmail={mockUser.email}
-    >
-      {children}
-    </DashboardShell>
+    <DashboardUserProvider user={user}>
+      <DashboardShell
+        creditBalance={user.creditBalance}
+        userInitials={user.initials}
+        userName={user.firstName}
+        userEmail={user.email}
+      >
+        {children}
+      </DashboardShell>
+    </DashboardUserProvider>
   );
 }

@@ -47,6 +47,10 @@ export async function GET(request: NextRequest) {
         secure: !isLocalEnv,
       });
 
+      const redirectUrl = new URL(`${baseUrl}${next}`);
+      redirectUrl.searchParams.set("toast", "login");
+      response.headers.set("location", redirectUrl.toString());
+
       return response;
     }
   }

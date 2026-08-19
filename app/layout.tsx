@@ -4,6 +4,7 @@ import { ToastProvider } from "@/components/ui/Toast";
 import { PlayerProvider } from "@/lib/player/PlayerContext";
 import { PersistentPlayerBar } from "@/components/player/PersistentPlayerBar";
 import { LanguageProvider } from "@/lib/i18n/LanguageContext";
+import { AuthToastBridge } from "@/components/auth/AuthToastBridge";
 import "./globals.css";
 
 // Manrope porte les titres (600/700/800) — géométrique, architecturé.
@@ -46,6 +47,7 @@ export default function RootLayout({
       <body className="font-sans">
         <LanguageProvider>
           <ToastProvider>
+            <AuthToastBridge />
             <PlayerProvider>
               {children}
               <PersistentPlayerBar />

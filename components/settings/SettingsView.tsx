@@ -3,13 +3,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Bell, LogOut, Trash2, User as UserIcon } from "lucide-react";
-import { Button, ButtonLink } from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import { Toggle } from "@/components/ui/Toggle";
 import { Modal } from "@/components/ui/Modal";
 import { Logo } from "@/components/ui/Logo";
 import { GoogleMark } from "@/components/auth/GoogleMark";
+import { LogoutConfirmModal } from "@/components/auth/LogoutConfirmModal";
 import { ProfilePhotoField } from "@/components/settings/ProfilePhotoField";
-import { clearMockSession } from "@/lib/auth/session";
+import { signOutUser } from "@/lib/auth/session";
 import { useToast } from "@/components/ui/Toast";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import type { DashboardUser } from "@/lib/types";
@@ -70,6 +71,7 @@ export function SettingsView({
   });
 
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [logoutOpen, setLogoutOpen] = useState(false);
   const [confirmText, setConfirmText] = useState("");
   const [deleted, setDeleted] = useState(false);
 
@@ -83,10 +85,15 @@ export function SettingsView({
     showToast(t("settings.preferencesSaved"), "success");
   }
 
-  function handleDeleteAccount() {
-    clearMockSession();
-    setDeleted(true);
-    setDeleteOpen(false);
+  async function handleDeleteAccount() {
+    try {
+      await signOutUser();
+      showToast(t("settings.accountDeletedToast"), "success");
+      setDeleted(true);
+      setDeleteOpen(false);
+    } catch {
+      showToast(t("settings.accountDeleteFailed"), "danger");
+    }
   }
 
   if (deleted) {
@@ -171,10 +178,10 @@ export function SettingsView({
       </SectionCard>
 
       <SectionCard icon={UserIcon} title={t("settings.account")}>
-        <ButtonLink href="/connexion" variant="secondary" className="w-full" onClick={() => clearMockSession()}>
+        <Button type="button" variant="secondary" className="w-full" onClick={() => setLogoutOpen(true)}>
           <LogOut className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
           {t("settings.logout")}
-        </ButtonLink>
+        </Button>
 
         <div className="mt-6 flex items-center justify-between gap-4 border-t border-border pt-4">
           <div>
@@ -229,6 +236,7 @@ export function SettingsView({
           </Button>
         </div>
       </Modal>
+      <LogoutConfirmModal open={logoutOpen} onClose={() => setLogoutOpen(false)} />
     </div>
   );
 }

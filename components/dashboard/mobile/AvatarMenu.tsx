@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Check, ChevronLeft, ChevronRight, CircleHelp, Globe, LogOut, Music, Settings } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
-import { clearMockSession } from "@/lib/auth/session";
+import { LogoutConfirmModal } from "@/components/auth/LogoutConfirmModal";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import type { Locale } from "@/lib/i18n/locale";
 
@@ -21,6 +21,7 @@ export function AvatarMenu({
 }) {
   const { t, locale, setLocale } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
+  const [logoutOpen, setLogoutOpen] = useState(false);
   const [panel, setPanel] = useState<Panel>("root");
 
   function close() {
@@ -93,17 +94,17 @@ export function AvatarMenu({
                   </Link>
                 </nav>
                 <div className="border-t border-border py-1.5">
-                  <Link
-                    href="/connexion"
+                  <button
+                    type="button"
                     onClick={() => {
-                      clearMockSession();
                       close();
+                      setLogoutOpen(true);
                     }}
-                    className="group flex min-h-[44px] items-center gap-3 px-4 text-sm font-medium text-danger transition-colors hover:bg-danger/5"
+                    className="group flex min-h-[44px] w-full items-center gap-3 px-4 text-left text-sm font-medium text-danger transition-colors hover:bg-danger/5"
                   >
                     <LogOut className="h-4 w-4 transition-transform duration-150 ease-magnetic group-hover:translate-x-0.5" strokeWidth={1.5} aria-hidden="true" />
                     {t("accountMenu.logout")}
-                  </Link>
+                  </button>
                 </div>
               </>
             ) : (
@@ -139,6 +140,7 @@ export function AvatarMenu({
           </div>
         </>
       )}
+      <LogoutConfirmModal open={logoutOpen} onClose={() => setLogoutOpen(false)} />
     </div>
   );
 }

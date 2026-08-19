@@ -7,7 +7,8 @@ import { MobileGreeting } from "@/components/dashboard/mobile/MobileGreeting";
 import { PrimaryActionCard } from "@/components/dashboard/mobile/PrimaryActionCard";
 import { Reveal } from "@/components/ui/Reveal";
 import { SectionTitle } from "@/components/ui/SectionTitle";
-import { mockSongs, mockUser } from "@/lib/data/mock-dashboard";
+import { useDashboardUser } from "@/lib/auth/DashboardUserContext";
+import { mockSongs } from "@/lib/data/mock-dashboard";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 // Ajoutez ?vide=1 à l'URL pour prévisualiser l'état d'un tout nouvel utilisateur,
@@ -18,16 +19,17 @@ export default function DashboardPage({
   searchParams: { vide?: string };
 }) {
   const { t } = useLanguage();
+  const user = useDashboardUser();
   const isEmptyPreview = searchParams.vide === "1";
   const songs = isEmptyPreview ? [] : mockSongs;
-  const creditBalance = isEmptyPreview ? 0 : mockUser.creditBalance;
+  const creditBalance = isEmptyPreview ? 0 : user.creditBalance;
 
   return (
     <>
         {/* Mobile — écran d'app dédié : salutation et action principale. */}
       <div className="space-y-6 lg:hidden">
         <Reveal>
-          <MobileGreeting firstName={mockUser.firstName} creditBalance={creditBalance} />
+          <MobileGreeting firstName={user.firstName} creditBalance={creditBalance} />
         </Reveal>
         <Reveal delayMs={80}>
           <PrimaryActionCard hasSongs={songs.length > 0} />
