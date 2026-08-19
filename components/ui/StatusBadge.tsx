@@ -11,13 +11,13 @@ export const STATUS_CONFIG: Record<
   { labelKey: string; text: string; bg: string; dot: string; pulse?: boolean }
 > = {
   draft: {
-    labelKey: "library.status.draft",
+    labelKey: "history.status.draft",
     text: "text-ink-muted",
     bg: "bg-border",
     dot: "bg-ink-muted",
   },
   generating: {
-    labelKey: "library.status.generating",
+    labelKey: "history.status.generating",
     text: "text-brand-light",
     bg: "bg-brand-light/10",
     dot: "bg-brand-light",
@@ -26,31 +26,31 @@ export const STATUS_CONFIG: Record<
     pulse: true,
   },
   preview_ready: {
-    labelKey: "library.status.previewReady",
+    labelKey: "history.status.previewReady",
     text: "text-brand",
     bg: "bg-brand/10",
     dot: "bg-brand",
   },
   awaiting_payment: {
-    labelKey: "library.status.awaitingPayment",
+    labelKey: "history.status.awaitingPayment",
     text: "text-warning",
     bg: "bg-warning/10",
     dot: "bg-warning",
   },
   paid: {
-    labelKey: "library.status.paid",
+    labelKey: "history.status.paid",
     text: "text-success",
     bg: "bg-success/10",
     dot: "bg-success",
   },
   delivered: {
-    labelKey: "library.status.paid",
+    labelKey: "history.status.delivered",
     text: "text-success",
     bg: "bg-success/10",
     dot: "bg-success",
   },
   failed: {
-    labelKey: "library.status.failed",
+    labelKey: "history.status.failed",
     text: "text-danger",
     bg: "bg-danger/10",
     dot: "bg-danger",

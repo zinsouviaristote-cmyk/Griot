@@ -26,23 +26,23 @@ function resumeTunnelHref(song: Song): string {
 export function getSongAction(song: Song, t: Translate): SongAction {
   switch (song.status) {
     case "draft":
-      return { label: t("library.action.continue"), href: resumeTunnelHref(song), icon: Wand2 };
+      return { label: t("history.action.continue"), href: resumeTunnelHref(song), icon: Wand2 };
     case "generating":
       return {
-        label: t("library.action.inProgress"),
+        label: t("history.action.inProgress"),
         href: `/bibliotheque/${song.id}`,
         icon: Loader2,
         disabled: true,
         spin: true,
       };
     case "preview_ready":
-      return { label: t("library.action.listenPreview"), href: `/bibliotheque/${song.id}`, icon: Play };
+      return { label: t("history.action.listenPreview"), href: `/bibliotheque/${song.id}`, icon: Play };
     case "awaiting_payment":
-      return { label: t("library.action.pay"), href: `/bibliotheque/${song.id}`, icon: Wand2 };
+      return { label: t("history.action.pay"), href: `/bibliotheque/${song.id}`, icon: Wand2 };
     case "paid":
     case "delivered":
-      return { label: t("library.action.download"), href: `/bibliotheque/${song.id}`, icon: Download };
+      return { label: t("history.action.download"), href: `/bibliotheque/${song.id}`, icon: Download };
     case "failed":
-      return { label: t("library.action.retry"), href: resumeTunnelHref(song), icon: RotateCcw };
+      return { label: t("history.action.retry"), href: resumeTunnelHref(song), icon: RotateCcw };
   }
 }

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, Compass, Home, Library, Megaphone, Wand2, type LucideIcon } from "lucide-react";
+import { BarChart3, Compass, History, Home, Wand2, type LucideIcon } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { CreditCard } from "@/components/dashboard/CreditCard";
 import { SidebarUserMenu } from "@/components/dashboard/SidebarUserMenu";
@@ -17,14 +17,13 @@ interface NavItem {
 const DISCOVER_ITEMS: NavItem[] = [
   { labelKey: "nav.home", href: "/tableau-de-bord", icon: Home },
   { labelKey: "nav.explore", href: "/explorer", icon: Compass },
-  { labelKey: "nav.library", href: "/bibliotheque", icon: Library },
 ];
 
 const CREATE_ITEMS: NavItem[] = [{ labelKey: "nav.newSong", href: "/creer", icon: Wand2 }];
 
 const ME_ITEMS: NavItem[] = [
-  { labelKey: "nav.myPublications", href: "/publications", icon: Megaphone },
   { labelKey: "nav.statistics", href: "/statistiques", icon: BarChart3 },
+  { labelKey: "nav.history", href: "/historiques", icon: History },
 ];
 
 function NavSection({
@@ -112,11 +111,6 @@ export function SidebarContent({
         <NavSection title={t("nav.me")} items={ME_ITEMS} pathname={pathname} onNavigate={onNavigate} />
       </nav>
 
-      {/* Absorbe l'espace restant sur un grand écran plutôt que de le laisser filer
-          en un seul bloc vide : un simple trait, centré dans ce qui reste, jamais
-          un second système de séparation. Sur un écran court, flex-1 vaut ~0 et ce
-          conteneur s'efface — seul le border-t du bloc crédits en dessous marque
-          la coupure, sans doublon visible. */}
       <div className="flex flex-1 items-center px-3" aria-hidden="true">
         <div className="h-px w-full bg-border" />
       </div>

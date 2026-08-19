@@ -26,11 +26,11 @@ export function SongsTable({ songs }: { songs: Song[] }) {
       <table className="w-full border-collapse">
         <thead>
           <tr className="border-b border-border bg-page text-left text-xs font-medium uppercase tracking-wide text-ink-muted">
-            <th className="py-3 pl-5 pr-3 font-medium">{t("library.table.recipient")}</th>
-            <th className="px-3 py-3 font-medium">{t("library.table.occasion")}</th>
-            <th className="px-3 py-3 font-medium">{t("library.table.style")}</th>
-            <th className="px-3 py-3 font-medium">{t("library.table.date")}</th>
-            <th className="px-3 py-3 font-medium">{t("library.table.status")}</th>
+            <th className="py-3 pl-5 pr-3 font-medium">{t("history.table.recipient")}</th>
+            <th className="px-3 py-3 font-medium">{t("history.table.occasion")}</th>
+            <th className="px-3 py-3 font-medium">{t("history.table.style")}</th>
+            <th className="px-3 py-3 font-medium">{t("history.table.date")}</th>
+            <th className="px-3 py-3 font-medium">{t("history.table.status")}</th>
             <th className="py-3 pl-3 pr-5" />
           </tr>
         </thead>

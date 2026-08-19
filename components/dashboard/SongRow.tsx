@@ -21,7 +21,7 @@ export function SongRow({ song, index = 0 }: { song: Song; index?: number }) {
       as="tr"
       delayMs={index * 80}
       tabIndex={0}
-      aria-label={t("library.item.viewSongAriaLabel", { name: song.recipientFirstName })}
+      aria-label={t("history.item.viewSongAriaLabel", { name: song.recipientFirstName })}
       onClick={() => router.push(detailHref)}
       onKeyDown={(event: React.KeyboardEvent) => {
         if (event.key === "Enter") router.push(detailHref);

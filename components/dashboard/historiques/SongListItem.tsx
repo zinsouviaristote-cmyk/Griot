@@ -12,18 +12,18 @@ import { LikeButton } from "@/components/explorer/LikeButton";
 import { PublishModal, type PublishModalOutput } from "@/components/publish/PublishModal";
 import { TrackArt } from "@/components/player/TrackArt";
 import { TrackPlayButton } from "@/components/player/TrackPlayButton";
-import { SongActionsMenu } from "@/components/dashboard/library/SongActionsMenu";
 import { getSongAction } from "@/components/dashboard/songAction";
 import { mockUser } from "@/lib/data/mock-dashboard";
 import { resolveSongArt } from "@/lib/songArt";
 import { formatDate } from "@/lib/format/date";
+import { SongActionsMenu } from "./SongActionsMenu";
 import { formatDuration } from "@/lib/format/duration";
-import { mockDeleteSong } from "@/lib/data/mockLibraryActions";
 import { getPublishedEntryForSong } from "@/lib/data/mock-explorer";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { occasionLabel, relationshipLabel, styleLabel } from "@/lib/i18n/catalog";
 import type { PlayerTrack } from "@/lib/player/PlayerContext";
 import type { PublishedSong, Song } from "@/lib/types";
+import { mockDeleteSong } from "@/lib/data/mockHistoryActions";
 
 function tunnelHref(song: Song): string {
   const params = new URLSearchParams({
@@ -75,7 +75,7 @@ export function SongListItem({ song, index = 0, queue }: { song: Song; index?: n
       await navigator.clipboard.writeText(`${window.location.origin}${detailHref}`);
       showToast(t("library.item.linkCopied"), "success");
     } catch {
-      showToast(t("library.item.linkCopyFailed"), "danger");
+      showToast(t("history.item.linkCopyFailed"), "danger");
     }
   }
 
@@ -99,18 +99,18 @@ export function SongListItem({ song, index = 0, queue }: { song: Song; index?: n
       lyrics: song.lyrics ? song.lyrics.split("\n").filter(Boolean) : [],
     });
     setPublishOpen(false);
-    showToast(t("library.item.publishedToast"), "success");
+    showToast(t("history.item.publishedToast"), "success");
   }
 
   function handleUnpublish() {
     setPublishedEntry(null);
-    showToast(t("library.item.unpublishedToast", { name: song.recipientFirstName }), "default");
+    showToast(t("history.item.unpublishedToast", { name: song.recipientFirstName }), "default");
   }
 
   async function handleDelete() {
     setDeleting(true);
     await mockDeleteSong(song.id);
-    showToast(t("library.item.deletedToast", { name: song.recipientFirstName }), "default");
+    showToast(t("history.item.deletedToast", { name: song.recipientFirstName }), "default");
     setDeleteOpen(false);
     setDeleted(true);
   }
@@ -161,7 +161,7 @@ export function SongListItem({ song, index = 0, queue }: { song: Song; index?: n
             </p>
 
             <div className="-mx-1 mt-1 flex flex-wrap items-center">
-              <span className="flex min-h-11 items-center gap-1 px-1 text-xs text-ink-muted" aria-label={t("library.item.listensAriaLabel", { count: song.listens })}>
+              <span className="flex min-h-11 items-center gap-1 px-1 text-xs text-ink-muted" aria-label={t("history.item.listensAriaLabel", { count: song.listens })}>
                 <Ear className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />
                 {song.listens}
               </span>
@@ -175,7 +175,7 @@ export function SongListItem({ song, index = 0, queue }: { song: Song; index?: n
               <button
                 type="button"
                 onClick={handleShare}
-                aria-label={t("library.item.shareAriaLabel")}
+                aria-label={t("history.item.shareAriaLabel")}
                 className="flex h-11 w-11 items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:bg-page hover:text-brand active:scale-90"
               >
                 <Share2 className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />
@@ -184,7 +184,7 @@ export function SongListItem({ song, index = 0, queue }: { song: Song; index?: n
                 <a
                   href={track.audioUrl}
                   download={`griot-${song.recipientFirstName}.wav`}
-                  aria-label={t("library.item.downloadAriaLabel")}
+                  aria-label={t("history.item.downloadAriaLabel")}
                   className="flex h-11 w-11 items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:bg-page hover:text-brand active:scale-90"
                 >
                   <Download className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />
@@ -199,7 +199,7 @@ export function SongListItem({ song, index = 0, queue }: { song: Song; index?: n
                 <SongActionsMenu
                   isPublished={!!publishedEntry}
                   redoHref={tunnelHref(song)}
-                  redoLabel={t("library.item.redoLabel", { name: song.recipientFirstName })}
+                  redoLabel={t("history.item.redoLabel", { name: song.recipientFirstName })}
                   onPublish={() => setPublishOpen(true)}
                   onUnpublish={handleUnpublish}
                   onDelete={() => setDeleteOpen(true)}
@@ -242,15 +242,15 @@ export function SongListItem({ song, index = 0, queue }: { song: Song; index?: n
 
       <Modal open={deleteOpen} onClose={() => setDeleteOpen(false)} labelledBy={`delete-${song.id}-title`}>
         <p id={`delete-${song.id}-title`} className="font-display text-lg font-semibold text-ink">
-          {t("library.item.deleteTitle", { name: song.recipientFirstName })}
+          {t("history.item.deleteTitle", { name: song.recipientFirstName })}
         </p>
-        <p className="mt-2 text-sm text-ink-muted">{t("library.item.deleteBody", { name: song.recipientFirstName })}</p>
+        <p className="mt-2 text-sm text-ink-muted">{t("history.item.deleteBody", { name: song.recipientFirstName })}</p>
         <div className="mt-5 flex gap-3">
           <Button variant="ghost" onClick={() => setDeleteOpen(false)} className="flex-1" disabled={deleting}>
-            {t("library.item.cancel")}
+            {t("history.item.cancel")}
           </Button>
           <Button onClick={handleDelete} disabled={deleting} className="flex-1 !bg-danger hover:!brightness-90">
-            {deleting ? t("library.item.deleting") : t("library.item.delete")}
+            {deleting ? t("history.item.deleting") : t("history.item.delete")}
           </Button>
         </div>
       </Modal>

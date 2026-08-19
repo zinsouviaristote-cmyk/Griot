@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Compass, Home, LibraryBig, Plus, UserRound, type LucideIcon } from "lucide-react";
+import { Compass, Home, History, Plus, UserRound, type LucideIcon } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 interface TabItem {
@@ -17,7 +17,7 @@ const LEFT_TABS: TabItem[] = [
 ];
 
 const RIGHT_TABS: TabItem[] = [
-  { labelKey: "dashboard.bottomNav.library", href: "/bibliotheque", icon: LibraryBig },
+  { labelKey: "dashboard.bottomNav.history", href: "/historique", icon: History },
   { labelKey: "dashboard.bottomNav.profile", href: "/profil", icon: UserRound },
 ];
 

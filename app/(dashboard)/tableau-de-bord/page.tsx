@@ -5,7 +5,6 @@ import { OccasionCarousel } from "@/components/dashboard/OccasionCarousel";
 import { SongsTable } from "@/components/dashboard/SongsTable";
 import { MobileGreeting } from "@/components/dashboard/mobile/MobileGreeting";
 import { PrimaryActionCard } from "@/components/dashboard/mobile/PrimaryActionCard";
-import { RecentSongsList } from "@/components/dashboard/mobile/RecentSongsList";
 import { Reveal } from "@/components/ui/Reveal";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { mockSongs, mockUser } from "@/lib/data/mock-dashboard";
@@ -25,19 +24,13 @@ export default function DashboardPage({
 
   return (
     <>
-      {/* Mobile — écran d'app dédié : pas de sidebar, pas de grille de stats, pas de
-          carrousel d'occasions. Juste la salutation, l'action principale et les
-          chansons récentes (voir la conversation : « conçue comme une application,
-          pas comme un site réduit »). */}
+        {/* Mobile — écran d'app dédié : salutation et action principale. */}
       <div className="space-y-6 lg:hidden">
         <Reveal>
           <MobileGreeting firstName={mockUser.firstName} creditBalance={creditBalance} />
         </Reveal>
         <Reveal delayMs={80}>
           <PrimaryActionCard hasSongs={songs.length > 0} />
-        </Reveal>
-        <Reveal delayMs={160}>
-          <RecentSongsList songs={songs} />
         </Reveal>
       </div>
 

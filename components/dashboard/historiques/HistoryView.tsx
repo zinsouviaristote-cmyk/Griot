@@ -2,30 +2,30 @@
 
 import { useMemo, useState } from "react";
 import { Music4, Search, X } from "lucide-react";
-import { SongListItem } from "@/components/dashboard/library/SongListItem";
-import { LibraryFiltersPanel } from "@/components/dashboard/library/LibraryFiltersPanel";
+import { SongListItem } from "@/components/dashboard/historiques/SongListItem";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { getPublishedEntryForSong } from "@/lib/data/mock-explorer";
 import { songsToQueue } from "@/lib/player/songToTrack";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import type { Song, SongStatus } from "@/lib/types";
+import { HistoryFiltersPanel } from "./HistoryFiltersPanel";
 
 type Shortcut = "toutes" | "publiees" | "telechargees";
 type SortMode = "recentes" | "anciennes" | "ecoutees";
 
 const SHORTCUTS: { key: Shortcut; labelKey: string }[] = [
-  { key: "toutes", labelKey: "library.shortcuts.all" },
-  { key: "publiees", labelKey: "library.shortcuts.published" },
-  { key: "telechargees", labelKey: "library.shortcuts.downloaded" },
+  { key: "toutes", labelKey: "history.shortcuts.all" },
+  { key: "publiees", labelKey: "history.shortcuts.published" },
+  { key: "telechargees", labelKey: "history.shortcuts.downloaded" },
 ];
 
 const SORT_LABEL_KEYS: Record<SortMode, string> = {
-  recentes: "library.sort.recent",
-  anciennes: "library.sort.oldest",
-  ecoutees: "library.sort.mostListened",
+  recentes: "history.sort.recent",
+  anciennes: "history.sort.oldest",
+  ecoutees: "history.sort.mostListened",
 };
 
-export function LibraryView({ songs }: { songs: Song[] }) {
+export function HistoryView({ songs }: { songs: Song[] }) {
   const { t } = useLanguage();
   const [search, setSearch] = useState("");
   const [shortcut, setShortcut] = useState<Shortcut>("toutes");
@@ -59,8 +59,8 @@ export function LibraryView({ songs }: { songs: Song[] }) {
     return (
       <EmptyState
         icon={Music4}
-        title={t("library.emptyLibrary.title")}
-        description={t("library.emptyLibrary.description")}
+        title={t("history.emptyHistory.title")}
+        description={t("history.emptyHistory.description")}
         actionLabel={t("dashboard.primaryAction.createFirstSong")}
         actionHref="/creer"
       />
@@ -79,19 +79,19 @@ export function LibraryView({ songs }: { songs: Song[] }) {
           type="search"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          placeholder={t("library.searchPlaceholder")}
-          aria-label={t("library.searchAriaLabel")}
+          placeholder={t("history.searchPlaceholder")}
+          aria-label={t("history.searchAriaLabel")}
           className="min-h-11 w-full rounded-control border border-border bg-surface py-2.5 pl-10 pr-3 text-sm text-ink placeholder:text-ink-muted transition-all duration-200 focus:border-brand focus:outline-none focus:shadow-ring-focus"
         />
       </label>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        <LibraryFiltersPanel active={statusFilters} onChange={setStatusFilters} />
+        <HistoryFiltersPanel active={statusFilters} onChange={setStatusFilters} />
 
         <select
           value={sort}
           onChange={(event) => setSort(event.target.value as SortMode)}
-          aria-label={t("library.sortAriaLabel")}
+          aria-label={t("history.sortAriaLabel")}
           className="min-h-11 rounded-full border border-border bg-surface px-3.5 py-2 text-sm font-medium text-ink-muted transition-colors hover:text-ink focus-visible:outline-none focus-visible:shadow-ring-focus"
         >
           {(Object.keys(SORT_LABEL_KEYS) as SortMode[]).map((key) => (
@@ -128,7 +128,7 @@ export function LibraryView({ songs }: { songs: Song[] }) {
         </div>
       ) : (
         <div className="mt-6 flex flex-col items-center gap-3 rounded-card border border-dashed border-border bg-surface px-6 py-12 text-center">
-          <p className="text-sm text-ink-muted">{t("library.noResults.message")}</p>
+          <p className="text-sm text-ink-muted">{t("history.noResults.message")}</p>
           {isFiltering && (
             <button
               type="button"
@@ -140,7 +140,7 @@ export function LibraryView({ songs }: { songs: Song[] }) {
               className="flex items-center gap-1.5 text-sm font-medium text-brand hover:underline"
             >
               <X className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />
-              {t("library.noResults.resetFilters")}
+              {t("history.noResults.resetFilters")}
             </button>
           )}
         </div>

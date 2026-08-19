@@ -7,7 +7,7 @@ type Translate = (key: string, vars?: Record<string, string | number>) => string
 
 // Un seul endroit pour construire une piste à partir d'une chanson — utilisé à
 // la fois par une ligne isolée (SongListItem) et par la file d'attente qui
-// l'entoure (LibraryView, PublicationsView), pour que précédent/suivant
+// l'entoure (HistoryView, PublicationsView), pour que précédent/suivant
 // retrouvent exactement les mêmes métadonnées (like compris) que le clic direct.
 export function songToTrack(song: Song, t: Translate): PlayerTrack | null {
   if (!song.audioUrl) return null;

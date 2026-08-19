@@ -128,7 +128,7 @@ export function SongListItemSkeleton() {
 }
 
 // Barre de recherche + rangée de filtres, en tête de la bibliothèque.
-export function LibraryToolbarSkeleton() {
+export function HistoryToolbarSkeleton() {
   return (
     <div>
       <Skeleton className="h-11 w-full rounded-control" />

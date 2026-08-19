@@ -3,7 +3,6 @@ import {
   MobileGreetingSkeleton,
   OccasionCardSkeleton,
   PrimaryActionCardSkeleton,
-  SongCardMobileSkeleton,
   SongRowSkeleton,
 } from "@/components/ui/Skeleton";
 
@@ -16,11 +15,6 @@ export default function DashboardLoading() {
       <div className="space-y-6 lg:hidden">
         <MobileGreetingSkeleton />
         <PrimaryActionCardSkeleton />
-        <div className="flex flex-col gap-3">
-          {Array.from({ length: 3 }, (_, index) => (
-            <SongCardMobileSkeleton key={index} />
-          ))}
-        </div>
       </div>
 
       <div className="hidden lg:block">

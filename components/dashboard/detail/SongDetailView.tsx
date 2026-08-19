@@ -29,7 +29,7 @@ import { mockUser } from "@/lib/data/mock-dashboard";
 import { resolveSongArt } from "@/lib/songArt";
 import { formatDate, formatDayMonth, parseLocalDate } from "@/lib/format/date";
 import { formatFcfa } from "@/lib/format/currency";
-import { generateUnlockedLyrics, mockDeleteSong, mockPaySong } from "@/lib/data/mockLibraryActions";
+import { generateUnlockedLyrics, mockDeleteSong, mockPaySong } from "@/lib/data/mockHistoryActions";
 import { getPublishedEntryForSong } from "@/lib/data/mock-explorer";
 import { getContactById } from "@/lib/data/mock-contacts";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
@@ -80,7 +80,7 @@ export function SongDetailView({ song }: { song: Song }) {
       return;
     }
     setBirthday(birthdayDraft);
-    showToast(t("library.detail.birthdayReminderToast", { name: song.recipientFirstName }), "success");
+    showToast(t("history.detail.birthdayReminderToast", { name: song.recipientFirstName }), "success");
   }
 
   const isUnlocked = status === "paid" || status === "delivered";
@@ -107,7 +107,7 @@ export function SongDetailView({ song }: { song: Song }) {
     setStatus("paid");
     setLyrics((current) => current ?? generateUnlockedLyrics(song));
     setPayPhase("idle");
-    showToast(t("library.detail.unlockedToast"), "success");
+    showToast(t("history.detail.unlockedToast"), "success");
   }
 
   async function handleCopyLyrics() {
@@ -115,10 +115,10 @@ export function SongDetailView({ song }: { song: Song }) {
     try {
       await navigator.clipboard.writeText(lyrics);
       setCopied(true);
-      showToast(t("library.detail.lyricsCopied"), "success");
+      showToast(t("history.detail.lyricsCopied"), "success");
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
-      showToast(t("library.detail.copyFailed"), "danger");
+      showToast(t("history.detail.copyFailed"), "danger");
     }
   }
 
@@ -131,16 +131,16 @@ export function SongDetailView({ song }: { song: Song }) {
       : window.location.href;
     try {
       await navigator.clipboard.writeText(url);
-      showToast(t("library.item.linkCopied"), "success");
+      showToast(t("history.detail.linkCopied"), "success");
     } catch {
-      showToast(t("library.item.linkCopyFailed"), "danger");
+      showToast(t("history.detail.linkCopyFailed"), "danger");
     }
   }
 
   async function handleDelete() {
     setDeleting(true);
     await mockDeleteSong(song.id);
-    showToast(t("library.item.deletedToast", { name: song.recipientFirstName }), "default");
+    showToast(t("history.detail.deletedToast", { name: song.recipientFirstName }), "default");
     router.push("/bibliotheque");
   }
 
@@ -164,14 +164,14 @@ export function SongDetailView({ song }: { song: Song }) {
       lyrics: song.lyrics ? song.lyrics.split("\n").filter(Boolean) : [],
     });
     setPublishOpen(false);
-    showToast(t("library.detail.publishedToast"), "success");
+    showToast(t("history.detail.publishedToast"), "success");
   }
 
   // Aucune confirmation ici, volontairement — le risque à éviter est la
   // publication accidentelle, pas le retrait.
   function handleUnpublish() {
     setPublishedEntry(null);
-    showToast(t("library.detail.unpublishedToast"), "default");
+    showToast(t("history.detail.unpublishedToast"), "default");
   }
 
   return (
@@ -181,7 +181,7 @@ export function SongDetailView({ song }: { song: Song }) {
         className="-my-3.5 inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink"
       >
         <ArrowLeft className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
-        {t("library.detail.backToLibrary")}
+        {t("history.detail.backToHistory")}
       </Link>
 
       <div className="mt-5">
@@ -206,7 +206,7 @@ export function SongDetailView({ song }: { song: Song }) {
                 onBlur={handleSaveBirthday}
                 className="min-h-11 rounded-control border border-border bg-surface px-3 text-sm text-ink focus:border-brand focus:outline-none focus:shadow-ring-focus"
               />
-              <span className="text-xs text-ink-muted">{t("library.detail.birthdayEditHint")}</span>
+              <span className="text-xs text-ink-muted">{t("history.detail.birthdayEditHint")}</span>
             </label>
           ) : (
             <button
@@ -219,9 +219,9 @@ export function SongDetailView({ song }: { song: Song }) {
             >
               <Cake className="h-4 w-4 shrink-0" strokeWidth={1.5} aria-hidden="true" />
               {birthday ? (
-                <span>{t("library.detail.birthdayOn", { date: formatDayMonth(parseLocalDate(birthday), locale) })}</span>
+                <span>{t("history.detail.birthdayOn", { date: formatDayMonth(parseLocalDate(birthday), locale) })}</span>
               ) : (
-                <span className="text-brand">{t("library.detail.addBirthday")}</span>
+                <span className="text-brand">{t("history.detail.addBirthday")}</span>
               )}
               <Pencil
                 className="h-3.5 w-3.5 shrink-0 text-ink-muted/60 opacity-0 transition-opacity group-hover:opacity-100"
@@ -249,10 +249,10 @@ export function SongDetailView({ song }: { song: Song }) {
             <span className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-soft text-brand">
               <Wand2 className="h-6 w-6" strokeWidth={1.5} aria-hidden="true" />
             </span>
-            <p className="mt-4 font-display text-lg font-semibold text-ink">{t("library.detail.draftTitle")}</p>
-            <p className="mt-1 max-w-sm text-sm text-ink-muted">{t("library.detail.draftBody")}</p>
+            <p className="mt-4 font-display text-lg font-semibold text-ink">{t("history.detail.draftTitle")}</p>
+            <p className="mt-1 max-w-sm text-sm text-ink-muted">{t("history.detail.draftBody")}</p>
             <ButtonLink href={tunnelHref(song, true)} variant="primary" className="mt-5">
-              {t("library.detail.continueCreating")}
+              {t("history.detail.continueCreating")}
             </ButtonLink>
           </div>
         )}
@@ -262,9 +262,9 @@ export function SongDetailView({ song }: { song: Song }) {
             <span className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-soft">
               <Sparkles className="h-6 w-6 animate-breathe text-brand" strokeWidth={1.5} aria-hidden="true" />
             </span>
-            <p className="mt-4 font-display text-lg font-semibold text-ink">{t("library.detail.generatingTitle")}</p>
+            <p className="mt-4 font-display text-lg font-semibold text-ink">{t("history.detail.generatingTitle")}</p>
             <p className="mt-1 max-w-sm text-sm text-ink-muted">
-              {t("library.detail.generatingBody", { name: song.recipientFirstName })}
+              {t("history.detail.generatingBody", { name: song.recipientFirstName })}
             </p>
           </div>
         )}
@@ -274,10 +274,10 @@ export function SongDetailView({ song }: { song: Song }) {
             <span className="flex h-14 w-14 items-center justify-center rounded-full bg-danger/10 text-danger">
               <RotateCcw className="h-6 w-6" strokeWidth={1.5} aria-hidden="true" />
             </span>
-            <p className="mt-4 font-display text-lg font-semibold text-ink">{t("library.detail.failedTitle")}</p>
-            <p className="mt-1 max-w-sm text-sm text-ink-muted">{t("library.detail.failedBody")}</p>
+            <p className="mt-4 font-display text-lg font-semibold text-ink">{t("history.detail.failedTitle")}</p>
+            <p className="mt-1 max-w-sm text-sm text-ink-muted">{t("history.detail.failedBody")}</p>
             <ButtonLink href={tunnelHref(song, true)} variant="primary" className="mt-5">
-              {t("library.detail.retry")}
+              {t("history.detail.retry")}
             </ButtonLink>
           </div>
         )}
@@ -288,24 +288,24 @@ export function SongDetailView({ song }: { song: Song }) {
 
             {isAwaitingPayment && (
               <div className="mt-6">
-                <p className="text-sm text-ink-muted">{t("library.detail.paymentHint")}</p>
+                <p className="text-sm text-ink-muted">{t("history.detail.paymentHint")}</p>
                 {payPhase === "confirm" ? (
                   <div className="mt-3 rounded-card border border-border bg-page p-4">
                     <p className="text-sm text-ink">
-                      {t("library.detail.unlockConfirm", { price: formatFcfa(UNLOCK_PRICE_FCFA) })}
+                      {t("history.detail.unlockConfirm", { price: formatFcfa(UNLOCK_PRICE_FCFA) })}
                     </p>
                     <div className="mt-3 flex gap-2">
                       <Button onClick={handleConfirmPay} disabled={payPhase !== "confirm"} className="flex-1">
-                        {t("library.detail.confirm")}
+                        {t("history.detail.confirm")}
                       </Button>
                       <Button variant="ghost" onClick={() => setPayPhase("idle")} className="flex-1">
-                        {t("library.detail.cancel")}
+                        {t("history.detail.cancel")}
                       </Button>
                     </div>
                   </div>
                 ) : (
                   <Button onClick={() => setPayPhase("confirm")} className="mt-3 w-full sm:w-auto">
-                    {t("library.detail.payButton", { price: formatFcfa(UNLOCK_PRICE_FCFA) })}
+                    {t("history.detail.payButton", { price: formatFcfa(UNLOCK_PRICE_FCFA) })}
                   </Button>
                 )}
               </div>
@@ -319,13 +319,13 @@ export function SongDetailView({ song }: { song: Song }) {
                   className="mt-6 flex min-h-11 w-full items-center justify-center gap-2 rounded-control bg-brand px-5 py-3 text-sm font-semibold text-white transition-all duration-200 ease-magnetic hover:brightness-90 active:scale-[0.98] sm:w-auto"
                 >
                   <Download className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
-                  {t("library.detail.downloadMp3")}
+                  {t("history.detail.downloadMp3")}
                 </a>
 
                 {lyrics && (
                   <div className="mt-6 border-t border-border pt-6">
                     <div className="flex items-center justify-between">
-                      <p className="text-label-md uppercase tracking-wide text-ink-muted">{t("library.detail.lyricsTitle")}</p>
+                      <p className="text-label-md uppercase tracking-wide text-ink-muted">{t("history.detail.lyricsTitle")}</p>
                       <button
                         type="button"
                         onClick={handleCopyLyrics}
@@ -336,7 +336,7 @@ export function SongDetailView({ song }: { song: Song }) {
                         ) : (
                           <Copy className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />
                         )}
-                        {copied ? t("library.detail.copied") : t("library.detail.copy")}
+                        {copied ? t("history.detail.copied") : t("history.detail.copy")}
                       </button>
                     </div>
                     <pre className="mt-3 whitespace-pre-wrap font-sans text-sm leading-relaxed text-ink">
@@ -352,7 +352,7 @@ export function SongDetailView({ song }: { song: Song }) {
         {payPhase === "paying" && (
           <div className="mt-4 flex items-center gap-2 text-sm text-ink-muted">
             <Loader2 className="h-4 w-4 animate-spin-slow" strokeWidth={1.5} aria-hidden="true" />
-            {t("library.detail.processing")}
+            {t("history.detail.processing")}
           </div>
         )}
       </div>
@@ -367,29 +367,29 @@ export function SongDetailView({ song }: { song: Song }) {
           {publishedEntry ? (
             <>
               <div>
-                <p className="text-sm font-medium text-ink">{t("library.detail.publishedBadge")}</p>
-                <p className="mt-0.5 text-xs text-ink-muted">{tn("library.detail.likes", publishedEntry.likes)}</p>
+                <p className="text-sm font-medium text-ink">{t("history.detail.publishedBadge")}</p>
+                <p className="mt-0.5 text-xs text-ink-muted">{tn("history.detail.likes", publishedEntry.likes)}</p>
               </div>
               <button
                 type="button"
                 onClick={handleUnpublish}
                 className="shrink-0 rounded-control border border-border px-3.5 py-2 text-xs font-semibold text-ink-muted transition-all duration-150 ease-magnetic hover:border-danger/40 hover:text-danger active:scale-95"
               >
-                {t("library.detail.unpublish")}
+                {t("history.detail.unpublish")}
               </button>
             </>
           ) : (
             <>
               <div>
-                <p className="text-sm font-medium text-ink">{t("library.detail.publishToExplore")}</p>
-                <p className="mt-0.5 text-xs text-ink-muted">{t("library.detail.publishHint")}</p>
+                <p className="text-sm font-medium text-ink">{t("history.detail.publishToExplore")}</p>
+                <p className="mt-0.5 text-xs text-ink-muted">{t("history.detail.publishHint")}</p>
               </div>
               <button
                 type="button"
                 onClick={() => setPublishOpen(true)}
                 className="shrink-0 rounded-control border border-brand/40 px-3.5 py-2 text-xs font-semibold text-brand transition-all duration-150 ease-magnetic hover:bg-brand-soft active:scale-95"
               >
-                {t("library.detail.publish")}
+                {t("history.detail.publish")}
               </button>
             </>
           )}
@@ -401,7 +401,7 @@ export function SongDetailView({ song }: { song: Song }) {
           onClick={() => setPublishOpen(true)}
           className="mt-6 text-sm font-medium text-ink-muted hover:text-brand hover:underline"
         >
-          {t("library.detail.publishTribute")}
+          {t("history.detail.publishTribute")}
         </button>
       )}
 
@@ -420,30 +420,30 @@ export function SongDetailView({ song }: { song: Song }) {
         {isUnlocked && (
           <Button variant="secondary" onClick={handleShare}>
             <Share2 className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
-            {t("library.detail.shareLink")}
+            {t("history.detail.shareLink")}
           </Button>
         )}
         <ButtonLink variant="secondary" href={tunnelHref(song, false)}>
           <Wand2 className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
-          {t("library.detail.redoFor", { name: song.recipientFirstName })}
+          {t("history.detail.redoFor", { name: song.recipientFirstName })}
         </ButtonLink>
         <Button variant="ghost" onClick={() => setDeleteOpen(true)} className="text-danger hover:bg-danger/10">
           <Trash2 className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
-          {t("library.detail.delete")}
+          {t("history.detail.delete")}
         </Button>
       </div>
 
       <Modal open={deleteOpen} onClose={() => setDeleteOpen(false)} labelledBy="delete-song-title">
         <p id="delete-song-title" className="font-display text-lg font-semibold text-ink">
-          {t("library.item.deleteTitle", { name: song.recipientFirstName })}
+          {t("history.detail.deleteTitle", { name: song.recipientFirstName })}
         </p>
-        <p className="mt-2 text-sm text-ink-muted">{t("library.item.deleteBody", { name: song.recipientFirstName })}</p>
+        <p className="mt-2 text-sm text-ink-muted">{t("history.detail.deleteBody", { name: song.recipientFirstName })}</p>
         <div className="mt-5 flex gap-3">
           <Button variant="ghost" onClick={() => setDeleteOpen(false)} className="flex-1" disabled={deleting}>
-            {t("library.item.cancel")}
+            {t("history.detail.cancel")}
           </Button>
           <Button onClick={handleDelete} disabled={deleting} className="flex-1 !bg-danger hover:!brightness-90">
-            {deleting ? t("library.item.deleting") : t("library.item.delete")}
+            {deleting ? t("history.detail.deleting") : t("history.detail.delete")}
           </Button>
         </div>
       </Modal>

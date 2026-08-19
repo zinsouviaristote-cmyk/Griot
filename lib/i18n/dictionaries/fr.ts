@@ -25,7 +25,7 @@ export const fr = {
     discover: "Découvrir",
     home: "Accueil",
     explore: "Explorer",
-    library: "Ma bibliothèque",
+    history: "Historique",
     create: "Créer",
     newSong: "Nouvelle chanson",
     me: "Moi",
@@ -105,7 +105,7 @@ export const fr = {
     bottomNav: {
       home: "Accueil",
       explore: "Explorer",
-      library: "Bibliothèque",
+      history: "Historique",
       profile: "Profil",
       create: "Créer une chanson",
     },
@@ -133,12 +133,12 @@ export const fr = {
     backHome: "Retour à l'accueil",
   },
 
-  library: {
-    pageTitle: "Ma bibliothèque",
+  history: {
+    pageTitle: "Mon historique",
     pageSubtitle: "Toutes vos chansons, à un seul endroit : cherchez, filtrez, ouvrez.",
     searchPlaceholder: "Rechercher par prénom du destinataire…",
     searchAriaLabel: "Rechercher par prénom du destinataire",
-    sortAriaLabel: "Trier la bibliothèque",
+    sortAriaLabel: "Trier l'historique",
     sort: { recent: "Plus récentes", oldest: "Plus anciennes", mostListened: "Plus écoutées" },
     shortcuts: { all: "Toutes", published: "Publiées", downloaded: "Téléchargées" },
     filters: {
@@ -154,6 +154,7 @@ export const fr = {
       previewReady: "Extrait prêt",
       awaitingPayment: "En attente de paiement",
       paid: "Payée",
+      delivered: "Livrée",
       failed: "Échec",
     },
     action: {
@@ -164,8 +165,8 @@ export const fr = {
       download: "Télécharger",
       retry: "Réessayer",
     },
-    emptyLibrary: {
-      title: "Votre bibliothèque est vide pour l'instant",
+    emptyHistory: {
+      title: "Votre historique est vide pour l'instant",
       description: "Chaque chanson que vous créez apparaît ici : un souvenir que vous pouvez réécouter et partager quand vous voulez.",
     },
     noResults: {
@@ -194,7 +195,7 @@ export const fr = {
       actionsMenu: { moreActions: "Plus d'actions", close: "Fermer le menu", delete: "Supprimer" },
     },
     detail: {
-      backToLibrary: "Ma bibliothèque",
+      backToHistory: "Mon historique",
       birthdayEditHint: "Pour vous prévenir l'an prochain.",
       birthdayOn: "Anniversaire le {{date}}",
       addBirthday: "Ajouter sa date d'anniversaire",

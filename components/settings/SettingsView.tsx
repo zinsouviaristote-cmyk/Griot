@@ -21,8 +21,6 @@ interface NotificationRow {
 }
 
 const NOTIFICATION_ROWS: NotificationRow[] = [
-  { key: "birthday", labelKey: "settings.notificationRows.birthday.label", descriptionKey: "settings.notificationRows.birthday.description" },
-  { key: "ready", labelKey: "settings.notificationRows.ready.label", descriptionKey: "settings.notificationRows.ready.description" },
   { key: "payment", labelKey: "settings.notificationRows.payment.label", descriptionKey: "settings.notificationRows.payment.description" },
 ];
 

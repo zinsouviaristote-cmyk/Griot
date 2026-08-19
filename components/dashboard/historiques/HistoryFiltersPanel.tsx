@@ -20,7 +20,7 @@ const STATUS_OPTIONS: { status: SongStatus; labelKey: string }[] = [
  * que leurs noms : à plus de deux ou trois cochés, les lister rendrait le
  * bouton plus large que ce qu'il déclenche.
  */
-export function LibraryFiltersPanel({
+export function HistoryFiltersPanel({
   active,
   onChange,
 }: {

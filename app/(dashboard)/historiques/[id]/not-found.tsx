@@ -13,9 +13,9 @@ export default function SongNotFound() {
     <div className="mx-auto max-w-2xl">
       <EmptyState
         icon={Music4}
-        title={t("library.notFound.title")}
-        description={t("library.notFound.description")}
-        actionLabel={t("library.notFound.action")}
+        title={t("history.notFound.title")}
+        description={t("history.notFound.description")}
+        actionLabel={t("history.notFound.action")}
         actionHref="/bibliotheque"
       />
     </div>

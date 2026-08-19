@@ -26,7 +26,7 @@ export function SongCardMobile({ song }: { song: Song }) {
       onKeyDown={(event) => {
         if (event.key === "Enter") router.push(detailHref);
       }}
-      aria-label={t("library.item.viewSongAriaLabel", { name: song.recipientFirstName })}
+      aria-label={t("history.item.viewSongAriaLabel", { name: song.recipientFirstName })}
       className="cursor-pointer rounded-card border border-border bg-surface p-4 shadow-card transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-card-hover focus-visible:outline-none focus-visible:shadow-ring-focus"
     >
       <div className="flex items-start justify-between gap-3">

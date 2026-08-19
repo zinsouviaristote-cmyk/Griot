@@ -39,7 +39,7 @@ export function SongActionsMenu({
           event.stopPropagation();
           setOpen((v) => !v);
         }}
-        aria-label={t("library.item.actionsMenu.moreActions")}
+        aria-label={t("history.item.actionsMenu.moreActions")}
         aria-expanded={open}
         className="flex h-11 w-11 items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:bg-page hover:text-ink active:scale-90"
       >
@@ -50,7 +50,7 @@ export function SongActionsMenu({
         <>
           <button
             type="button"
-            aria-label={t("library.item.actionsMenu.close")}
+            aria-label={t("history.item.actionsMenu.close")}
             onClick={(event) => {
               event.preventDefault();
               event.stopPropagation();
@@ -71,7 +71,7 @@ export function SongActionsMenu({
               className="flex min-h-11 w-full items-center gap-3 px-4 text-left text-sm text-ink transition-colors hover:bg-brand-soft"
             >
               <Megaphone className="h-4 w-4 text-ink-muted" strokeWidth={1.5} aria-hidden="true" />
-              {isPublished ? t("library.item.unpublish") : t("library.item.publishToExplore")}
+              {isPublished ? t("history.item.unpublish") : t("history.item.publishToExplore")}
             </button>
             <Link
               href={redoHref}
@@ -92,7 +92,7 @@ export function SongActionsMenu({
               className="flex min-h-11 w-full items-center gap-3 px-4 text-left text-sm text-danger transition-colors hover:bg-danger/5"
             >
               <Trash2 className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
-              {t("library.item.actionsMenu.delete")}
+              {t("history.item.actionsMenu.delete")}
             </button>
           </div>
         </>

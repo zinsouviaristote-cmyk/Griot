@@ -26,7 +26,7 @@ export const en: DeepDictionary<typeof fr> = {
     discover: "Discover",
     home: "Home",
     explore: "Explore",
-    library: "My library",
+    history: "History",
     create: "Create",
     newSong: "New song",
     me: "Me",
@@ -106,7 +106,7 @@ export const en: DeepDictionary<typeof fr> = {
     bottomNav: {
       home: "Home",
       explore: "Explore",
-      library: "Library",
+      history: "History",
       profile: "Profile",
       create: "Create a song",
     },
@@ -134,12 +134,12 @@ export const en: DeepDictionary<typeof fr> = {
     backHome: "Back to home",
   },
 
-  library: {
-    pageTitle: "My library",
+  history: {
+    pageTitle: "My history",
     pageSubtitle: "All your songs, in one place: search, filter, open.",
     searchPlaceholder: "Search by recipient's first name…",
     searchAriaLabel: "Search by recipient's first name",
-    sortAriaLabel: "Sort the library",
+    sortAriaLabel: "Sort the history",
     sort: { recent: "Most recent", oldest: "Oldest", mostListened: "Most listened" },
     shortcuts: { all: "All", published: "Published", downloaded: "Downloaded" },
     filters: {
@@ -155,6 +155,7 @@ export const en: DeepDictionary<typeof fr> = {
       previewReady: "Preview ready",
       awaitingPayment: "Awaiting payment",
       paid: "Paid",
+      delivered: "Delivered",
       failed: "Failed",
     },
     action: {
@@ -165,8 +166,8 @@ export const en: DeepDictionary<typeof fr> = {
       download: "Download",
       retry: "Try again",
     },
-    emptyLibrary: {
-      title: "Your library is empty for now",
+    emptyHistory: {
+      title: "Your history is empty for now",
       description: "Every song you create appears here: a memory you can replay and share whenever you want.",
     },
     noResults: {
@@ -195,7 +196,7 @@ export const en: DeepDictionary<typeof fr> = {
       actionsMenu: { moreActions: "More actions", close: "Close menu", delete: "Delete" },
     },
     detail: {
-      backToLibrary: "My library",
+      backToHistory: "My history",
       birthdayEditHint: "So we can remind you next year.",
       birthdayOn: "Birthday on {{date}}",
       addBirthday: "Add their birthday",
@@ -237,7 +238,7 @@ export const en: DeepDictionary<typeof fr> = {
     notFound: {
       title: "This song no longer exists",
       description: "It may have been deleted, or the link is incorrect.",
-      action: "Back to my library",
+      action: "Back to my history",
     },
   },
 

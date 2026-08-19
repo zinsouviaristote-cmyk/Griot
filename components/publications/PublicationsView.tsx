@@ -1,7 +1,7 @@
 "use client";
 
 import { Heart, Megaphone } from "lucide-react";
-import { SongListItem } from "@/components/dashboard/library/SongListItem";
+import { SongListItem } from "@/components/dashboard/historiques/SongListItem";
 import { CountUp } from "@/components/ui/CountUp";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { getPublishedEntryForSong } from "@/lib/data/mock-explorer";
@@ -10,7 +10,7 @@ import { useLanguage } from "@/lib/i18n/LanguageContext";
 import type { Song } from "@/lib/types";
 
 /**
- * Mêmes lignes que la bibliothèque (SongListItem), un sous-ensemble de
+ * Mêmes lignes que l'historique (SongListItem), un sous-ensemble de
  * chansons : celles qui ont un enregistrement dans mock-explorer.ts. Dépublier
  * une ligne (menu « … ») retire son enregistrement local, exactement comme
  * avant — seule la présentation a changé, pas la mécanique.
