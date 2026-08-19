@@ -6,15 +6,17 @@ export const metadata: Metadata = {
   title: "Connexion : Griot",
 };
 
-// Hors DashboardShell — comme /creer, cet écran mérite toute l'attention, sans
-// sidebar ni barre de recherche pour la distraire. `returnTo` porte la page à
-// rejoindre après connexion ; sans lui (arrivée directe), c'est le tableau de
-// bord.
-export default function ConnexionPage({
+export default async function ConnexionPage({
   searchParams,
 }: {
-  searchParams: { returnTo?: string };
+  searchParams: Promise<{ returnTo?: string }>;
 }) {
-  const returnTo = searchParams.returnTo?.startsWith("/") ? searchParams.returnTo : DEFAULT_RETURN_TO;
+  // 💡 Résolution asynchrone des searchParams obligatoire sur Next.js 15+
+  const resolvedParams = await searchParams;
+  
+  const returnTo = resolvedParams.returnTo?.startsWith("/")
+    ? resolvedParams.returnTo
+    : DEFAULT_RETURN_TO;
+
   return <ConnexionView returnTo={returnTo} />;
 }
