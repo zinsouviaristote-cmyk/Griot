@@ -2,14 +2,13 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import type { Database } from "./types";
 
-export function createClient() {
-  const cookieStore = cookies();
+export async function createClient() {
+  const cookieStore = await cookies();
 
-  const supabaseUrl = 
+  const supabaseUrl =
     process.env.NEXT_PUBLIC_SUPABASE_URL || "https://ejssioxqjpubbqkifhko.supabase.co";
-  
-  // Replacez par la clé eyJ...
-  const supabaseAnonKey = 
+
+  const supabaseAnonKey =
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
 
   return createServerClient<Database>(
@@ -17,19 +16,14 @@ export function createClient() {
     supabaseAnonKey,
     {
       cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
+        getAll() {
+          return cookieStore.getAll();
         },
-        set(name: string, value: string, options: Record<string, unknown>) {
+        setAll(cookiesToSet) {
           try {
-            cookieStore.set({ name, value, ...options });
-          } catch {
-            // Ignoré si appelé depuis un Server Component pur
-          }
-        },
-        remove(name: string, options: Record<string, unknown>) {
-          try {
-            cookieStore.set({ name, value: "", ...options });
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            );
           } catch {
             // Ignoré si appelé depuis un Server Component pur
           }

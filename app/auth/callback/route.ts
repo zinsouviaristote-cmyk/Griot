@@ -4,32 +4,32 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  // Rediriger vers /tableau-de-bord par défaut au lieu de /dashboard
   const next = searchParams.get("next") ?? "/tableau-de-bord";
 
   if (code) {
-    // Ajouter await si createClient est une promesse
+    // 1. Déterminer l'URL de base exacte
+    const forwardedHost = request.headers.get("x-forwarded-host");
+    const isLocalEnv = process.env.NODE_ENV === "development";
+    const baseUrl =
+      !isLocalEnv && forwardedHost
+        ? `https://${forwardedHost}`
+        : origin;
+
+    // 2. Préparer la réponse de redirection
+    const response = NextResponse.redirect(`${baseUrl}${next}`);
+
+    // 3. Initialiser le client Supabase serveur avec la gestion des cookies de la réponse
     const supabase = await createClient();
+
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-    
+
     if (!error) {
-      const forwardedHost = request.headers.get("x-forwarded-host");
-      const isLocalEnv = process.env.NODE_ENV === "development";
-
-      let redirectUrl = `${origin}${next}`;
-      
-      // En production sur Vercel, utiliser le host transmis pour éviter les problèmes de domaine
-      if (!isLocalEnv && forwardedHost) {
-        redirectUrl = `https://${forwardedHost}${next}`;
-      }
-
-      const response = NextResponse.redirect(redirectUrl);
-      
-      // Définit également le cookie session pour la landing
+      // Cookie personnalisé si nécessaire
       response.cookies.set("griot_session", "1", {
         path: "/",
         maxAge: 30 * 24 * 60 * 60,
         sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
       });
 
       return response;
