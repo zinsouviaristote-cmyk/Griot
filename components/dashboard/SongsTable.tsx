@@ -7,14 +7,22 @@ import { useLanguage } from "@/lib/i18n/LanguageContext";
 import type { Song } from "@/lib/types";
 
 // Desktop uniquement — sur mobile, RecentSongsList affiche des cartes empilées.
-export function SongsTable({ songs }: { songs: Song[] }) {
+export function SongsTable({
+  songs,
+  emptyTitle,
+  emptyDescription,
+}: {
+  songs: Song[];
+  emptyTitle?: string;
+  emptyDescription?: string;
+}) {
   const { t } = useLanguage();
   if (songs.length === 0) {
     return (
       <EmptyState
         icon={Music4}
-        title={t("dashboard.recentSongs.emptyTitle")}
-        description={t("dashboard.recentSongs.emptyDescription")}
+        title={emptyTitle ?? t("dashboard.recentSongs.emptyTitle")}
+        description={emptyDescription ?? t("dashboard.recentSongs.emptyDescription")}
         actionLabel={t("dashboard.primaryAction.createFirstSong")}
         actionHref="/creer"
       />

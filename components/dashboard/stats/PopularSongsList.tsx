@@ -19,7 +19,7 @@ export function PopularSongsList({ songs }: { songs: Song[] }) {
         title={t("stats.popularSongs.emptyTitle")}
         description={t("stats.popularSongs.emptyDescription")}
         actionLabel={t("stats.popularSongs.emptyAction")}
-        actionHref="/bibliotheque"
+        actionHref="/historiques"
       />
     );
   }

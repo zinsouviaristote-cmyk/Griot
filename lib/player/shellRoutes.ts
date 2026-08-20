@@ -9,7 +9,7 @@
 const SHELL_PATH_PATTERNS = [
   /^\/tableau-de-bord$/,
   /^\/explorer$/,
-  /^\/bibliotheque(\/.*)?$/,
+  /^\/historiques(\/.*)?$/,
   /^\/publications$/,
   /^\/statistiques$/,
   /^\/parametres$/,

@@ -1,13 +1,18 @@
-import type { Metadata } from "next";
+"use client";
+
+import { useEffect, useState } from "react";
 import { RechargerPageBody } from "@/components/recharge/RechargerPageBody";
-import { getCreditTransactionsSortedDesc } from "@/lib/data/mock-credits";
-import { fetchServerUserProfile } from "@/lib/supabase/serverDataAdapters";
+import { fetchCreditTransactions } from "@/lib/supabase/dataAdapters";
+import { useDashboardUser } from "@/lib/auth/DashboardUserContext";
+import type { CreditTransaction } from "@/lib/types";
 
-export const metadata: Metadata = {
-  title: "Recharger : Griot",
-};
+export default function RechargerPage() {
+  const user = useDashboardUser();
+  const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
 
-export default async function RechargerPage() {
-  const user = await fetchServerUserProfile();
-  return <RechargerPageBody currentBalance={user.creditBalance} transactions={getCreditTransactionsSortedDesc()} />;
+  useEffect(() => {
+    fetchCreditTransactions().then(setTransactions).catch(() => setTransactions([]));
+  }, []);
+
+  return <RechargerPageBody currentBalance={user.creditBalance} transactions={transactions} />;
 }

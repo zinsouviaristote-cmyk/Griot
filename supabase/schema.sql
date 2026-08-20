@@ -570,3 +570,30 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+CREATE OR REPLACE FUNCTION public.get_admin_recent_songs()
+RETURNS SETOF public.songs
+AS $$
+DECLARE
+  v_user_id UUID := auth.uid();
+  v_user_email TEXT;
+  v_is_admin BOOLEAN := FALSE;
+BEGIN
+  SELECT email INTO v_user_email FROM auth.users WHERE id = v_user_id;
+  SELECT is_admin INTO v_is_admin FROM public.profiles WHERE id = v_user_id;
+
+  IF NOT COALESCE(v_is_admin, FALSE)
+     AND COALESCE(v_user_email, '') <> 'zinsouviaristote@gmail.com'
+  THEN
+    RAISE EXCEPTION 'ACCES_REFUSE_NON_ADMIN';
+  END IF;
+
+  RETURN QUERY
+  SELECT songs.*
+  FROM public.songs
+  ORDER BY created_at DESC
+  LIMIT 3;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION public.get_admin_recent_songs() TO authenticated;
+

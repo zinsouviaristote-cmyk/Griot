@@ -26,7 +26,7 @@ export function PublicationsView({ songs }: { songs: Song[] }) {
         title={t("publications.emptyTitle")}
         description={t("publications.emptyDescription")}
         actionLabel={t("publications.emptyAction")}
-        actionHref="/bibliotheque"
+        actionHref="/historiques"
       />
     );
   }

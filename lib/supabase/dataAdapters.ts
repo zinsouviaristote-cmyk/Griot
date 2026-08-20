@@ -1,8 +1,6 @@
 import { createClient } from "@/lib/supabase/client";
-import { mockUser, mockSongs } from "@/lib/data/mock-dashboard";
+import { mockUser } from "@/lib/data/mock-dashboard";
 import { mockContacts } from "@/lib/data/mock-contacts";
-import { mockPublishedSongs } from "@/lib/data/mock-explorer";
-import { mockCreditTransactions } from "@/lib/data/mock-credits";
 import type { Song, Contact, DashboardUser, PublishedSong, CreditTransaction, Occasion, MusicStyle, SongStatus, Relationship } from "@/lib/types";
 
 interface DBProfile {
@@ -163,19 +161,17 @@ export async function updateUserProfile({
 }
 
 export async function fetchCreditTransactions(): Promise<CreditTransaction[]> {
-  try {
-    const supabase = createClient();
-    const { data, error } = await supabase
-      .from("credit_transactions")
-      .select("*")
-      .order("created_at", { ascending: false });
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("credit_transactions")
+    .select("*")
+    .order("created_at", { ascending: false });
 
-    if (error || !data || data.length === 0) {
-      return mockCreditTransactions;
-    }
+  if (error) throw error;
+  if (!data || data.length === 0) return [];
 
-    const transactions = data as unknown as DBCreditTransaction[];
-    return transactions.map((t) => ({
+  const transactions = data as unknown as DBCreditTransaction[];
+  return transactions.map((t) => ({
       id: t.id,
       date: t.created_at.split("T")[0],
       motif: t.motif,
@@ -183,10 +179,7 @@ export async function fetchCreditTransactions(): Promise<CreditTransaction[]> {
       labelParams: t.label_params || undefined,
       delta: t.delta,
       balanceAfter: t.balance_after,
-    }));
-  } catch {
-    return mockCreditTransactions;
-  }
+  }));
 }
 
 // ==========================================
@@ -283,19 +276,17 @@ export async function saveUserContact(contact: Omit<Contact, "id"> & { id?: stri
 // ==========================================
 
 export async function fetchUserSongs(): Promise<Song[]> {
-  try {
-    const supabase = createClient();
-    const { data, error } = await supabase
-      .from("songs")
-      .select("*")
-      .order("created_at", { ascending: false });
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("songs")
+    .select("*")
+    .order("created_at", { ascending: false });
 
-    if (error || !data || data.length === 0) {
-      return mockSongs;
-    }
+  if (error) throw error;
+  if (!data) return [];
 
-    const songs = data as unknown as DBSong[];
-    return songs.map((s) => ({
+  const songs = data as unknown as DBSong[];
+  return songs.map((s) => ({
       id: s.id,
       recipientFirstName: s.recipient_first_name,
       relationship: s.relationship,
@@ -309,10 +300,7 @@ export async function fetchUserSongs(): Promise<Song[]> {
       contactId: s.contact_id,
       listens: s.listens_count,
       imageUrl: s.image_url,
-    }));
-  } catch {
-    return mockSongs;
-  }
+  }));
 }
 
 export async function createSongDraft(song: {
@@ -370,21 +358,19 @@ export async function createSongDraft(song: {
 // ==========================================
 
 export async function fetchPublishedExplorerSongs(): Promise<PublishedSong[]> {
-  try {
-    const supabase = createClient();
-    const { data, error } = await supabase
-      .from("published_songs")
-      .select("*")
-      .order("published_at", { ascending: false });
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("published_songs")
+    .select("*")
+    .order("published_at", { ascending: false });
 
-    if (error || !data || data.length === 0) {
-      return mockPublishedSongs;
-    }
+  if (error) throw error;
+  if (!data || data.length === 0) return [];
 
-    const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
-    const publications = data as unknown as DBPublishedSong[];
-    return publications.map((p) => ({
+  const publications = data as unknown as DBPublishedSong[];
+  return publications.map((p) => ({
       id: p.id,
       sourceSongId: p.source_song_id,
       mine: user ? p.user_id === user.id : false,
@@ -401,8 +387,5 @@ export async function fetchPublishedExplorerSongs(): Promise<PublishedSong[]> {
       authorName: "Griot",
       imageUrl: p.image_url,
       lyrics: p.lyrics || [],
-    }));
-  } catch {
-    return mockPublishedSongs;
-  }
+  }));
 }

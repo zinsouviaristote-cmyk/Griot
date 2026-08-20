@@ -40,7 +40,7 @@ export const en: DeepDictionary<typeof fr> = {
     rootLabel: "Account menu",
     account: "Account",
     settings: "Settings",
-    mySongs: "My songs",
+    mySongs: "History",
     language: "Language",
     languageAriaLabel: "Language",
     theme: "Theme",

@@ -16,7 +16,7 @@ export default function SongNotFound() {
         title={t("history.notFound.title")}
         description={t("history.notFound.description")}
         actionLabel={t("history.notFound.action")}
-        actionHref="/bibliotheque"
+        actionHref="/historiques"
       />
     </div>
   );

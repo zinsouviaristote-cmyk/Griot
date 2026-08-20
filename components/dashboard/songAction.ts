@@ -30,18 +30,18 @@ export function getSongAction(song: Song, t: Translate): SongAction {
     case "generating":
       return {
         label: t("history.action.inProgress"),
-        href: `/bibliotheque/${song.id}`,
+        href: `/historiques/${song.id}`,
         icon: Loader2,
         disabled: true,
         spin: true,
       };
     case "preview_ready":
-      return { label: t("history.action.listenPreview"), href: `/bibliotheque/${song.id}`, icon: Play };
+      return { label: t("history.action.listenPreview"), href: `/historiques/${song.id}`, icon: Play };
     case "awaiting_payment":
-      return { label: t("history.action.pay"), href: `/bibliotheque/${song.id}`, icon: Wand2 };
+      return { label: t("history.action.pay"), href: `/historiques/${song.id}`, icon: Wand2 };
     case "paid":
     case "delivered":
-      return { label: t("history.action.download"), href: `/bibliotheque/${song.id}`, icon: Download };
+      return { label: t("history.action.download"), href: `/historiques/${song.id}`, icon: Download };
     case "failed":
       return { label: t("history.action.retry"), href: resumeTunnelHref(song), icon: RotateCcw };
   }

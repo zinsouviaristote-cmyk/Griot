@@ -66,7 +66,7 @@ export function AvatarMenu({
                     {t("accountMenu.settings")}
                   </Link>
                   <Link
-                    href="/bibliotheque"
+                    href="/historiques"
                     onClick={close}
                     className="group flex min-h-[44px] items-center gap-3 px-4 text-sm text-ink transition-colors hover:bg-brand-soft"
                   >

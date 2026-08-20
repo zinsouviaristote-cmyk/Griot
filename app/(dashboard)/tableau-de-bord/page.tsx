@@ -1,14 +1,18 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import { CreateSongHero } from "@/components/dashboard/CreateSongHero";
 import { OccasionCarousel } from "@/components/dashboard/OccasionCarousel";
 import { SongsTable } from "@/components/dashboard/SongsTable";
 import { MobileGreeting } from "@/components/dashboard/mobile/MobileGreeting";
 import { PrimaryActionCard } from "@/components/dashboard/mobile/PrimaryActionCard";
+import { RecentSongsList } from "@/components/dashboard/mobile/RecentSongsList";
 import { Reveal } from "@/components/ui/Reveal";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { useDashboardUser } from "@/lib/auth/DashboardUserContext";
-import { mockSongs } from "@/lib/data/mock-dashboard";
+import { fetchUserSongs } from "@/lib/supabase/dataAdapters";
+import type { Song } from "@/lib/types";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 // Ajoutez ?vide=1 à l'URL pour prévisualiser l'état d'un tout nouvel utilisateur,
@@ -20,8 +24,15 @@ export default function DashboardPage({
 }) {
   const { t } = useLanguage();
   const user = useDashboardUser();
+  const [songs, setSongs] = useState<Song[]>([]);
+  const [songsLoading, setSongsLoading] = useState(true);
   const isEmptyPreview = searchParams.vide === "1";
-  const songs = isEmptyPreview ? [] : mockSongs;
+  useEffect(() => {
+    fetchUserSongs()
+      .then((userSongs) => setSongs(userSongs.slice(0, 3)))
+      .finally(() => setSongsLoading(false));
+  }, []);
+  const visibleSongs = isEmptyPreview ? [] : songs;
   const creditBalance = isEmptyPreview ? 0 : user.creditBalance;
 
   return (
@@ -32,7 +43,10 @@ export default function DashboardPage({
           <MobileGreeting firstName={user.firstName} creditBalance={creditBalance} />
         </Reveal>
         <Reveal delayMs={80}>
-          <PrimaryActionCard hasSongs={songs.length > 0} />
+          <PrimaryActionCard hasSongs={visibleSongs.length > 0} />
+        </Reveal>
+        <Reveal delayMs={160}>
+          <RecentSongsList songs={songsLoading ? [] : visibleSongs} />
         </Reveal>
       </div>
 
@@ -59,7 +73,7 @@ export default function DashboardPage({
           <div className="mb-3">
             <SectionTitle>{t("dashboard.latestSongs")}</SectionTitle>
           </div>
-          <SongsTable songs={songs} />
+          <SongsTable songs={songsLoading ? [] : visibleSongs} />
         </section>
       </div>
     </>

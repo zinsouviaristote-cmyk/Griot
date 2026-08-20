@@ -3,14 +3,18 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Music, DollarSign, Users, Disc, ShieldCheck, PlusCircle, ArrowUpRight, TrendingUp } from "lucide-react";
-import { fetchAdminStats, checkIsAdmin, type AdminStats } from "@/lib/supabase/adminAdapters";
+import { fetchAdminStats, fetchAdminRecentSongs, checkIsAdmin, type AdminStats } from "@/lib/supabase/adminAdapters";
 import { fetchUserProfile } from "@/lib/supabase/dataAdapters";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import type { DashboardUser } from "@/lib/types";
+import { SongsTable } from "@/components/dashboard/SongsTable";
+import type { DashboardUser, Song } from "@/lib/types";
 
 export function AdminDashboardView() {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [stats, setStats] = useState<AdminStats | null>(null);
+  const [statsError, setStatsError] = useState<string | null>(null);
+  const [recentSongs, setRecentSongs] = useState<Song[]>([]);
+  const [songsError, setSongsError] = useState<string | null>(null);
   const [userProfile, setUserProfile] = useState<DashboardUser | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -23,8 +27,17 @@ export function AdminDashboardView() {
       setIsAdmin(adminFlag);
       setUserProfile(uProfile);
       if (adminFlag) {
-        const s = await fetchAdminStats();
-        setStats(s);
+        const [statsResult, songsResult] = await Promise.allSettled([fetchAdminStats(), fetchAdminRecentSongs()]);
+        if (statsResult.status === "fulfilled") {
+          setStats(statsResult.value);
+        } else {
+          setStatsError(statsResult.reason instanceof Error ? statsResult.reason.message : "Les statistiques sont indisponibles.");
+        }
+        if (songsResult.status === "fulfilled") {
+          setRecentSongs(songsResult.value.slice(0, 3));
+        } else {
+          setSongsError(songsResult.reason instanceof Error ? songsResult.reason.message : "Les chansons récentes sont indisponibles.");
+        }
       }
       setLoading(false);
     }
@@ -93,6 +106,15 @@ export function AdminDashboardView() {
           </div>
         ) : (
           <>
+            {statsError && (
+              <div className="rounded-feature border border-danger/20 bg-danger/5 p-4 text-sm text-danger shadow-card">
+                {statsError}
+                <p className="mt-1 text-xs text-ink-muted">
+                  Vérifiez que la fonction SQL <code>get_admin_stats</code> a bien été exécutée dans Supabase.
+                </p>
+              </div>
+            )}
+
             {/* Grid des indicateurs clés */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {/* Revenus Totaux */}
@@ -104,7 +126,7 @@ export function AdminDashboardView() {
                   </div>
                 </div>
                 <p className="mt-3 font-display text-display-sm font-bold text-ink">
-                  {(stats?.totalRevenueFcfa || 0).toLocaleString("fr-FR")} FCFA
+                  {stats ? `${stats.totalRevenueFcfa.toLocaleString("fr-FR")} FCFA` : "—"}
                 </p>
                 <div className="mt-2 flex items-center gap-1.5 text-xs text-emerald-600 font-medium">
                   <TrendingUp className="h-3.5 w-3.5" />
@@ -121,7 +143,7 @@ export function AdminDashboardView() {
                   </div>
                 </div>
                 <p className="mt-3 font-display text-display-sm font-bold text-ink">
-                  {stats?.totalSongs || 0}
+                  {stats?.totalSongs ?? "—"}
                 </p>
                 <p className="mt-2 text-xs text-ink-muted">Chansons enregistrées en base</p>
               </div>
@@ -135,7 +157,7 @@ export function AdminDashboardView() {
                   </div>
                 </div>
                 <p className="mt-3 font-display text-display-sm font-bold text-ink">
-                  {stats?.totalNotesSold || 0} Notes
+                  {stats ? `${stats.totalNotesSold} Notes` : "—"}
                 </p>
                 <p className="mt-2 text-xs text-ink-muted">Packs de 2, 6 et 10 Notes</p>
               </div>
@@ -149,7 +171,7 @@ export function AdminDashboardView() {
                   </div>
                 </div>
                 <p className="mt-3 font-display text-display-sm font-bold text-ink">
-                  {stats?.totalUsers || 0}
+                  {stats?.totalUsers ?? "—"}
                 </p>
                 <p className="mt-2 text-xs text-ink-muted">Inscriptions Google & E-mail</p>
               </div>
@@ -163,7 +185,7 @@ export function AdminDashboardView() {
                   </div>
                 </div>
                 <p className="mt-3 font-display text-display-sm font-bold text-ink">
-                  {stats?.totalListens || 0}
+                  {stats?.totalListens ?? "—"}
                 </p>
                 <p className="mt-2 text-xs text-ink-muted">Lectures audio uniques et publiques</p>
               </div>
@@ -177,11 +199,24 @@ export function AdminDashboardView() {
                   </div>
                 </div>
                 <p className="mt-3 font-display text-display-sm font-bold text-ink">
-                  {stats?.totalPublications || 0}
+                  {stats?.totalPublications ?? "—"}
                 </p>
                 <p className="mt-2 text-xs text-ink-muted">Chansons publiées dans la communauté</p>
               </div>
             </div>
+
+            <section>
+              <h2 className="mb-3 font-display text-title-lg font-semibold text-ink">Les 3 dernières chansons</h2>
+              {songsError ? (
+                <p className="rounded-card border border-danger/20 bg-danger/5 p-4 text-sm text-danger">{songsError}</p>
+              ) : (
+                <SongsTable
+                  songs={recentSongs}
+                  emptyTitle="Aucune chanson créée"
+                  emptyDescription="Les chansons créées par les utilisateurs apparaîtront ici."
+                />
+              )}
+            </section>
 
             {/* Raccourcis de Gestion */}
             <div className="rounded-feature border border-border bg-surface p-6 shadow-card">
@@ -201,11 +236,11 @@ export function AdminDashboardView() {
                 </Link>
 
                 <Link
-                  href="/bibliotheque"
+                  href="/historiques"
                   className="flex items-center justify-between rounded-control border border-border bg-page p-4 transition-all hover:border-brand/40"
                 >
                   <div>
-                    <p className="font-semibold text-ink text-sm">Ma Bibliothèque</p>
+                    <p className="font-semibold text-ink text-sm">Historique</p>
                     <p className="text-xs text-ink-muted mt-0.5">Vos chansons personnelles</p>
                   </div>
                   <ArrowUpRight className="h-4 w-4 text-brand" />

@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
+import type { Song } from "@/lib/types";
 
 export interface AdminStats {
   totalSongs: number;
@@ -31,46 +32,65 @@ export async function checkIsAdmin(): Promise<boolean> {
 }
 
 export async function fetchAdminStats(): Promise<AdminStats> {
-  try {
-    const supabase = createClient();
-    const { data, error } = await supabase.rpc("get_admin_stats", {});
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc("get_admin_stats", {});
 
-    if (error || !data) {
-      return {
-        totalSongs: 7,
-        totalUsers: 1,
-        totalRevenueFcfa: 15700,
-        totalNotesSold: 18,
-        totalListens: 48,
-        totalPublications: 2,
-      };
-    }
+  if (error) throw new Error(`Impossible de récupérer les statistiques réelles : ${error.message}`);
+  if (!data) throw new Error("Aucune statistique réelle n'a été renvoyée par Supabase.");
 
-    const res = data as unknown as {
-      total_songs: number;
-      total_users: number;
-      total_revenue_fcfa: number;
-      total_notes_sold: number;
-      total_listens: number;
-      total_publications: number;
-    };
+  const res = data as unknown as {
+    total_songs: number;
+    total_users: number;
+    total_revenue_fcfa: number;
+    total_notes_sold: number;
+    total_listens: number;
+    total_publications: number;
+  };
 
-    return {
-      totalSongs: res.total_songs,
-      totalUsers: res.total_users,
-      totalRevenueFcfa: res.total_revenue_fcfa,
-      totalNotesSold: res.total_notes_sold,
-      totalListens: res.total_listens,
-      totalPublications: res.total_publications,
-    };
-  } catch {
-    return {
-      totalSongs: 7,
-      totalUsers: 1,
-      totalRevenueFcfa: 15700,
-      totalNotesSold: 18,
-      totalListens: 48,
-      totalPublications: 2,
-    };
-  }
+  return {
+    totalSongs: res.total_songs,
+    totalUsers: res.total_users,
+    totalRevenueFcfa: res.total_revenue_fcfa,
+    totalNotesSold: res.total_notes_sold,
+    totalListens: res.total_listens,
+    totalPublications: res.total_publications,
+  };
+}
+
+export async function fetchAdminRecentSongs(): Promise<Song[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc("get_admin_recent_songs", {});
+  if (error) throw new Error(`Impossible de récupérer les chansons récentes : ${error.message}`);
+  if (!data) return [];
+
+  return (data as unknown as Array<{
+    id: string;
+    recipient_first_name: string;
+    relationship: string;
+    occasion: string;
+    style: string;
+    status: string;
+    created_at: string;
+    duration_seconds: number | null;
+    audio_path: string | null;
+    preview_audio_path: string | null;
+    lyrics: string | null;
+    contact_id: string | null;
+    listens_count: number;
+    image_url: string | null;
+  }>).map((song) => ({
+    id: song.id,
+    recipientFirstName: song.recipient_first_name,
+    relationship: song.relationship,
+    occasion: song.occasion as Song["occasion"],
+    style: song.style as Song["style"],
+    status: song.status as Song["status"],
+    createdAt: song.created_at.split("T")[0],
+    durationSeconds: song.duration_seconds,
+    audioUrl: song.audio_path || song.preview_audio_path || null,
+    lyrics: song.lyrics,
+    contactId: song.contact_id,
+    listens: song.listens_count,
+    imageUrl: song.image_url,
+  }));
 }

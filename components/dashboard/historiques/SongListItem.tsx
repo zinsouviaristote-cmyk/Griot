@@ -51,7 +51,7 @@ export function SongListItem({ song, index = 0, queue }: { song: Song; index?: n
   const [deleting, setDeleting] = useState(false);
   const [deleted, setDeleted] = useState(false);
 
-  const detailHref = `/bibliotheque/${song.id}`;
+  const detailHref = `/historiques/${song.id}`;
   const action = getSongAction(song, t);
   const isUnlocked = song.status === "paid" || song.status === "delivered";
 

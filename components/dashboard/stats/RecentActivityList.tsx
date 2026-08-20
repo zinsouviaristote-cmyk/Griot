@@ -18,7 +18,7 @@ export function RecentActivityList({ entries }: { entries: ActivityEntry[] }) {
         title={t("stats.recentActivity.emptyTitle")}
         description={t("stats.recentActivity.emptyDescription")}
         actionLabel={t("stats.recentActivity.emptyAction")}
-        actionHref="/bibliotheque"
+        actionHref="/historiques"
       />
     );
   }

@@ -20,7 +20,7 @@ export function ReferralCard({ stats }: { stats: ReferralStats }) {
         title={t("stats.referral.emptyTitle")}
         description={t("stats.referral.emptyDescription")}
         actionLabel={t("stats.referral.emptyAction")}
-        actionHref="/bibliotheque"
+        actionHref="/historiques"
       />
     );
   }

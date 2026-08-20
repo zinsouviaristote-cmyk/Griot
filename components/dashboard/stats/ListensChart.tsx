@@ -233,7 +233,7 @@ export function ListensChart({ hasListens }: { hasListens: boolean }) {
         title={t("stats.listensChart.emptyTitle")}
         description={t("stats.listensChart.emptyDescription")}
         actionLabel={t("stats.listensChart.emptyAction")}
-        actionHref="/bibliotheque"
+        actionHref="/historiques"
       />
     );
   }

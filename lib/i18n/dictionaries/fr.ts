@@ -39,7 +39,7 @@ export const fr = {
     rootLabel: "Menu du compte",
     account: "Compte",
     settings: "Paramètres",
-    mySongs: "Mes chansons",
+    mySongs: "Historique",
     language: "Langue",
     languageAriaLabel: "Langue",
     theme: "Thème",

@@ -141,7 +141,7 @@ export function SongDetailView({ song }: { song: Song }) {
     setDeleting(true);
     await mockDeleteSong(song.id);
     showToast(t("history.detail.deletedToast", { name: song.recipientFirstName }), "default");
-    router.push("/bibliotheque");
+    router.push("/historiques");
   }
 
   function handlePublish({ hideFirstName, publicTitle, imageUrl: publishedImageUrl }: PublishModalOutput) {
@@ -177,7 +177,7 @@ export function SongDetailView({ song }: { song: Song }) {
   return (
     <div className="mx-auto max-w-2xl">
       <Link
-        href="/bibliotheque"
+        href="/historiques"
         className="-my-3.5 inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink"
       >
         <ArrowLeft className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />

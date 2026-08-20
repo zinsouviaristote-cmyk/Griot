@@ -16,7 +16,7 @@ export function SongCardMobile({ song }: { song: Song }) {
   const { t, locale } = useLanguage();
   const router = useRouter();
   const action = getSongAction(song, t);
-  const detailHref = `/bibliotheque/${song.id}`;
+  const detailHref = `/historiques/${song.id}`;
 
   return (
     <div
