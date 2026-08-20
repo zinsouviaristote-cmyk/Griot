@@ -17,6 +17,7 @@ import {
 import { Avatar } from "@/components/ui/Avatar";
 import { LogoutConfirmModal } from "@/components/auth/LogoutConfirmModal";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { useTheme, type Theme } from "@/lib/i18n/ThemeContext";
 import type { Locale } from "@/lib/i18n/locale";
 
 type Panel = "root" | "langue" | "theme";
@@ -75,6 +76,7 @@ export function SidebarUserMenu({
   email: string;
 }) {
   const { t, locale, setLocale } = useLanguage();
+  const { theme, setTheme } = useTheme();
   const [open, setOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [panel, setPanel] = useState<Panel>("root");
@@ -97,9 +99,9 @@ export function SidebarUserMenu({
   ];
 
   const themeOptions: OptionRow[] = [
-    { key: "light", label: t("accountMenu.themeLight"), active: true },
-    { key: "dark", label: t("accountMenu.themeDark"), active: false, soon: true },
-    { key: "system", label: t("accountMenu.themeSystem"), active: false, soon: true },
+    { key: "light", label: t("accountMenu.themeLight"), active: theme === "light", onSelect: () => setTheme("light") },
+    { key: "dark", label: t("accountMenu.themeDark"), active: theme === "dark", onSelect: () => setTheme("dark") },
+    { key: "system", label: t("accountMenu.themeSystem"), active: theme === "system", onSelect: () => setTheme("system") },
   ];
 
   useEffect(() => {

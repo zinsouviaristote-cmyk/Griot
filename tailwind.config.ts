@@ -34,14 +34,14 @@ const config: Config = {
           amour: "#c026d3",
           hommage: "#4a3b66",
         },
-        page: "#f7f9fb",
-        surface: "#ffffff",
+        page: "rgb(var(--color-page) / <alpha-value>)",
+        surface: "rgb(var(--color-surface) / <alpha-value>)",
         // outline-variant à faible opacité, tel que prescrit — pas un token opaque.
-        border: "rgba(204,195,216,0.5)",
+        border: "rgb(var(--color-border) / 0.5)",
         ink: {
-          DEFAULT: "#191c1e",
+          DEFAULT: "rgb(var(--color-ink) / <alpha-value>)",
           // Plancher de contraste : jamais plus clair que ça (lisibilité plein soleil).
-          muted: "#4a4455",
+          muted: "rgb(var(--color-ink-muted) / <alpha-value>)",
         },
         success: "#0e9f6e",
         warning: "#b45309",

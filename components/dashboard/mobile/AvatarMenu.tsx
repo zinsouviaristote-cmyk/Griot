@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Check, ChevronLeft, ChevronRight, CircleHelp, Globe, LogOut, Music, Settings } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, CircleHelp, Globe, LogOut, Music, Settings, SunMedium } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { LogoutConfirmModal } from "@/components/auth/LogoutConfirmModal";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { useTheme, type Theme } from "@/lib/i18n/ThemeContext";
 import type { Locale } from "@/lib/i18n/locale";
 
-type Panel = "root" | "langue";
+type Panel = "root" | "langue" | "theme";
 
 export function AvatarMenu({
   initials,
@@ -20,6 +21,7 @@ export function AvatarMenu({
   email: string;
 }) {
   const { t, locale, setLocale } = useLanguage();
+  const { theme, setTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [panel, setPanel] = useState<Panel>("root");
@@ -84,6 +86,17 @@ export function AvatarMenu({
                     </span>
                     <ChevronRight className="h-4 w-4 text-ink-muted" strokeWidth={1.5} aria-hidden="true" />
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => setPanel("theme")}
+                    className="group flex w-full min-h-[44px] items-center justify-between gap-3 px-4 text-sm text-ink transition-colors hover:bg-brand-soft"
+                  >
+                    <span className="flex items-center gap-3">
+                      <SunMedium className="h-4 w-4 text-ink-muted" strokeWidth={1.5} aria-hidden="true" />
+                      {t("accountMenu.theme")}
+                    </span>
+                    <ChevronRight className="h-4 w-4 text-ink-muted" strokeWidth={1.5} aria-hidden="true" />
+                  </button>
                   <Link
                     href="/aide"
                     onClick={close}
@@ -115,10 +128,10 @@ export function AvatarMenu({
                   className="flex min-h-[44px] w-full items-center gap-2 border-b border-border px-3 text-sm font-medium text-ink-muted transition-colors hover:text-ink"
                 >
                   <ChevronLeft className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
-                  {t("accountMenu.language")}
+                  {panel === "langue" ? t("accountMenu.language") : t("accountMenu.theme")}
                 </button>
                 <div className="py-1.5">
-                  {(["fr", "en"] as Locale[]).map((option) => (
+                  {panel === "langue" && (["fr", "en"] as Locale[]).map((option) => (
                     <button
                       key={option}
                       type="button"
@@ -132,6 +145,22 @@ export function AvatarMenu({
                     >
                       <span>{t(option === "fr" ? "accountMenu.languageFrench" : "accountMenu.languageEnglish")}</span>
                       {locale === option && <Check className="h-4 w-4 text-brand" strokeWidth={1.5} aria-hidden="true" />}
+                    </button>
+                  ))}
+                  {panel === "theme" && (["light", "dark", "system"] as Theme[]).map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      role="menuitemradio"
+                      aria-checked={theme === option}
+                      onClick={() => {
+                        setTheme(option);
+                        close();
+                      }}
+                      className="flex min-h-[44px] w-full items-center justify-between gap-3 px-4 text-left text-sm text-ink transition-colors hover:bg-brand-soft"
+                    >
+                      <span>{t(`accountMenu.theme${option === "light" ? "Light" : option === "dark" ? "Dark" : "System"}`)}</span>
+                      {theme === option && <Check className="h-4 w-4 text-brand" strokeWidth={1.5} aria-hidden="true" />}
                     </button>
                   ))}
                 </div>

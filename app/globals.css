@@ -5,10 +5,24 @@
 @layer base {
   :root {
     color-scheme: light;
+    --color-page: 247 249 251;
+    --color-surface: 255 255 255;
+    --color-border: 204 195 216;
+    --color-ink: 25 28 30;
+    --color-ink-muted: 74 68 85;
     /* Hauteur de la pilule de navigation flottante (voir LandingNav) + marge :
        référence unique pour le scroll-padding global et le scroll-margin de
        chaque section, pour qu'aucun titre ne puisse atterrir sous la barre. */
     --nav-clearance: 6.5rem;
+  }
+
+  html.dark {
+    color-scheme: dark;
+    --color-page: 18 19 24;
+    --color-surface: 29 30 38;
+    --color-border: 74 70 88;
+    --color-ink: 245 243 248;
+    --color-ink-muted: 190 184 201;
   }
 
   html {
@@ -68,4 +82,31 @@
       scroll-behavior: auto !important;
     }
   }
+}
+
+/* Les tokens restent synchronisés avec le thème même si une feuille Tailwind
+   déjà générée contient encore les anciennes valeurs statiques. */
+html.dark body,
+html.dark .bg-page {
+  background-color: rgb(var(--color-page) / var(--tw-bg-opacity, 1)) !important;
+}
+
+html.dark .bg-page\/95 {
+  background-color: rgb(var(--color-page) / 0.95) !important;
+}
+
+html.dark .bg-surface {
+  background-color: rgb(var(--color-surface) / var(--tw-bg-opacity, 1)) !important;
+}
+
+html.dark .text-ink {
+  color: rgb(var(--color-ink) / var(--tw-text-opacity, 1)) !important;
+}
+
+html.dark .text-ink-muted {
+  color: rgb(var(--color-ink-muted) / var(--tw-text-opacity, 1)) !important;
+}
+
+html.dark .border-border {
+  border-color: rgb(var(--color-border) / 0.5) !important;
 }

@@ -4,6 +4,7 @@ import { ToastProvider } from "@/components/ui/Toast";
 import { PlayerProvider } from "@/lib/player/PlayerContext";
 import { PersistentPlayerBar } from "@/components/player/PersistentPlayerBar";
 import { LanguageProvider } from "@/lib/i18n/LanguageContext";
+import { ThemeProvider } from "@/lib/i18n/ThemeContext";
 import { AuthToastBridge } from "@/components/auth/AuthToastBridge";
 import "./globals.css";
 
@@ -46,13 +47,15 @@ export default function RootLayout({
     <html lang="fr" className={`${manrope.variable} ${hankenGrotesk.variable}`}>
       <body className="font-sans">
         <LanguageProvider>
-          <ToastProvider>
-            <AuthToastBridge />
-            <PlayerProvider>
-              {children}
-              <PersistentPlayerBar />
-            </PlayerProvider>
-          </ToastProvider>
+          <ThemeProvider>
+            <ToastProvider>
+              <AuthToastBridge />
+              <PlayerProvider>
+                {children}
+                <PersistentPlayerBar />
+              </PlayerProvider>
+            </ToastProvider>
+          </ThemeProvider>
         </LanguageProvider>
       </body>
     </html>
