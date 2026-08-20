@@ -28,12 +28,12 @@ export function AidePageBody() {
       <SectionTitle as="h1" size="lg">
         {t("help.pageTitle")}
       </SectionTitle>
-      <p className="mt-2 text-body-md text-ink-muted">{t("help.pageSubtitle")}</p>
+      <p className="mt-1.5 text-sm text-ink-muted">{t("help.pageSubtitle")}</p>
 
-      <div className="mt-6 flex flex-col gap-3">
+      <div className="mt-5 flex flex-col gap-2.5">
         {faq.map((item, index) => (
           <Reveal key={item.question} delayMs={index * 80}>
-            <div className="rounded-card border border-border bg-surface p-5 shadow-card">
+            <div className="rounded-card border border-border bg-surface p-4 shadow-card">
               <p className="font-display text-base font-semibold text-ink">{item.question}</p>
               <p className="mt-2 text-sm leading-relaxed text-ink-muted">{item.answer}</p>
             </div>

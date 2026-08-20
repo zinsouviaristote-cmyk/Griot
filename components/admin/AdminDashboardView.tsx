@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Music, DollarSign, Users, Disc, ShieldCheck, PlusCircle, ArrowUpRight, TrendingUp } from "lucide-react";
-import { fetchAdminStats, fetchAdminRecentSongs, checkIsAdmin, type AdminStats } from "@/lib/supabase/adminAdapters";
+import { fetchAdminStats, fetchAdminRecentSongs, fetchAdminOverview, checkIsAdmin, type AdminOverview, type AdminStats } from "@/lib/supabase/adminAdapters";
 import { fetchUserProfile } from "@/lib/supabase/dataAdapters";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { SongsTable } from "@/components/dashboard/SongsTable";
@@ -15,6 +15,8 @@ export function AdminDashboardView() {
   const [statsError, setStatsError] = useState<string | null>(null);
   const [recentSongs, setRecentSongs] = useState<Song[]>([]);
   const [songsError, setSongsError] = useState<string | null>(null);
+  const [overview, setOverview] = useState<AdminOverview | null>(null);
+  const [overviewError, setOverviewError] = useState<string | null>(null);
   const [userProfile, setUserProfile] = useState<DashboardUser | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -27,7 +29,11 @@ export function AdminDashboardView() {
       setIsAdmin(adminFlag);
       setUserProfile(uProfile);
       if (adminFlag) {
-        const [statsResult, songsResult] = await Promise.allSettled([fetchAdminStats(), fetchAdminRecentSongs()]);
+        const [statsResult, songsResult, overviewResult] = await Promise.allSettled([
+          fetchAdminStats(),
+          fetchAdminRecentSongs(),
+          fetchAdminOverview(),
+        ]);
         if (statsResult.status === "fulfilled") {
           setStats(statsResult.value);
         } else {
@@ -37,6 +43,11 @@ export function AdminDashboardView() {
           setRecentSongs(songsResult.value.slice(0, 3));
         } else {
           setSongsError(songsResult.reason instanceof Error ? songsResult.reason.message : "Les chansons récentes sont indisponibles.");
+        }
+        if (overviewResult.status === "fulfilled") {
+          setOverview(overviewResult.value);
+        } else {
+          setOverviewError(overviewResult.reason instanceof Error ? overviewResult.reason.message : "Les données détaillées sont indisponibles.");
         }
       }
       setLoading(false);
@@ -56,7 +67,7 @@ export function AdminDashboardView() {
       userName={name}
       userEmail={email}
     >
-      <div className="space-y-8">
+      <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -116,7 +127,7 @@ export function AdminDashboardView() {
             )}
 
             {/* Grid des indicateurs clés */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {/* Revenus Totaux */}
               <div className="rounded-feature border border-border bg-surface p-6 shadow-card transition-all duration-200 hover:border-brand/30">
                 <div className="flex items-center justify-between">
@@ -205,7 +216,22 @@ export function AdminDashboardView() {
               </div>
             </div>
 
-            <section>
+            {overviewError && (
+              <p className="rounded-card border border-danger/20 bg-danger/5 p-4 text-sm text-danger">{overviewError}</p>
+            )}
+
+            <section id="users" className="rounded-feature border border-border bg-surface p-5 shadow-card">
+              <h2 className="font-display text-title-lg font-semibold text-ink">Utilisateurs</h2>
+              <div className="mt-3 overflow-x-auto">
+                <table className="w-full min-w-[560px] text-left text-sm">
+                  <thead className="border-b border-border text-xs uppercase tracking-wide text-ink-muted"><tr><th className="px-3 py-2">Nom</th><th className="px-3 py-2">Email</th><th className="px-3 py-2">Notes</th><th className="px-3 py-2">Inscription</th></tr></thead>
+                  <tbody>{overview?.users.map((item) => <tr key={item.id} className="border-b border-border last:border-0"><td className="px-3 py-2.5 font-medium text-ink">{item.name}</td><td className="px-3 py-2.5 text-ink-muted">{item.email}</td><td className="px-3 py-2.5 text-ink-muted">{item.credits}</td><td className="px-3 py-2.5 text-ink-muted">{item.createdAt.slice(0, 10)}</td></tr>)}</tbody>
+                </table>
+                {overview && overview.users.length === 0 && <p className="p-4 text-sm text-ink-muted">Aucun utilisateur trouvé.</p>}
+              </div>
+            </section>
+
+            <section id="songs">
               <h2 className="mb-3 font-display text-title-lg font-semibold text-ink">Les 3 dernières chansons</h2>
               {songsError ? (
                 <p className="rounded-card border border-danger/20 bg-danger/5 p-4 text-sm text-danger">{songsError}</p>
@@ -216,6 +242,22 @@ export function AdminDashboardView() {
                   emptyDescription="Les chansons créées par les utilisateurs apparaîtront ici."
                 />
               )}
+            </section>
+
+            <section id="payments" className="rounded-feature border border-border bg-surface p-5 shadow-card">
+              <h2 className="font-display text-title-lg font-semibold text-ink">Paiements</h2>
+              <div className="mt-3 overflow-x-auto">
+                <table className="w-full min-w-[560px] text-left text-sm"><thead className="border-b border-border text-xs uppercase tracking-wide text-ink-muted"><tr><th className="px-3 py-2">Email</th><th className="px-3 py-2">Montant</th><th className="px-3 py-2">État</th><th className="px-3 py-2">Date</th></tr></thead><tbody>{overview?.payments.map((item) => <tr key={item.id} className="border-b border-border last:border-0"><td className="px-3 py-2.5 text-ink">{item.email}</td><td className="px-3 py-2.5 text-ink">{item.amount.toLocaleString("fr-FR")} FCFA</td><td className="px-3 py-2.5 text-ink-muted">{item.status}</td><td className="px-3 py-2.5 text-ink-muted">{item.createdAt.slice(0, 10)}</td></tr>)}</tbody></table>
+                {overview && overview.payments.length === 0 && <p className="p-4 text-sm text-ink-muted">Aucun paiement trouvé.</p>}
+              </div>
+            </section>
+
+            <section id="publications" className="rounded-feature border border-border bg-surface p-5 shadow-card">
+              <h2 className="font-display text-title-lg font-semibold text-ink">Publications</h2>
+              <div className="mt-3 overflow-x-auto">
+                <table className="w-full min-w-[560px] text-left text-sm"><thead className="border-b border-border text-xs uppercase tracking-wide text-ink-muted"><tr><th className="px-3 py-2">Titre</th><th className="px-3 py-2">Auteur</th><th className="px-3 py-2">Likes</th><th className="px-3 py-2">Écoutes</th></tr></thead><tbody>{overview?.publications.map((item) => <tr key={item.id} className="border-b border-border last:border-0"><td className="px-3 py-2.5 font-medium text-ink">{item.title}</td><td className="px-3 py-2.5 text-ink-muted">{item.authorEmail}</td><td className="px-3 py-2.5 text-ink-muted">{item.likes}</td><td className="px-3 py-2.5 text-ink-muted">{item.listens}</td></tr>)}</tbody></table>
+                {overview && overview.publications.length === 0 && <p className="p-4 text-sm text-ink-muted">Aucune publication trouvée.</p>}
+              </div>
             </section>
 
             {/* Raccourcis de Gestion */}

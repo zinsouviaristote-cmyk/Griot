@@ -597,3 +597,47 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION public.get_admin_recent_songs() TO authenticated;
 
+CREATE OR REPLACE FUNCTION public.get_admin_overview_data()
+RETURNS JSONB AS $$
+DECLARE
+  v_user_id UUID := auth.uid();
+  v_user_email TEXT;
+  v_is_admin BOOLEAN := FALSE;
+BEGIN
+  SELECT email INTO v_user_email FROM auth.users WHERE id = v_user_id;
+  SELECT is_admin INTO v_is_admin FROM public.profiles WHERE id = v_user_id;
+
+  IF NOT COALESCE(v_is_admin, FALSE)
+     AND COALESCE(v_user_email, '') <> 'zinsouviaristote@gmail.com'
+  THEN
+    RAISE EXCEPTION 'ACCES_REFUSE_NON_ADMIN';
+  END IF;
+
+  RETURN jsonb_build_object(
+    'users', COALESCE((SELECT jsonb_agg(jsonb_build_object(
+      'id', p.id, 'name', p.first_name, 'email', p.email,
+      'credits', p.credit_balance, 'createdAt', p.created_at
+    ) ORDER BY p.created_at DESC) FROM public.profiles p), '[]'::jsonb),
+    'songs', COALESCE((SELECT jsonb_agg(jsonb_build_object(
+      'id', s.id, 'recipient', s.recipient_first_name, 'status', s.status,
+      'createdAt', s.created_at, 'listens', s.listens_count
+    ) ORDER BY s.created_at DESC) FROM public.songs s), '[]'::jsonb),
+    'payments', COALESCE((SELECT jsonb_agg(jsonb_build_object(
+      'id', pay.id, 'email', COALESCE(p.email, ''), 'amount', pay.amount_fcfa,
+      'status', pay.status, 'createdAt', pay.created_at
+    ) ORDER BY pay.created_at DESC)
+      FROM public.payments pay
+      LEFT JOIN public.profiles p ON p.id = pay.user_id), '[]'::jsonb),
+    'publications', COALESCE((SELECT jsonb_agg(jsonb_build_object(
+      'id', pub.id, 'title', COALESCE(pub.public_title, pub.recipient_first_name),
+      'authorEmail', COALESCE(p.email, ''), 'likes', pub.likes_count,
+      'listens', pub.listens_count, 'publishedAt', pub.published_at
+    ) ORDER BY pub.published_at DESC)
+      FROM public.published_songs pub
+      LEFT JOIN public.profiles p ON p.id = pub.user_id), '[]'::jsonb)
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION public.get_admin_overview_data() TO authenticated;
+

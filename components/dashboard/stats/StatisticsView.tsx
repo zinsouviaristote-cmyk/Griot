@@ -50,8 +50,8 @@ export function StatisticsView({
         </Reveal>
       </div>
 
-      <Reveal delayMs={80} className="mt-8">
-        <div className="rounded-feature border border-border bg-surface p-6 shadow-card">
+      <Reveal delayMs={80} className="mt-6">
+        <div className="rounded-feature border border-border bg-surface p-5 shadow-card">
           <SectionTitle>{t("stats.listensChart.title")}</SectionTitle>
           <div className="mt-5">
             <ListensChart hasListens={hasListens} />
@@ -59,21 +59,21 @@ export function StatisticsView({
         </div>
       </Reveal>
 
-      <Reveal delayMs={120} className="mt-8">
+      <Reveal delayMs={120} className="mt-6">
         <SectionTitle>{t("stats.popularSongs.title")}</SectionTitle>
         <div className="mt-5">
           <PopularSongsList songs={popularSongs} />
         </div>
       </Reveal>
 
-      <Reveal delayMs={160} className="mt-8">
+      <Reveal delayMs={160} className="mt-6">
         <SectionTitle>{t("stats.recentActivity.title")}</SectionTitle>
         <div className="mt-5">
           <RecentActivityList entries={recentActivity} />
         </div>
       </Reveal>
 
-      <Reveal delayMs={200} className="mt-8">
+      <Reveal delayMs={200} className="mt-6">
         <ReferralCard stats={referral} />
       </Reveal>
     </div>

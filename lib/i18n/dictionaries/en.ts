@@ -36,6 +36,17 @@ export const en: DeepDictionary<typeof fr> = {
     homeAriaLabel: "Griot home",
   },
 
+  admin: {
+    nav: {
+      title: "Administration",
+      dashboard: "Dashboard",
+      users: "Users",
+      songs: "Songs",
+      payments: "Payments",
+      publications: "Publications",
+    },
+  },
+
   accountMenu: {
     rootLabel: "Account menu",
     account: "Account",

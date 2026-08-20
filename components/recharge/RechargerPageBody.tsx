@@ -19,9 +19,9 @@ export function RechargerPageBody({
       <SectionTitle as="h1" size="lg">
         {t("recharge.pageTitle")}
       </SectionTitle>
-      <p className="mt-2 text-body-md text-ink-muted">{t("recharge.pageSubtitle")}</p>
+      <p className="mt-1.5 text-sm text-ink-muted">{t("recharge.pageSubtitle")}</p>
 
-      <Reveal delayMs={80} className="mt-6">
+      <Reveal delayMs={80} className="mt-5">
         <RechargeView currentBalance={currentBalance} transactions={transactions} />
       </Reveal>
     </div>

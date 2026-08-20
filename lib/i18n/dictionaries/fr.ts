@@ -35,6 +35,17 @@ export const fr = {
     homeAriaLabel: "Accueil Griot",
   },
 
+  admin: {
+    nav: {
+      title: "Administration",
+      dashboard: "Tableau de bord",
+      users: "Utilisateurs",
+      songs: "Chansons",
+      payments: "Paiements",
+      publications: "Publications",
+    },
+  },
+
   accountMenu: {
     rootLabel: "Menu du compte",
     account: "Compte",

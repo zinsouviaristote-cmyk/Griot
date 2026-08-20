@@ -397,6 +397,10 @@ export interface Database {
         Args: Record<string, unknown>
         Returns: Json
       }
+      get_admin_overview_data: {
+        Args: Record<string, unknown>
+        Returns: Json
+      }
       request_song_generation: {
         Args: {
           p_song_id: string

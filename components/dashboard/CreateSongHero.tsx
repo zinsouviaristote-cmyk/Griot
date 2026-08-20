@@ -38,20 +38,20 @@ export function CreateSongHero() {
   }
 
   return (
-    <section className="rounded-feature border border-border bg-surface px-5 py-6 shadow-card sm:px-8 sm:py-8">
-      <div className="max-w-2xl">
-        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-brand text-white sm:h-14 sm:w-14">
-          <Wand2 className="h-5 w-5 sm:h-6 sm:w-6" strokeWidth={1.5} aria-hidden="true" />
+    <section className="rounded-feature border border-border bg-surface px-5 py-5 shadow-card sm:px-7 sm:py-6">
+      <div className="max-w-3xl">
+        <span className="flex h-10 w-10 items-center justify-center rounded-control bg-brand text-white">
+          <Wand2 className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
         </span>
 
-        <div className="mt-4">
+        <div className="mt-3">
           <SectionTitle as="h1" size="lg" align="left">
             {t("dashboard.hero.title")}
           </SectionTitle>
         </div>
-        <p className="mt-2 max-w-md text-body-md leading-relaxed text-ink-muted">{t("dashboard.hero.subtitle")}</p>
+        <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-ink-muted">{t("dashboard.hero.subtitle")}</p>
 
-        <form onSubmit={handleSubmit} className="mt-5 space-y-3">
+        <form onSubmit={handleSubmit} className="mt-4 space-y-2.5">
           <div
             className={`flex flex-col gap-2.5 rounded-card border bg-page p-2 transition-colors duration-200 sm:flex-row sm:items-center ${
               showError ? "border-danger/60" : "border-border focus-within:border-brand/50"

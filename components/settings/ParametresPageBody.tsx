@@ -21,9 +21,9 @@ export function ParametresPageBody({
       <SectionTitle as="h1" size="lg">
         {t("settings.pageTitle")}
       </SectionTitle>
-      <p className="mt-2 text-body-md text-ink-muted">{t("settings.pageSubtitle")}</p>
+      <p className="mt-1.5 text-sm text-ink-muted">{t("settings.pageSubtitle")}</p>
 
-      <Reveal delayMs={80} className="mt-6">
+      <Reveal delayMs={80} className="mt-5">
         <SettingsView user={user} songCount={songCount} publishedCount={publishedCount} />
       </Reveal>
     </div>

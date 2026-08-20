@@ -15,10 +15,10 @@ export function BibliothequePageBody({ songs }: { songs: Song[] }) {
         <SectionTitle as="h1" size="lg">
           {t("history.pageTitle")}
         </SectionTitle>
-        <p className="mt-2 max-w-xl text-body-md text-ink-muted">{t("history.pageSubtitle")}</p>
+        <p className="mt-1.5 max-w-xl text-sm text-ink-muted">{t("history.pageSubtitle")}</p>
       </div>
 
-      <Reveal delayMs={80} className="mt-6">
+      <Reveal delayMs={80} className="mt-5">
         <HistoryView songs={songs} />
       </Reveal>
     </div>

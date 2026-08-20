@@ -36,7 +36,7 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-feature border border-border bg-surface p-6 shadow-card">
+    <section className="rounded-feature border border-border bg-surface p-5 shadow-card">
       <div className="flex items-center gap-2.5">
         <Icon className="h-4 w-4 text-brand" strokeWidth={1.5} aria-hidden="true" />
         <p className="text-label-md uppercase tracking-wide text-ink-muted">{title}</p>
@@ -130,7 +130,7 @@ export function SettingsView({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <SectionCard icon={UserIcon} title={t("settings.myProfile")}>
         <ProfilePhotoField
           initials={user.initials}

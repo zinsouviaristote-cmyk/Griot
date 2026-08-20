@@ -10,6 +10,13 @@ export interface AdminStats {
   totalPublications: number;
 }
 
+export interface AdminOverview {
+  users: Array<{ id: string; name: string; email: string; credits: number; createdAt: string }>;
+  songs: Array<{ id: string; recipient: string; status: string; createdAt: string; listens: number }>;
+  payments: Array<{ id: string; email: string; amount: number; status: string; createdAt: string }>;
+  publications: Array<{ id: string; title: string; authorEmail: string; likes: number; listens: number; publishedAt: string }>;
+}
+
 export async function checkIsAdmin(): Promise<boolean> {
   try {
     const supabase = createClient();
@@ -93,4 +100,24 @@ export async function fetchAdminRecentSongs(): Promise<Song[]> {
     listens: song.listens_count,
     imageUrl: song.image_url,
   }));
+}
+
+export async function fetchAdminOverview(): Promise<AdminOverview> {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc("get_admin_overview_data", {});
+  if (error) throw new Error(`Impossible de récupérer les données détaillées : ${error.message}`);
+
+  const overview = (data ?? {}) as unknown as {
+    users?: AdminOverview["users"];
+    songs?: AdminOverview["songs"];
+    payments?: AdminOverview["payments"];
+    publications?: AdminOverview["publications"];
+  };
+
+  return {
+    users: overview.users ?? [],
+    songs: overview.songs ?? [],
+    payments: overview.payments ?? [],
+    publications: overview.publications ?? [],
+  };
 }
