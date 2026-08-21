@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Music, DollarSign, Users, Disc, ShieldCheck, PlusCircle, ArrowUpRight, TrendingUp } from "lucide-react";
-import { fetchAdminStats, fetchAdminRecentSongs, fetchAdminOverview, checkIsAdmin, type AdminOverview, type AdminStats } from "@/lib/supabase/adminAdapters";
+import { fetchAdminStats, fetchAdminRecentSongs, fetchAdminOverview, checkIsAdmin, type AdminStats } from "@/lib/supabase/adminAdapters";
 import { fetchUserProfile } from "@/lib/supabase/dataAdapters";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { SongsTable } from "@/components/dashboard/SongsTable";
@@ -15,7 +15,6 @@ export function AdminDashboardView() {
   const [statsError, setStatsError] = useState<string | null>(null);
   const [recentSongs, setRecentSongs] = useState<Song[]>([]);
   const [songsError, setSongsError] = useState<string | null>(null);
-  const [overview, setOverview] = useState<AdminOverview | null>(null);
   const [overviewError, setOverviewError] = useState<string | null>(null);
   const [userProfile, setUserProfile] = useState<DashboardUser | null>(null);
   const [loading, setLoading] = useState(true);
@@ -44,9 +43,7 @@ export function AdminDashboardView() {
         } else {
           setSongsError(songsResult.reason instanceof Error ? songsResult.reason.message : "Les chansons récentes sont indisponibles.");
         }
-        if (overviewResult.status === "fulfilled") {
-          setOverview(overviewResult.value);
-        } else {
+        if (overviewResult.status === "rejected") {
           setOverviewError(overviewResult.reason instanceof Error ? overviewResult.reason.message : "Les données détaillées sont indisponibles.");
         }
       }

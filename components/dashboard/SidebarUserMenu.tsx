@@ -17,7 +17,7 @@ import {
 import { Avatar } from "@/components/ui/Avatar";
 import { LogoutConfirmModal } from "@/components/auth/LogoutConfirmModal";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import { useTheme, type Theme } from "@/lib/i18n/ThemeContext";
+import { useTheme } from "@/lib/i18n/ThemeContext";
 import type { Locale } from "@/lib/i18n/locale";
 
 type Panel = "root" | "langue" | "theme";
@@ -63,9 +63,6 @@ function SoonBadge() {
   return <span className="text-label-sm text-ink-muted/60">({t("accountMenu.comingSoon")})</span>;
 }
 
-// Menu utilisateur ancré en bas de la sidebar desktop — avatar, nom, bouton
-// "…". Seul chemin vers Compte/Paramètres et Aide sur ce breakpoint : ils ne
-// vivent nulle part ailleurs dans la sidebar (voir SidebarContent).
 export function SidebarUserMenu({
   initials,
   name,
