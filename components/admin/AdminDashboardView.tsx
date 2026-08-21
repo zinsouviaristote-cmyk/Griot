@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Music, Music2, CircleDot, DollarSign, Users, Disc, ShieldCheck, PlusCircle, ArrowUpRight, TrendingUp } from "lucide-react";
+import { Music, DollarSign, Users, Disc, ShieldCheck, PlusCircle, ArrowUpRight, TrendingUp } from "lucide-react";
 import { fetchAdminStats, fetchAdminRecentSongs, fetchAdminOverview, checkIsAdmin, type AdminOverview, type AdminStats } from "@/lib/supabase/adminAdapters";
 import { fetchUserProfile } from "@/lib/supabase/dataAdapters";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
@@ -67,14 +67,7 @@ export function AdminDashboardView() {
       userName={name}
       userEmail={email}
     >
-      <div className="relative isolate space-y-6 overflow-hidden">
-        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
-          <span className="admin-orbit admin-orbit-one" />
-          <span className="admin-orbit admin-orbit-two" />
-          <Music2 className="admin-mark admin-mark-one" strokeWidth={1.2} />
-          <CircleDot className="admin-mark admin-mark-two" strokeWidth={1.2} />
-          <Music className="admin-mark admin-mark-three" strokeWidth={1.2} />
-        </div>
+      <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>

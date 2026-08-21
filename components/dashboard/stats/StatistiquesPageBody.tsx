@@ -24,6 +24,7 @@ export function StatistiquesPageBody({
     .map((publication) => songs.find((song) => song.id === publication.sourceSongId))
     .filter((song): song is Song => Boolean(song))
     .sort((a, b) => b.listens - a.listens);
+
   const totals = published.reduce(
     (result, publication) => {
       const source = songs.find((song) => song.id === publication.sourceSongId);
@@ -35,9 +36,8 @@ export function StatistiquesPageBody({
         publishedCount: result.publishedCount + 1,
       };
     },
-    { listens: 0, likes: 0, downloads: 0, listeningSeconds: 0, publishedCount: 0 },
+    EMPTY_TOTALS,
   );
-  const emptyTotals = { listens: 0, likes: 0, downloads: 0, listeningSeconds: 0, publishedCount: 0 };
 
   return (
     <div>
@@ -48,7 +48,7 @@ export function StatistiquesPageBody({
 
       <Reveal delayMs={80} className="mt-5">
         <StatisticsView
-          totals={isEmptyPreview ? emptyTotals : totals}
+          totals={isEmptyPreview ? EMPTY_TOTALS : totals}
           popularSongs={isEmptyPreview ? [] : popularSongs}
           recentActivity={[]}
           referral={{ pageOpens: 0, songsCreated: 0 }}
