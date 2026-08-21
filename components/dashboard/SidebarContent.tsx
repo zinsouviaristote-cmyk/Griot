@@ -43,7 +43,7 @@ function NavSection({
       <p className="px-3 text-xs font-medium uppercase tracking-wide text-ink-muted">{title}</p>
       <ul className="mt-2 space-y-1">
         {items.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
           return (
             <li key={item.href}>
               <Link

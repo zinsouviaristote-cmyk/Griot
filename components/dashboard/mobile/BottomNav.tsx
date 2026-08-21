@@ -17,7 +17,7 @@ const LEFT_TABS: TabItem[] = [
 ];
 
 const RIGHT_TABS: TabItem[] = [
-  { labelKey: "dashboard.bottomNav.history", href: "/historique", icon: History },
+  { labelKey: "dashboard.bottomNav.history", href: "/historiques", icon: History },
   { labelKey: "dashboard.bottomNav.profile", href: "/profil", icon: UserRound },
 ];
 
@@ -60,7 +60,11 @@ export function BottomNav() {
       <div className="border-t border-border bg-surface pb-[env(safe-area-inset-bottom)]">
         <div className="grid h-16 grid-cols-5 items-center px-1">
           {LEFT_TABS.map((item) => (
-            <TabLink key={item.href} item={item} isActive={pathname === item.href} />
+            <TabLink
+              key={item.href}
+              item={item}
+              isActive={pathname === item.href || pathname.startsWith(`${item.href}/`)}
+            />
           ))}
           <div className="flex items-center justify-center">
             <Link
@@ -76,7 +80,11 @@ export function BottomNav() {
             </Link>
           </div>
           {RIGHT_TABS.map((item) => (
-            <TabLink key={item.href} item={item} isActive={pathname === item.href} />
+            <TabLink
+              key={item.href}
+              item={item}
+              isActive={pathname === item.href || pathname.startsWith(`${item.href}/`)}
+            />
           ))}
         </div>
       </div>

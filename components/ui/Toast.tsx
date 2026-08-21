@@ -68,8 +68,13 @@ function ToastCard({ toast, onDone }: { toast: ToastItem; onDone: (id: number) =
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const nextId = useRef(0);
+  const lastToast = useRef<{ message: string; tone: ToastTone; at: number } | null>(null);
 
   const show = useCallback<ShowToast>((message, tone = "default") => {
+    const now = Date.now();
+    const previous = lastToast.current;
+    if (previous && previous.message === message && previous.tone === tone && now - previous.at < 1200) return;
+    lastToast.current = { message, tone, at: now };
     const id = nextId.current++;
     setToasts((current) => [...current, { id, message, tone }]);
   }, []);

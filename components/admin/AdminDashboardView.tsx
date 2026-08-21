@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Music, DollarSign, Users, Disc, ShieldCheck, PlusCircle, ArrowUpRight, TrendingUp } from "lucide-react";
+import { Music, Music2, CircleDot, DollarSign, Users, Disc, ShieldCheck, PlusCircle, ArrowUpRight, TrendingUp } from "lucide-react";
 import { fetchAdminStats, fetchAdminRecentSongs, fetchAdminOverview, checkIsAdmin, type AdminOverview, type AdminStats } from "@/lib/supabase/adminAdapters";
 import { fetchUserProfile } from "@/lib/supabase/dataAdapters";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
@@ -67,7 +67,14 @@ export function AdminDashboardView() {
       userName={name}
       userEmail={email}
     >
-      <div className="space-y-6">
+      <div className="relative isolate space-y-6 overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
+          <span className="admin-orbit admin-orbit-one" />
+          <span className="admin-orbit admin-orbit-two" />
+          <Music2 className="admin-mark admin-mark-one" strokeWidth={1.2} />
+          <CircleDot className="admin-mark admin-mark-two" strokeWidth={1.2} />
+          <Music className="admin-mark admin-mark-three" strokeWidth={1.2} />
+        </div>
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -220,17 +227,6 @@ export function AdminDashboardView() {
               <p className="rounded-card border border-danger/20 bg-danger/5 p-4 text-sm text-danger">{overviewError}</p>
             )}
 
-            <section id="users" className="rounded-feature border border-border bg-surface p-5 shadow-card">
-              <h2 className="font-display text-title-lg font-semibold text-ink">Utilisateurs</h2>
-              <div className="mt-3 overflow-x-auto">
-                <table className="w-full min-w-[560px] text-left text-sm">
-                  <thead className="border-b border-border text-xs uppercase tracking-wide text-ink-muted"><tr><th className="px-3 py-2">Nom</th><th className="px-3 py-2">Email</th><th className="px-3 py-2">Notes</th><th className="px-3 py-2">Inscription</th></tr></thead>
-                  <tbody>{overview?.users.map((item) => <tr key={item.id} className="border-b border-border last:border-0"><td className="px-3 py-2.5 font-medium text-ink">{item.name}</td><td className="px-3 py-2.5 text-ink-muted">{item.email}</td><td className="px-3 py-2.5 text-ink-muted">{item.credits}</td><td className="px-3 py-2.5 text-ink-muted">{item.createdAt.slice(0, 10)}</td></tr>)}</tbody>
-                </table>
-                {overview && overview.users.length === 0 && <p className="p-4 text-sm text-ink-muted">Aucun utilisateur trouvé.</p>}
-              </div>
-            </section>
-
             <section id="songs">
               <h2 className="mb-3 font-display text-title-lg font-semibold text-ink">Les 3 dernières chansons</h2>
               {songsError ? (
@@ -242,22 +238,6 @@ export function AdminDashboardView() {
                   emptyDescription="Les chansons créées par les utilisateurs apparaîtront ici."
                 />
               )}
-            </section>
-
-            <section id="payments" className="rounded-feature border border-border bg-surface p-5 shadow-card">
-              <h2 className="font-display text-title-lg font-semibold text-ink">Paiements</h2>
-              <div className="mt-3 overflow-x-auto">
-                <table className="w-full min-w-[560px] text-left text-sm"><thead className="border-b border-border text-xs uppercase tracking-wide text-ink-muted"><tr><th className="px-3 py-2">Email</th><th className="px-3 py-2">Montant</th><th className="px-3 py-2">État</th><th className="px-3 py-2">Date</th></tr></thead><tbody>{overview?.payments.map((item) => <tr key={item.id} className="border-b border-border last:border-0"><td className="px-3 py-2.5 text-ink">{item.email}</td><td className="px-3 py-2.5 text-ink">{item.amount.toLocaleString("fr-FR")} FCFA</td><td className="px-3 py-2.5 text-ink-muted">{item.status}</td><td className="px-3 py-2.5 text-ink-muted">{item.createdAt.slice(0, 10)}</td></tr>)}</tbody></table>
-                {overview && overview.payments.length === 0 && <p className="p-4 text-sm text-ink-muted">Aucun paiement trouvé.</p>}
-              </div>
-            </section>
-
-            <section id="publications" className="rounded-feature border border-border bg-surface p-5 shadow-card">
-              <h2 className="font-display text-title-lg font-semibold text-ink">Publications</h2>
-              <div className="mt-3 overflow-x-auto">
-                <table className="w-full min-w-[560px] text-left text-sm"><thead className="border-b border-border text-xs uppercase tracking-wide text-ink-muted"><tr><th className="px-3 py-2">Titre</th><th className="px-3 py-2">Auteur</th><th className="px-3 py-2">Likes</th><th className="px-3 py-2">Écoutes</th></tr></thead><tbody>{overview?.publications.map((item) => <tr key={item.id} className="border-b border-border last:border-0"><td className="px-3 py-2.5 font-medium text-ink">{item.title}</td><td className="px-3 py-2.5 text-ink-muted">{item.authorEmail}</td><td className="px-3 py-2.5 text-ink-muted">{item.likes}</td><td className="px-3 py-2.5 text-ink-muted">{item.listens}</td></tr>)}</tbody></table>
-                {overview && overview.publications.length === 0 && <p className="p-4 text-sm text-ink-muted">Aucune publication trouvée.</p>}
-              </div>
             </section>
 
             {/* Raccourcis de Gestion */}

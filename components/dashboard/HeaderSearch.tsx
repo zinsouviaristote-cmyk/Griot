@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { Search, X } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
@@ -9,7 +10,10 @@ import { useLanguage } from "@/lib/i18n/LanguageContext";
 // écran, sans lui réserver toute la largeur du haut sur chaque page.
 export function HeaderSearch() {
   const { t } = useLanguage();
+  const router = useRouter();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -33,6 +37,14 @@ export function HeaderSearch() {
     };
   }, [open]);
 
+  function submitSearch() {
+    const value = query.trim();
+    if (!value) return;
+    const target = pathname.startsWith("/admin") ? "/admin/chansons" : "/historiques";
+    router.push(`${target}?recherche=${encodeURIComponent(value)}`);
+    setOpen(false);
+  }
+
   return (
     <div ref={containerRef} className="relative flex items-center">
       {open ? (
@@ -42,6 +54,11 @@ export function HeaderSearch() {
             ref={inputRef}
             type="search"
             placeholder={t("dashboard.search.placeholder")}
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") submitSearch();
+            }}
             className="w-52 bg-transparent text-sm text-ink placeholder:text-ink-muted focus:outline-none"
           />
           <button

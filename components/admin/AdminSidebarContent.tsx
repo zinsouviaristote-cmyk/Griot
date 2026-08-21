@@ -10,10 +10,10 @@ import { usePathname } from "next/navigation";
 
 const ITEMS: Array<{ labelKey: string; href: string; icon: LucideIcon }> = [
   { labelKey: "admin.nav.dashboard", href: "/admin", icon: BarChart3 },
-  { labelKey: "admin.nav.users", href: "/admin#users", icon: Users },
-  { labelKey: "admin.nav.songs", href: "/admin#songs", icon: FileMusic },
-  { labelKey: "admin.nav.payments", href: "/admin#payments", icon: CreditCard },
-  { labelKey: "admin.nav.publications", href: "/admin#publications", icon: Megaphone },
+  { labelKey: "admin.nav.users", href: "/admin/utilisateurs", icon: Users },
+  { labelKey: "admin.nav.songs", href: "/admin/chansons", icon: FileMusic },
+  { labelKey: "admin.nav.payments", href: "/admin/paiements", icon: CreditCard },
+  { labelKey: "admin.nav.publications", href: "/admin/publications", icon: Megaphone },
 ];
 
 export function AdminSidebarContent({
@@ -39,7 +39,9 @@ export function AdminSidebarContent({
       <nav aria-label={t("admin.nav.title")} className="flex flex-col gap-1.5 overflow-y-auto">
         <p className="mb-1 px-3 text-xs font-medium uppercase tracking-wide text-ink-muted">{t("admin.nav.title")}</p>
         {ITEMS.map((item) => {
-          const isActive = item.href === "/admin" ? pathname === "/admin" : false;
+          const isActive = item.href === "/admin"
+            ? pathname === "/admin"
+            : pathname === item.href || pathname.startsWith(`${item.href}/`);
           return (
             <Link
               key={item.href}

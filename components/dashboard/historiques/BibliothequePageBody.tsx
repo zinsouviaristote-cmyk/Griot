@@ -7,7 +7,7 @@ import { useLanguage } from "@/lib/i18n/LanguageContext";
 import type { Song } from "@/lib/types";
 
 
-export function BibliothequePageBody({ songs }: { songs: Song[] }) {
+export function BibliothequePageBody({ songs, initialSearch = "" }: { songs: Song[]; initialSearch?: string }) {
   const { t } = useLanguage();
   return (
     <div>
@@ -19,7 +19,7 @@ export function BibliothequePageBody({ songs }: { songs: Song[] }) {
       </div>
 
       <Reveal delayMs={80} className="mt-5">
-        <HistoryView songs={songs} />
+        <HistoryView songs={songs} initialSearch={initialSearch} />
       </Reveal>
     </div>
   );

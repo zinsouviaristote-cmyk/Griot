@@ -25,9 +25,9 @@ const SORT_LABEL_KEYS: Record<SortMode, string> = {
   ecoutees: "history.sort.mostListened",
 };
 
-export function HistoryView({ songs }: { songs: Song[] }) {
+export function HistoryView({ songs, initialSearch = "" }: { songs: Song[]; initialSearch?: string }) {
   const { t } = useLanguage();
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initialSearch);
   const [shortcut, setShortcut] = useState<Shortcut>("toutes");
   const [statusFilters, setStatusFilters] = useState<Set<SongStatus>>(new Set());
   const [sort, setSort] = useState<SortMode>("recentes");
