@@ -21,11 +21,13 @@ export function AdminSidebarContent({
   userInitials,
   userName,
   userEmail,
+  userPhotoUrl,
 }: {
   creditBalance: number;
   userInitials: string;
   userName: string;
   userEmail: string;
+  userPhotoUrl?: string | null;
 }) {
   const { t } = useLanguage();
   const pathname = usePathname();
@@ -67,7 +69,7 @@ export function AdminSidebarContent({
       </div>
 
       <div className="border-t border-border pt-3">
-        <SidebarUserMenu initials={userInitials} name={userName} email={userEmail} />
+        <SidebarUserMenu initials={userInitials} name={userName} email={userEmail} avatarUrl={userPhotoUrl} />
       </div>
     </div>
   );

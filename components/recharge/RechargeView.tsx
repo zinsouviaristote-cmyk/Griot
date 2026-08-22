@@ -120,7 +120,7 @@ export function RechargeView({
           <Smartphone className="h-5 w-5" strokeWidth={1.5} />
         </span>
         <div>
-          <p className="text-sm font-semibold text-ink">Paiement sécurisé via Chariow</p>
+          <p className="text-sm font-semibold text-ink">Paiement sécurisé</p>
           <p className="text-xs text-ink-muted">MTN Mobile Money, Moov, Wave, Carte Bancaire</p>
         </div>
       </div>

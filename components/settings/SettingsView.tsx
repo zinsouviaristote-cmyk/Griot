@@ -14,6 +14,7 @@ import { signOutUser } from "@/lib/auth/session";
 import { useToast } from "@/components/ui/Toast";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { updateUserProfile } from "@/lib/supabase/dataAdapters";
+import { useUserProfile } from "@/lib/hooks/useUserProfile";
 import type { DashboardUser } from "@/lib/types";
 
 interface NotificationRow {
@@ -60,6 +61,10 @@ export function SettingsView({
 }) {
   const { t, tn } = useLanguage();
   const showToast = useToast();
+  // refresh() propage tout changement de profil (photo, nom...) à la
+  // Sidebar/TopBar partout dans l'app, sans recharger la page — voir
+  // useUserProfile.ts pour le magasin partagé derrière ce hook.
+  const { refresh } = useUserProfile();
 
   const [firstName, setFirstName] = useState(user.firstName);
   const [photoUrl, setPhotoUrl] = useState<string | null>(user.photoUrl);
@@ -87,6 +92,11 @@ export function SettingsView({
         photoFile,
         photoUrl: photoChanged ? photoUrl : undefined,
       });
+      // Nouvelle photo/nom potentiellement modifiés : on rafraîchit le cache
+      // partagé pour que Sidebar/TopBar/AvatarMenu se mettent à jour
+      // immédiatement, sur cette page comme sur toutes les autres déjà
+      // montées (voir DashboardShell, qui lit ce même hook).
+      await refresh();
       setPhotoFile(null);
       setPhotoChanged(false);
       showToast(t("settings.profileUpdated"), "success");
@@ -99,6 +109,7 @@ export function SettingsView({
     event.preventDefault();
     try {
       await updateUserProfile({ firstName, phone, photoFile: null });
+      await refresh();
       showToast(t("settings.preferencesSaved"), "success");
     } catch (error) {
       showToast(error instanceof Error ? error.message : t("settings.profileUpdateFailed"), "danger");

@@ -67,10 +67,12 @@ export function SidebarUserMenu({
   initials,
   name,
   email,
+  avatarUrl,
 }: {
   initials: string;
   name: string;
   email: string;
+  avatarUrl?: string | null;
 }) {
   const { t, locale, setLocale } = useLanguage();
   const { theme, setTheme } = useTheme();
@@ -133,7 +135,7 @@ export function SidebarUserMenu({
         aria-haspopup="menu"
         className="flex w-full items-center gap-2.5 rounded-control px-2 py-2 text-left transition-colors duration-150 hover:bg-brand-soft/60"
       >
-        <Avatar initials={initials} size="sm" />
+        <Avatar initials={initials} avatarUrl={avatarUrl} size="sm" />
         <span className="min-w-0 flex-1">
           <span className="block truncate text-sm font-semibold text-ink">{name}</span>
           <span className="block truncate text-xs text-ink-muted">{email}</span>

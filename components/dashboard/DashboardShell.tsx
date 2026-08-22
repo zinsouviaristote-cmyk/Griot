@@ -1,3 +1,5 @@
+"use client";
+
 import type { ReactNode } from "react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { TopBar } from "@/components/dashboard/TopBar";
@@ -5,14 +7,8 @@ import { MobileTopBar } from "@/components/dashboard/mobile/MobileTopBar";
 import { BottomNav } from "@/components/dashboard/mobile/BottomNav";
 import { PlayerContentSpacer } from "@/components/player/PlayerContentSpacer";
 import { DashboardMusicBackdrop } from "@/components/dashboard/DashboardMusicBackdrop";
+import { useUserProfile } from "@/lib/hooks/useUserProfile";
 
-/**
- * Deux shells de navigation distincts, jamais un seul redimensionné :
- * sidebar + barre sticky sur desktop, barre haute + barre basse fixes sur mobile
- * (la sidebar ne s'y affiche pas du tout — voir Sidebar.tsx, `hidden lg:flex`).
- * Le choix se fait en CSS pur (`lg:` / `hidden`), jamais en JS, pour éviter tout
- * flash d'hydratation lié à la détection de la taille d'écran.
- */
 export function DashboardShell({
   creditBalance,
   userInitials,
@@ -26,8 +22,13 @@ export function DashboardShell({
   userEmail: string;
   children: ReactNode;
 }) {
+  // Photo de profil : source UNIQUE, jamais reçue en prop — c'est exactement
+  // ce qui manquait avant (chaque page devait penser à la transmettre, et
+  // aucune ne se mettait à jour après un changement dans Paramètres).
+  const { profile } = useUserProfile();
+  const userPhotoUrl = profile?.photoUrl ?? null;
+
   return (
-    // Pas de `bg-page` ici : `body` le porte déjà globalement (globals.css).
     <div className="relative min-h-screen overflow-hidden">
       <DashboardMusicBackdrop />
       <Sidebar
@@ -35,16 +36,24 @@ export function DashboardShell({
         userInitials={userInitials}
         userName={userName}
         userEmail={userEmail}
+        userPhotoUrl={userPhotoUrl}
       />
       <MobileTopBar
         creditBalance={creditBalance}
         userInitials={userInitials}
         userName={userName}
         userEmail={userEmail}
+        userPhotoUrl={userPhotoUrl}
       />
 
       <div className="relative z-10 lg:pl-[280px]">
-        <TopBar creditBalance={creditBalance} userInitials={userInitials} userName={userName} userEmail={userEmail} />
+        <TopBar
+          creditBalance={creditBalance}
+          userInitials={userInitials}
+          userName={userName}
+          userEmail={userEmail}
+          userPhotoUrl={userPhotoUrl}
+        />
         <main className="mx-auto max-w-shell px-4 pb-28 pt-20 lg:px-8 lg:pb-8 lg:pt-8">
           {children}
           <PlayerContentSpacer />

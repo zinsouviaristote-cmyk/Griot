@@ -84,12 +84,14 @@ export function SidebarContent({
   userInitials,
   userName,
   userEmail,
+  userPhotoUrl,
   onNavigate,
 }: {
   creditBalance: number;
   userInitials: string;
   userName: string;
   userEmail: string;
+  userPhotoUrl?: string | null;
   onNavigate?: () => void;
 }) {
   const { t } = useLanguage();
@@ -120,7 +122,7 @@ export function SidebarContent({
       </div>
 
       <div className="border-t border-border pt-3">
-        <SidebarUserMenu initials={userInitials} name={userName} email={userEmail} />
+        <SidebarUserMenu initials={userInitials} name={userName} email={userEmail} avatarUrl={userPhotoUrl} />
       </div>
     </div>
   );

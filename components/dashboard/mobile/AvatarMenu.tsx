@@ -15,10 +15,12 @@ export function AvatarMenu({
   initials,
   name,
   email,
+  avatarUrl,
 }: {
   initials: string;
   name: string;
   email: string;
+  avatarUrl?: string | null;
 }) {
   const { t, locale, setLocale } = useLanguage();
   const { theme, setTheme } = useTheme();
@@ -40,7 +42,7 @@ export function AvatarMenu({
         aria-expanded={isOpen}
         className="flex h-11 w-11 items-center justify-center rounded-full transition-transform duration-200 ease-magnetic hover:scale-105 active:scale-95"
       >
-        <Avatar initials={initials} size="sm" />
+        <Avatar initials={initials} avatarUrl={avatarUrl} size="sm" />
       </button>
 
       {isOpen && (

@@ -11,11 +11,13 @@ export function MobileTopBar({
   userInitials,
   userName,
   userEmail,
+  userPhotoUrl,
 }: {
   creditBalance: number;
   userInitials: string;
   userName: string;
   userEmail: string;
+  userPhotoUrl?: string | null;
 }) {
   const { t } = useLanguage();
   return (
@@ -29,8 +31,6 @@ export function MobileTopBar({
       </Link>
 
       <div className="flex items-center gap-2">
-        {/* La pastille de crédits est l'élément le plus important de cette barre :
-            c'est ce qui ramène l'utilisateur ouvrir l'app. */}
         <Link
           href="/recharger"
           className="group flex items-center gap-1.5 rounded-full bg-brand-soft py-1 pl-3 pr-1 text-sm font-semibold text-brand transition-transform duration-200 ease-magnetic active:scale-95"
@@ -57,7 +57,7 @@ export function MobileTopBar({
           />
         </button>
 
-        <AvatarMenu initials={userInitials} name={userName} email={userEmail} />
+        <AvatarMenu initials={userInitials} name={userName} email={userEmail} avatarUrl={userPhotoUrl} />
       </div>
     </header>
   );

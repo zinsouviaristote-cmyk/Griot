@@ -6,23 +6,20 @@ import { Avatar } from "@/components/ui/Avatar";
 import { HeaderSearch } from "@/components/dashboard/HeaderSearch";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
-// Desktop uniquement — sur mobile, MobileTopBar prend le relais (voir DashboardShell).
-// L'identité et ses actions (Compte, Aide, déconnexion…) vivent uniquement dans
-// SidebarUserMenu, en bas de la sidebar, toujours visible sur ce breakpoint —
-// l'avatar ici reste un simple repère visuel, sans second menu qui dupliquerait
-// le même chemin.
 export function TopBar({
   creditBalance,
   userInitials,
+  userPhotoUrl,
 }: {
   creditBalance: number;
   userInitials: string;
   userName: string;
   userEmail: string;
+  userPhotoUrl?: string | null;
 }) {
   const { tn } = useLanguage();
   return (
-    <header className="sticky top-0 z-20 hidden items-center justify-end gap-3 border-b border-border bg-page/95 px-8 py-4 lg:flex">
+    <header className="sticky top-0 z-20 hidden items-center justify-end gap-3 border-b border-border bg-page/95 px-8 py-2.5 lg:flex">
       <HeaderSearch />
 
       <Link
@@ -33,7 +30,7 @@ export function TopBar({
         {creditBalance} {tn("credits.unit", creditBalance)}
       </Link>
 
-      <Avatar initials={userInitials} size="sm" />
+      <Avatar initials={userInitials} avatarUrl={userPhotoUrl} size="sm" />
     </header>
   );
 }

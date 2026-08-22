@@ -4,29 +4,25 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Music, DollarSign, Users, Disc, ShieldCheck, PlusCircle, ArrowUpRight, TrendingUp } from "lucide-react";
 import { fetchAdminStats, fetchAdminRecentSongs, fetchAdminOverview, checkIsAdmin, type AdminStats } from "@/lib/supabase/adminAdapters";
-import { fetchUserProfile } from "@/lib/supabase/dataAdapters";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { SongsTable } from "@/components/dashboard/SongsTable";
-import type { DashboardUser, Song } from "@/lib/types";
+import { useUserProfile } from "@/lib/hooks/useUserProfile";
+import type { Song } from "@/lib/types";
 
 export function AdminDashboardView() {
+  const { profile: userProfile } = useUserProfile();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [statsError, setStatsError] = useState<string | null>(null);
   const [recentSongs, setRecentSongs] = useState<Song[]>([]);
   const [songsError, setSongsError] = useState<string | null>(null);
   const [overviewError, setOverviewError] = useState<string | null>(null);
-  const [userProfile, setUserProfile] = useState<DashboardUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadData() {
-      const [adminFlag, uProfile] = await Promise.all([
-        checkIsAdmin(),
-        fetchUserProfile(),
-      ]);
+      const adminFlag = await checkIsAdmin();
       setIsAdmin(adminFlag);
-      setUserProfile(uProfile);
       if (adminFlag) {
         const [statsResult, songsResult, overviewResult] = await Promise.allSettled([
           fetchAdminStats(),
@@ -123,9 +119,7 @@ export function AdminDashboardView() {
               </div>
             )}
 
-            {/* Grid des indicateurs clés */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {/* Revenus Totaux */}
               <div className="rounded-feature border border-border bg-surface p-6 shadow-card transition-all duration-200 hover:border-brand/30">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold uppercase tracking-wider text-ink-muted">Chiffre d&apos;Affaires</span>
@@ -142,7 +136,6 @@ export function AdminDashboardView() {
                 </div>
               </div>
 
-              {/* Chansons Créées */}
               <div className="rounded-feature border border-border bg-surface p-6 shadow-card transition-all duration-200 hover:border-brand/30">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold uppercase tracking-wider text-ink-muted">Total Chansons Créées</span>
@@ -156,7 +149,6 @@ export function AdminDashboardView() {
                 <p className="mt-2 text-xs text-ink-muted">Chansons enregistrées en base</p>
               </div>
 
-              {/* Notes Vendues */}
               <div className="rounded-feature border border-border bg-surface p-6 shadow-card transition-all duration-200 hover:border-brand/30">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold uppercase tracking-wider text-ink-muted">Notes Vendues</span>
@@ -170,7 +162,6 @@ export function AdminDashboardView() {
                 <p className="mt-2 text-xs text-ink-muted">Packs de 2, 6 et 10 Notes</p>
               </div>
 
-              {/* Utilisateurs Inscrits */}
               <div className="rounded-feature border border-border bg-surface p-6 shadow-card transition-all duration-200 hover:border-brand/30">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold uppercase tracking-wider text-ink-muted">Comptes Utilisateurs</span>
@@ -184,7 +175,6 @@ export function AdminDashboardView() {
                 <p className="mt-2 text-xs text-ink-muted">Inscriptions Google & E-mail</p>
               </div>
 
-              {/* Écoutes Cumulées */}
               <div className="rounded-feature border border-border bg-surface p-6 shadow-card transition-all duration-200 hover:border-brand/30">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold uppercase tracking-wider text-ink-muted">Écoutes Cumulées</span>
@@ -198,7 +188,6 @@ export function AdminDashboardView() {
                 <p className="mt-2 text-xs text-ink-muted">Lectures audio uniques et publiques</p>
               </div>
 
-              {/* Publications Explorer */}
               <div className="rounded-feature border border-border bg-surface p-6 shadow-card transition-all duration-200 hover:border-brand/30">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold uppercase tracking-wider text-ink-muted">Publications Explorer</span>
@@ -230,7 +219,6 @@ export function AdminDashboardView() {
               )}
             </section>
 
-            {/* Raccourcis de Gestion */}
             <div className="rounded-feature border border-border bg-surface p-6 shadow-card">
               <h2 className="font-display text-title-lg font-semibold text-ink">
                 Actions & Gestion de la Plateforme

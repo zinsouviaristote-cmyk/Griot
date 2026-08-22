@@ -1,6 +1,4 @@
 import { createClient } from "@/lib/supabase/client";
-import { mockUser } from "@/lib/data/mock-dashboard";
-import { mockContacts } from "@/lib/data/mock-contacts";
 import type { Song, Contact, DashboardUser, PublishedSong, CreditTransaction, Occasion, MusicStyle, SongStatus, Relationship } from "@/lib/types";
 
 interface DBProfile {
@@ -69,14 +67,13 @@ interface DBPublishedSong {
 // ==========================================
 // ADAPTATEURS PROFIL UTILISATEUR & NOTES
 // ==========================================
-
-export async function fetchUserProfile(): Promise<DashboardUser> {
+export async function fetchUserProfile(): Promise<DashboardUser | null> {
   try {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-      return mockUser;
+      return null;
     }
 
     const { data, error } = await supabase
@@ -85,11 +82,13 @@ export async function fetchUserProfile(): Promise<DashboardUser> {
       .eq("id", user.id)
       .single();
 
+    const fallbackName = user.email ? user.email.split("@")[0] : "Utilisateur";
+
     if (error || !data) {
       return {
-        firstName: user.user_metadata?.full_name || user.email?.split("@")[0] || "Aïcha",
-        initials: (user.email?.slice(0, 2) || "AK").toUpperCase(),
-        email: user.email || "aicha.k@example.com",
+        firstName: user.user_metadata?.full_name || user.user_metadata?.first_name || fallbackName,
+        initials: (user.email?.slice(0, 2) || fallbackName.slice(0, 2)).toUpperCase(),
+        email: user.email || "",
         creditBalance: 0,
         phone: null,
         photoUrl: user.user_metadata?.avatar_url || null,
@@ -97,17 +96,24 @@ export async function fetchUserProfile(): Promise<DashboardUser> {
     }
 
     const profile = data as unknown as DBProfile;
-    const name = profile.first_name || "Aïcha";
+    const name = profile.first_name || user.user_metadata?.full_name || fallbackName;
+
+    // "" = l'utilisateur a explicitement retiré sa photo — on respecte ce
+    // choix, jamais de repli sur Google dans ce cas précis. `null` (colonne
+    // jamais touchée) reste le seul cas qui retombe sur avatar_url.
+    const resolvedPhotoUrl =
+      profile.photo_url === "" ? null : profile.photo_url || user.user_metadata?.avatar_url || null;
+
     return {
       firstName: name,
       initials: name.slice(0, 2).toUpperCase(),
-      email: profile.email,
-      creditBalance: profile.credit_balance,
+      email: profile.email || user.email || "",
+      creditBalance: profile.credit_balance ?? 0,
       phone: profile.phone,
-      photoUrl: profile.photo_url,
+      photoUrl: resolvedPhotoUrl,
     };
   } catch {
-    return mockUser;
+    return null;
   }
 }
 
@@ -154,7 +160,14 @@ export async function updateUserProfile({
     first_name: firstName.trim(),
     phone: phone.trim() || null,
   };
-  if (photoUrl !== undefined || photoFile) updates.photo_url = storedPhotoUrl ?? null;
+  if (photoUrl !== undefined || photoFile) {
+    // "" (chaîne vide) = suppression volontaire, distincte de `null` ("jamais
+    // configuré, retomber sur la photo Google"). Sans cette distinction,
+    // fetchUserProfile ne peut pas savoir si `null` signifie "pas encore
+    // choisi" ou "l'utilisateur a explicitement retiré sa photo" — et
+    // retombait à tort sur Google dans le second cas.
+    updates.photo_url = storedPhotoUrl === null ? "" : (storedPhotoUrl ?? "");
+  }
 
   const { error } = await supabase.from("profiles").update(updates).eq("id", user.id);
   if (error) throw error;
@@ -172,13 +185,13 @@ export async function fetchCreditTransactions(): Promise<CreditTransaction[]> {
 
   const transactions = data as unknown as DBCreditTransaction[];
   return transactions.map((t) => ({
-      id: t.id,
-      date: t.created_at.split("T")[0],
-      motif: t.motif,
-      labelKey: t.label_key,
-      labelParams: t.label_params || undefined,
-      delta: t.delta,
-      balanceAfter: t.balance_after,
+    id: t.id,
+    date: t.created_at.split("T")[0],
+    motif: t.motif,
+    labelKey: t.label_key,
+    labelParams: t.label_params || undefined,
+    delta: t.delta,
+    balanceAfter: t.balance_after,
   }));
 }
 
@@ -194,8 +207,8 @@ export async function fetchUserContacts(): Promise<Contact[]> {
       .select("*")
       .order("created_at", { ascending: false });
 
-    if (error || !data || data.length === 0) {
-      return mockContacts;
+    if (error || !data) {
+      return [];
     }
 
     const contacts = data as unknown as DBContact[];
@@ -208,7 +221,7 @@ export async function fetchUserContacts(): Promise<Contact[]> {
       note: c.note,
     }));
   } catch {
-    return mockContacts;
+    return [];
   }
 }
 
@@ -287,19 +300,19 @@ export async function fetchUserSongs(): Promise<Song[]> {
 
   const songs = data as unknown as DBSong[];
   return songs.map((s) => ({
-      id: s.id,
-      recipientFirstName: s.recipient_first_name,
-      relationship: s.relationship,
-      occasion: s.occasion as Occasion,
-      style: s.style as MusicStyle,
-      status: s.status as SongStatus,
-      createdAt: s.created_at.split("T")[0],
-      durationSeconds: s.duration_seconds,
-      audioUrl: s.audio_path || s.preview_audio_path || null,
-      lyrics: s.lyrics,
-      contactId: s.contact_id,
-      listens: s.listens_count,
-      imageUrl: s.image_url,
+    id: s.id,
+    recipientFirstName: s.recipient_first_name,
+    relationship: s.relationship,
+    occasion: s.occasion as Occasion,
+    style: s.style as MusicStyle,
+    status: s.status as SongStatus,
+    createdAt: s.created_at.split("T")[0],
+    durationSeconds: s.duration_seconds,
+    audioUrl: s.audio_path || s.preview_audio_path || null,
+    lyrics: s.lyrics,
+    contactId: s.contact_id,
+    listens: s.listens_count,
+    imageUrl: s.image_url,
   }));
 }
 
@@ -371,21 +384,21 @@ export async function fetchPublishedExplorerSongs(): Promise<PublishedSong[]> {
 
   const publications = data as unknown as DBPublishedSong[];
   return publications.map((p) => ({
-      id: p.id,
-      sourceSongId: p.source_song_id,
-      mine: user ? p.user_id === user.id : false,
-      recipientFirstName: p.recipient_first_name,
-      hideFirstName: p.hide_first_name,
-      publicTitle: p.public_title,
-      occasion: p.occasion as Occasion,
-      style: p.style as MusicStyle,
-      audioUrl: p.audio_url,
-      likes: p.likes_count,
-      listens: p.listens_count,
-      downloads: p.downloads_count,
-      publishedAt: p.published_at.split("T")[0],
-      authorName: "Griot",
-      imageUrl: p.image_url,
-      lyrics: p.lyrics || [],
+    id: p.id,
+    sourceSongId: p.source_song_id,
+    mine: user ? p.user_id === user.id : false,
+    recipientFirstName: p.recipient_first_name,
+    hideFirstName: p.hide_first_name,
+    publicTitle: p.public_title,
+    occasion: p.occasion as Occasion,
+    style: p.style as MusicStyle,
+    audioUrl: p.audio_url,
+    likes: p.likes_count,
+    listens: p.listens_count,
+    downloads: p.downloads_count,
+    publishedAt: p.published_at.split("T")[0],
+    authorName: "Griot",
+    imageUrl: p.image_url,
+    lyrics: p.lyrics || [],
   }));
 }

@@ -6,11 +6,13 @@ export function Sidebar({
   userInitials,
   userName,
   userEmail,
+  userPhotoUrl,
 }: {
   creditBalance: number;
   userInitials: string;
   userName: string;
   userEmail: string;
+  userPhotoUrl?: string | null;
 }) {
   const isAdmin = userEmail.trim().toLowerCase() === "zinsouviaristote@gmail.com";
   return (
@@ -21,6 +23,7 @@ export function Sidebar({
           userInitials={userInitials}
           userName={userName}
           userEmail={userEmail}
+          userPhotoUrl={userPhotoUrl}
         />
       ) : (
         <SidebarContent
@@ -28,6 +31,7 @@ export function Sidebar({
           userInitials={userInitials}
           userName={userName}
           userEmail={userEmail}
+          userPhotoUrl={userPhotoUrl}
         />
       )}
     </aside>

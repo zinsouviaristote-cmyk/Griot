@@ -21,7 +21,7 @@ export default function ExplorerPage() {
   return (
     <>
       <ExplorerHeading />
-      <div className="fixed left-0 right-0 top-[65px] bottom-[65px] lg:bottom-0 lg:left-[280px] lg:right-0 lg:top-[77px]">
+      <div className="fixed left-0 right-0 top-[65px] bottom-[65px] lg:bottom-0 lg:left-[280px] lg:right-0 lg:top-[95px]">
         <ExplorerFeed entries={entries} />
       </div>
     </>

@@ -10,7 +10,7 @@ export type SongStatus =
   | "awaiting_payment"
   | "paid"
   | "delivered"
-  | "failed";
+  | "failed"; 
 
 export type Occasion = "anniversaire" | "amour" | "mariage" | "reussite" | "hommage";
 
