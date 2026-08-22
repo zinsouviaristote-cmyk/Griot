@@ -5,8 +5,8 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import { fetchUserProfile } from "@/lib/supabase/dataAdapters";
 import { checkIsAdmin, fetchAdminOverview, type AdminOverview } from "@/lib/supabase/adminAdapters";
+import { useUserProfile } from "@/lib/hooks/useUserProfile";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 type Section = "users" | "songs" | "payments" | "publications";
@@ -21,16 +21,20 @@ const TITLES: Record<Section, string> = {
 export function AdminDataPage({ section }: { section: Section }) {
   const { t } = useLanguage();
   const searchParams = useSearchParams();
+  // Profil (nom, initiales, email, crédits, photo) désormais lu depuis le
+  // magasin partagé — DashboardShell lit ce même hook pour la photo, donc
+  // plus besoin de la transmettre ici : fini le risque d'oublier un champ
+  // ou de rester bloqué sur des initiales par défaut, comme ce fichier le
+  // faisait avant avec son propre useState local.
+  const { profile } = useUserProfile();
   const [overview, setOverview] = useState<AdminOverview | null>(null);
   const [allowed, setAllowed] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [profile, setProfile] = useState({ firstName: "", initials: "", email: "", creditBalance: 0 });
 
   useEffect(() => {
-    Promise.all([checkIsAdmin(), fetchUserProfile(), fetchAdminOverview()])
-      .then(([isAdmin, user, data]) => {
+    Promise.all([checkIsAdmin(), fetchAdminOverview()])
+      .then(([isAdmin, data]) => {
         setAllowed(isAdmin);
-        setProfile(user);
         if (isAdmin) setOverview(data);
       })
       .catch((reason: unknown) => setError(reason instanceof Error ? reason.message : "Données indisponibles."));
@@ -43,10 +47,10 @@ export function AdminDataPage({ section }: { section: Section }) {
 
   return (
     <DashboardShell
-      creditBalance={profile.creditBalance}
-      userInitials={profile.initials}
-      userName={profile.firstName}
-      userEmail={profile.email}
+      creditBalance={profile?.creditBalance ?? 0}
+      userInitials={profile?.initials ?? ""}
+      userName={profile?.firstName ?? ""}
+      userEmail={profile?.email ?? ""}
     >
       <div className="space-y-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
