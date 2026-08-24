@@ -27,7 +27,7 @@ export function MobileTopBar({
         aria-label={t("dashboard.topBar.homeAriaLabel")}
         className="inline-block transition-transform duration-200 ease-magnetic hover:scale-105 active:scale-95"
       >
-        <Logo withWordmark={false} />
+        <Logo withWordmark={true} />  {/* ← Changé de false à true */}
       </Link>
 
       <div className="flex items-center gap-2">

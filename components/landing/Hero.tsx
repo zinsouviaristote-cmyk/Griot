@@ -123,7 +123,7 @@ export function Hero() {
         
         {/* Colonne Gauche */}
         <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
-          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3.5 py-1.5 text-sm font-semibold uppercase tracking-wide text-ink-muted">
+          <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3.5 py-1.5 text-sm font-semibold uppercase tracking-wide text-ink-muted">
             <span className="h-1.5 w-1.5 rounded-full bg-brand" aria-hidden="true" />
             L&apos;émotion en musique
           </div>
