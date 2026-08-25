@@ -19,7 +19,7 @@ export function TopBar({
 }) {
   const { tn } = useLanguage();
   return (
-    <header className="sticky top-0 z-20 hidden items-center justify-end gap-3 border-b border-border bg-page/95 px-8 py-2.5 lg:flex">
+    <header className="sticky top-0 z-20 hidden items-center justify-end gap-3 border-b border-border bg-page/95 px-8 py-2 lg:flex">
       <HeaderSearch />
 
       <Link

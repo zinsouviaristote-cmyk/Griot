@@ -172,6 +172,7 @@ export const CREDIT_PACKS: CreditPack[] = [
     songs: 5,
     priceFcfa: 5900,
   },
+  
 ];
 
 // Une Note = un essai.
@@ -216,11 +217,6 @@ export interface TunnelData {
   // jamais lier une chanson au mauvais contact.
   contactId: string | null;
 
-  recipientAge: string;
-
-  // "YYYY-MM-DD", facultatif — alimente la carte "Prochaine occasion" du
-  // tableau de bord et les rappels.
-  recipientBirthday: string;
 
   story: string;
 
@@ -270,8 +266,6 @@ export const EMPTY_TUNNEL_DATA: TunnelData = {
   recipientFirstName: "",
   relationship: null,
   contactId: null,
-  recipientAge: "",
-  recipientBirthday: "",
   story: "",
   storyMode: "raconte",
   style: null,
