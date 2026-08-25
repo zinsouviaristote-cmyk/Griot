@@ -130,6 +130,7 @@ export const mockSongs: Song[] = [
     listens: 24,
     imageUrl: null,
   },
+
   {
     id: "song_2",
     recipientFirstName: "Moussa",
@@ -144,6 +145,7 @@ export const mockSongs: Song[] = [
     listens: 17,
     imageUrl: null,
   },
+
   {
     id: "song_3",
     recipientFirstName: "Awa",
@@ -158,6 +160,7 @@ export const mockSongs: Song[] = [
     listens: 5,
     imageUrl: null,
   },
+
   {
     id: "song_4",
     recipientFirstName: "Ibrahim",
@@ -172,11 +175,12 @@ export const mockSongs: Song[] = [
     listens: 2,
     imageUrl: null,
   },
+
   {
     id: "song_5",
     recipientFirstName: "Aminata",
     occasion: "mariage",
-    style: "ballade_acoustique",
+    style: "piano_voix",
     status: "generating",
     createdAt: "2026-07-15",
     durationSeconds: null,
@@ -186,6 +190,7 @@ export const mockSongs: Song[] = [
     listens: 0,
     imageUrl: null,
   },
+
   {
     id: "song_6",
     recipientFirstName: "Kader",
@@ -200,11 +205,12 @@ export const mockSongs: Song[] = [
     listens: 0,
     imageUrl: null,
   },
+
   {
     id: "song_7",
     recipientFirstName: "Yacouba",
     occasion: "anniversaire",
-    style: "ballade_acoustique",
+    style: "piano_voix",
     status: "draft",
     createdAt: "2026-08-06",
     durationSeconds: null,
@@ -225,6 +231,14 @@ export const MUSIC_STYLE_IDS: Song["style"][] = [
   "afrobeat",
   "coupe_decale",
   "gospel",
-  "ballade_acoustique",
   "zouk",
+  "rnb",
+  "afropop",
+  "amapiano",
+  "reggae",
+  "pop",
+  "piano_voix",
+  "jazz",
+  "rap_hiphop",
+  "afro_soul",
 ];
