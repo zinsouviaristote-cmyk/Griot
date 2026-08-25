@@ -9,7 +9,7 @@ import { mockUser } from "@/lib/data/mock-dashboard";
 import { resolveSongArt } from "@/lib/songArt";
 import { formatDate } from "@/lib/format/date";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import { occasionLabel, relationshipLabel, styleLabel } from "@/lib/i18n/catalog";
+import { occasionLabel, styleLabel } from "@/lib/i18n/catalog";
 import type { Song } from "@/lib/types";
 
 export function SongCardMobile({ song }: { song: Song }) {
@@ -40,7 +40,6 @@ export function SongCardMobile({ song }: { song: Song }) {
             <p className="truncate font-display text-base font-semibold text-ink">
               {song.recipientFirstName}
             </p>
-            <p className="mt-0.5 text-sm text-ink-muted">{relationshipLabel(t, song.relationship)}</p>
           </div>
         </div>
         <StatusBadge status={song.status} />

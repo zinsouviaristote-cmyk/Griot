@@ -23,7 +23,7 @@ export function MagicLinkForm({ returnTo }: { returnTo: string }) {
     try {
       await sendMagicLink(email.trim(), returnTo);
       setSent(true);
-      showToast(t("auth.linkSentToast") || "Lien magique envoyé par e-mail !", "success");
+      showToast(t("auth.linkSentToast"), "success");
     } catch (err: unknown) {
       setSending(false);
       const message = err instanceof Error ? err.message : t("auth.linkSendFailed");
@@ -36,10 +36,12 @@ export function MagicLinkForm({ returnTo }: { returnTo: string }) {
       <div className="rounded-control border border-brand/20 bg-brand/5 p-4 text-center">
         <CheckCircle2 className="mx-auto h-8 w-8 text-brand" />
         <p className="mt-2 text-sm font-semibold text-ink">
-          Lien magique envoyé !
+          {t("auth.linkSentToast")}
         </p>
         <p className="mt-1 text-xs text-ink-muted leading-relaxed">
-          Un lien de connexion a été envoyé à <strong>{email}</strong>. Cliquez dessus dans votre boîte e-mail pour accéder directement à Griot.
+          {t("auth.linkSentToBefore")}
+          <strong>{email}</strong>
+          {t("auth.linkSentToAfter")}
         </p>
       </div>
     );

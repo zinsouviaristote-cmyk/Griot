@@ -31,15 +31,14 @@ import { formatDate, formatDayMonth, parseLocalDate } from "@/lib/format/date";
 import { formatFcfa } from "@/lib/format/currency";
 import { generateUnlockedLyrics, mockDeleteSong, mockPaySong } from "@/lib/data/mockHistoryActions";
 import { getPublishedEntryForSong } from "@/lib/data/mock-explorer";
-import { getContactById } from "@/lib/data/mock-contacts";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import { occasionLabel, relationshipLabel, styleLabel } from "@/lib/i18n/catalog";
+import { occasionLabel, styleLabel } from "@/lib/i18n/catalog";
 import type { PublishedSong, Song, SongStatus } from "@/lib/types";
 
 const UNLOCK_PRICE_FCFA = 1900;
 
 function tunnelHref(song: Song, includeOccasion: boolean): string {
-  const params = new URLSearchParams({ prenom: song.recipientFirstName, lien: song.relationship });
+  const params = new URLSearchParams({ prenom: song.recipientFirstName });
   if (includeOccasion) params.set("occasion", song.occasion);
   return `/creer?${params.toString()}`;
 }
@@ -67,9 +66,7 @@ export function SongDetailView({ song }: { song: Song }) {
   // Seul endroit du produit où cette date se modifie — aucune page de gestion
   // de contacts : elle vit ici, rattachée à la chanson concernée, et alimente
   // la carte "Prochaine occasion" du tableau de bord et les rappels.
-  const [birthday, setBirthday] = useState<string | null>(
-    () => getContactById(song.contactId ?? "")?.birthday ?? null,
-  );
+  const [birthday, setBirthday] = useState<string | null>(null);
   const [editingBirthday, setEditingBirthday] = useState(false);
   const [birthdayDraft, setBirthdayDraft] = useState(birthday ?? "");
 
@@ -131,16 +128,16 @@ export function SongDetailView({ song }: { song: Song }) {
       : window.location.href;
     try {
       await navigator.clipboard.writeText(url);
-      showToast(t("history.detail.linkCopied"), "success");
+      showToast(t("history.item.linkCopied"), "success");
     } catch {
-      showToast(t("history.detail.linkCopyFailed"), "danger");
+      showToast(t("history.item.linkCopyFailed"), "danger");
     }
   }
 
   async function handleDelete() {
     setDeleting(true);
     await mockDeleteSong(song.id);
-    showToast(t("history.detail.deletedToast", { name: song.recipientFirstName }), "default");
+    showToast(t("history.item.deletedToast", { name: song.recipientFirstName }), "default");
     router.push("/historiques");
   }
 
@@ -186,7 +183,6 @@ export function SongDetailView({ song }: { song: Song }) {
 
       <div className="mt-5">
         <p className="font-display text-display-lg text-ink">{song.recipientFirstName}</p>
-        <p className="mt-1 text-body-md text-ink-muted">{relationshipLabel(t, song.relationship)}</p>
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <StatusBadge status={status} />
           <span className="text-sm text-ink-muted">
@@ -435,15 +431,15 @@ export function SongDetailView({ song }: { song: Song }) {
 
       <Modal open={deleteOpen} onClose={() => setDeleteOpen(false)} labelledBy="delete-song-title">
         <p id="delete-song-title" className="font-display text-lg font-semibold text-ink">
-          {t("history.detail.deleteTitle", { name: song.recipientFirstName })}
+          {t("history.item.deleteTitle", { name: song.recipientFirstName })}
         </p>
-        <p className="mt-2 text-sm text-ink-muted">{t("history.detail.deleteBody", { name: song.recipientFirstName })}</p>
+        <p className="mt-2 text-sm text-ink-muted">{t("history.item.deleteBody", { name: song.recipientFirstName })}</p>
         <div className="mt-5 flex gap-3">
           <Button variant="ghost" onClick={() => setDeleteOpen(false)} className="flex-1" disabled={deleting}>
             {t("history.detail.cancel")}
           </Button>
           <Button onClick={handleDelete} disabled={deleting} className="flex-1 !bg-danger hover:!brightness-90">
-            {deleting ? t("history.detail.deleting") : t("history.detail.delete")}
+            {deleting ? t("history.item.deleting") : t("history.detail.delete")}
           </Button>
         </div>
       </Modal>

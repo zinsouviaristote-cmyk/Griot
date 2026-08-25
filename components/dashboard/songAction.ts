@@ -18,7 +18,6 @@ function resumeTunnelHref(song: Song): string {
   const params = new URLSearchParams({
     prenom: song.recipientFirstName,
     occasion: song.occasion,
-    lien: song.relationship,
   });
   return `/creer?${params.toString()}`;
 }

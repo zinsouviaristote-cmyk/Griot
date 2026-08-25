@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
-import type { Song, Contact, DashboardUser, PublishedSong, CreditTransaction, Occasion, MusicStyle, SongStatus, Relationship } from "@/lib/types";
+import type { Song, Contact, DashboardUser, PublishedSong, CreditTransaction, Occasion, MusicStyle, SongStatus } from "@/lib/types";
 
 interface DBProfile {
   id: string;
@@ -23,8 +23,6 @@ interface DBCreditTransaction {
 interface DBContact {
   id: string;
   first_name: string;
-  relationship: string;
-  birthday: string;
   phone: string | null;
   note: string | null;
 }
@@ -32,7 +30,6 @@ interface DBContact {
 interface DBSong {
   id: string;
   recipient_first_name: string;
-  relationship: string;
   occasion: string;
   style: string;
   status: string;
@@ -215,8 +212,6 @@ export async function fetchUserContacts(): Promise<Contact[]> {
     return contacts.map((c) => ({
       id: c.id,
       firstName: c.first_name,
-      relationship: c.relationship as Relationship,
-      birthday: c.birthday,
       phone: c.phone,
       note: c.note,
     }));
@@ -238,8 +233,6 @@ export async function saveUserContact(contact: Omit<Contact, "id"> & { id?: stri
       .from("contacts")
       .update({
         first_name: contact.firstName,
-        relationship: contact.relationship,
-        birthday: contact.birthday,
         phone: contact.phone,
         note: contact.note,
       })
@@ -252,8 +245,6 @@ export async function saveUserContact(contact: Omit<Contact, "id"> & { id?: stri
     return {
       id: c.id,
       firstName: c.first_name,
-      relationship: c.relationship as Relationship,
-      birthday: c.birthday,
       phone: c.phone,
       note: c.note,
     };
@@ -263,10 +254,12 @@ export async function saveUserContact(contact: Omit<Contact, "id"> & { id?: stri
       .insert({
         user_id: user.id,
         first_name: contact.firstName,
-        relationship: contact.relationship,
-        birthday: contact.birthday,
         phone: contact.phone,
         note: contact.note,
+        // Colonnes encore NOT NULL en base mais retirées de Contact — le
+        // produit ne les collecte plus, voir lib/types.ts.
+        relationship: "",
+        birthday: "",
       })
       .select()
       .single();
@@ -276,8 +269,6 @@ export async function saveUserContact(contact: Omit<Contact, "id"> & { id?: stri
     return {
       id: c.id,
       firstName: c.first_name,
-      relationship: c.relationship as Relationship,
-      birthday: c.birthday,
       phone: c.phone,
       note: c.note,
     };
@@ -302,7 +293,6 @@ export async function fetchUserSongs(): Promise<Song[]> {
   return songs.map((s) => ({
     id: s.id,
     recipientFirstName: s.recipient_first_name,
-    relationship: s.relationship,
     occasion: s.occasion as Occasion,
     style: s.style as MusicStyle,
     status: s.status as SongStatus,
@@ -318,7 +308,6 @@ export async function fetchUserSongs(): Promise<Song[]> {
 
 export async function createSongDraft(song: {
   recipientFirstName: string;
-  relationship: string;
   occasion: string;
   style: string;
   contactId?: string | null;
@@ -336,7 +325,9 @@ export async function createSongDraft(song: {
     .insert({
       user_id: user.id,
       recipient_first_name: song.recipientFirstName,
-      relationship: song.relationship,
+      // Colonne encore NOT NULL en base mais retirée de Song — le produit ne
+      // la collecte plus, voir lib/types.ts.
+      relationship: "",
       occasion: song.occasion,
       style: song.style,
       contact_id: song.contactId || null,
@@ -352,7 +343,6 @@ export async function createSongDraft(song: {
   return {
     id: s.id,
     recipientFirstName: s.recipient_first_name,
-    relationship: s.relationship,
     occasion: s.occasion as Occasion,
     style: s.style as MusicStyle,
     status: s.status as SongStatus,

@@ -12,7 +12,7 @@ import { styleLabel, styleTagline } from "@/lib/i18n/catalog";
 import type { MusicStyle } from "@/lib/types";
 
 const PREVIEW_DURATION_MS = 8000;
-
+ 
 export function StyleVoiceStep() {
   const { t } = useLanguage();
   const { data, update, goNext } = useTunnel();
@@ -23,8 +23,8 @@ export function StyleVoiceStep() {
   // L'hommage écarte les styles festifs — si l'utilisateur revient en arrière
   // et change d'occasion après avoir choisi un style qui n'est plus proposé,
   // on ne laisse pas une sélection invalide et invisible traîner en mémoire.
-  const availableStyles = data.occasion === "hommage" ? styleCatalog.filter((s) => !s.festive) : styleCatalog;
-
+  const availableStyles = styleCatalog;
+  
   useEffect(() => {
     if (data.style && !availableStyles.some((s) => s.id === data.style)) {
       update({ style: null });

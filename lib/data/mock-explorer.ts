@@ -69,6 +69,18 @@ const LYRICS_TEMPLATES: Record<Occasion, (name: string) => string[]> = {
     "Cette chanson garde ta mémoire vivante,",
     `merci pour tout, ${name}, ton empreinte est marquante.`,
   ],
+  celebration: (name) => [
+    `${name}, ce soir on célèbre, ensemble on chante,`,
+    "un moment précieux, une joie éclatante.",
+    "Que la fête résonne encore longtemps,",
+    `à toi ${name}, à cet instant.`,
+  ],
+  autre: (name) => [
+    `${name}, cette chanson est pour toi seul,`,
+    "un moment qui compte, unique dans son genre.",
+    "Que ces quelques mots portent tout ce qu'on ressent,",
+    `pour toi, ${name}, maintenant et longtemps.`,
+  ],
 };
 
 function lyricsFor(entry: RawEntry): string[] {

@@ -4,18 +4,21 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Play, Heart, Shuffle, SkipBack, SkipForward, Repeat } from "lucide-react";
 import { PrenomForm } from "@/components/landing/PrenomForm";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
-const ROTATING_WORDS = [
-  "son anniversaire",
-  "votre mariage",
-  "lui dire je t'aime",
-  "sa réussite",
-  "honorer sa mémoire",
+const ROTATING_WORD_KEYS = [
+  "landing.hero.rotatingWord1",
+  "landing.hero.rotatingWord2",
+  "landing.hero.rotatingWord3",
+  "landing.hero.rotatingWord4",
+  "landing.hero.rotatingWord5",
 ];
 
 const WORD_INTERVAL_MS = 2000;
 
 function RotatingWord() {
+  const { t } = useLanguage();
+  const words = ROTATING_WORD_KEYS.map((key) => t(key));
   const [index, setIndex] = useState(0);
   const [reducedMotion, setReducedMotion] = useState(false);
 
@@ -24,9 +27,10 @@ function RotatingWord() {
     setReducedMotion(query.matches);
     if (query.matches) return;
     const id = window.setInterval(() => {
-      setIndex((current) => (current + 1) % ROTATING_WORDS.length);
+      setIndex((current) => (current + 1) % words.length);
     }, WORD_INTERVAL_MS);
     return () => window.clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -35,10 +39,10 @@ function RotatingWord() {
         key={reducedMotion ? "static" : index}
         className="col-start-1 row-start-1 animate-reveal-up"
       >
-        {ROTATING_WORDS[reducedMotion ? 0 : index]}
+        {words[reducedMotion ? 0 : index]}
       </span>
       <span className="invisible col-start-1 row-start-1" aria-hidden="true">
-        {ROTATING_WORDS.reduce((longest, word) => (word.length > longest.length ? word : longest))}
+        {words.reduce((longest, word) => (word.length > longest.length ? word : longest))}
       </span>
     </span>
   );
@@ -117,24 +121,25 @@ function MusicStaffDecoration() {
 }
 
 export function Hero() {
+  const { t } = useLanguage();
   return (
     <section className="relative scroll-mt-[var(--nav-clearance)] overflow-hidden bg-white px-4 pb-10 pt-16 sm:pb-14 sm:pt-20 lg:pt-24">
       <div className="relative mx-auto grid max-w-6xl gap-10 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:gap-16">
-        
+
         {/* Colonne Gauche */}
         <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
           <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3.5 py-1.5 text-sm font-semibold uppercase tracking-wide text-ink-muted">
             <span className="h-1.5 w-1.5 rounded-full bg-brand" aria-hidden="true" />
-            L&apos;émotion en musique
+            {t("landing.hero.badge")}
           </div>
 
           <h1 className="mt-6 font-display text-[2.5rem] font-extrabold leading-[1.05] tracking-tight text-ink sm:text-6xl sm:leading-[1.05]">
-            Une chanson pour
+            {t("landing.hero.titlePrefix")}
             <br className="hidden sm:block" /> <RotatingWord />
           </h1>
 
           <p className="mt-3 max-w-md text-body-lg text-ink-muted">
-            Racontez son histoire. Recevez une chanson chantée, prête à offrir.
+            {t("landing.hero.subtitle")}
           </p>
 
           <div className="mt-6 w-full lg:mt-8">
@@ -143,7 +148,7 @@ export function Hero() {
 
           <p className="mt-4 flex items-center gap-2 text-sm text-ink-muted">
             <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-brand" aria-hidden="true" />
-            Le premier essai est offert. Vous écoutez avant de payer.
+            {t("landing.hero.freeTrialNote")}
           </p>
         </div>
 
@@ -159,8 +164,8 @@ export function Hero() {
               <Play className="ml-0.5 h-3 w-3 fill-current" />
             </span>
             <div className="text-left">
-              <p className="text-[10px] font-bold text-ink">Extrait personnalisé</p>
-              <p className="text-[9px] font-medium text-brand">Prêt à écouter</p>
+              <p className="text-[10px] font-bold text-ink">{t("landing.hero.playerBadgeTitle")}</p>
+              <p className="text-[9px] font-medium text-brand">{t("landing.hero.playerBadgeSubtitle")}</p>
             </div>
           </div>
 
@@ -168,7 +173,7 @@ export function Hero() {
           <div className="relative z-10 h-72 w-72 overflow-hidden rounded-full border-4 border-surface shadow-xl sm:h-80 sm:w-80 transition-transform duration-500 hover:scale-105">
             <Image
               src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80"
-              alt="Chanson sur mesure"
+              alt={t("landing.hero.imageAlt")}
               fill
               className="object-cover"
               priority

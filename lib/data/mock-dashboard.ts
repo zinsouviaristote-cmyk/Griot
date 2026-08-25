@@ -119,7 +119,6 @@ export const mockSongs: Song[] = [
   {
     id: "song_1",
     recipientFirstName: "Fatou",
-    relationship: "ma mère",
     occasion: "anniversaire",
     style: "afrobeat",
     status: "delivered",
@@ -134,7 +133,6 @@ export const mockSongs: Song[] = [
   {
     id: "song_2",
     recipientFirstName: "Moussa",
-    relationship: "mon ami·e",
     occasion: "reussite",
     style: "coupe_decale",
     status: "paid",
@@ -149,7 +147,6 @@ export const mockSongs: Song[] = [
   {
     id: "song_3",
     recipientFirstName: "Awa",
-    relationship: "ma femme",
     occasion: "amour",
     style: "zouk",
     status: "preview_ready",
@@ -164,7 +161,6 @@ export const mockSongs: Song[] = [
   {
     id: "song_4",
     recipientFirstName: "Ibrahim",
-    relationship: "mon père",
     occasion: "hommage",
     style: "gospel",
     status: "awaiting_payment",
@@ -179,7 +175,6 @@ export const mockSongs: Song[] = [
   {
     id: "song_5",
     recipientFirstName: "Aminata",
-    relationship: "ma sœur",
     occasion: "mariage",
     style: "ballade_acoustique",
     status: "generating",
@@ -194,7 +189,6 @@ export const mockSongs: Song[] = [
   {
     id: "song_6",
     recipientFirstName: "Kader",
-    relationship: "mon collègue",
     occasion: "reussite",
     style: "afrobeat",
     status: "failed",
@@ -209,7 +203,6 @@ export const mockSongs: Song[] = [
   {
     id: "song_7",
     recipientFirstName: "Yacouba",
-    relationship: "mon grand-père",
     occasion: "anniversaire",
     style: "ballade_acoustique",
     status: "draft",

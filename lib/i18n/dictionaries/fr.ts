@@ -528,6 +528,7 @@ export const fr = {
     sending: "Envoi…",
     receiveLink: "Recevoir un lien de connexion",
     linkSendFailed: "Le lien n'a pas pu être envoyé. Réessayez.",
+    linkSentToast: "Lien magique envoyé par e-mail !",
     checkYourInbox: "Vérifiez votre boîte mail",
     linkSentToBefore: "Un lien de connexion a été envoyé à ",
     linkSentToAfter: ". Ouvrez-le sur cet appareil pour continuer.",
@@ -566,14 +567,72 @@ autre: {
   label: "Autre occasion",
   tagline: "Créez une chanson pour toute occasion",
 },
-    },
-    styles: {
-      afrobeat: { label: "Afrobeat", tagline: "Rythme entraînant, groove chaloupé." },
-      coupe_decale: { label: "Coupé-décalé", tagline: "Énergie de fête, pour danser." },
-      gospel: { label: "Gospel", tagline: "Voix chorale, chaleur et recueillement." },
-      ballade_acoustique: { label: "Ballade acoustique", tagline: "Guitare, piano, tout en douceur." },
-      zouk: { label: "Zouk", tagline: "Slow langoureux, à deux." },
-    },
+    },styles: {
+  afrobeat: {
+    label: "Afrobeat",
+    tagline: "Rythme entraînant, groove chaloupé.",
+  },
+
+  coupe_decale: {
+    label: "Coupé-décalé",
+    tagline: "Énergie de fête, pour danser.",
+  },
+
+  gospel: {
+    label: "Gospel",
+    tagline: "Voix chorale, chaleur et recueillement.",
+  },
+
+  zouk: {
+    label: "Zouk",
+    tagline: "Slow langoureux, à deux.",
+  },
+
+  rnb: {
+    label: "R&B",
+    tagline: "Sensuel, moderne et émotionnel.",
+  },
+
+  afropop: {
+    label: "Afropop",
+    tagline: "Mélodique, moderne et chaleureux.",
+  },
+
+  amapiano: {
+    label: "Amapiano",
+    tagline: "Groove doux, basses profondes et ambiance dansante.",
+  },
+
+  reggae: {
+    label: "Reggae",
+    tagline: "Détendu, chaleureux et positif.",
+  },
+
+  pop: {
+    label: "Pop",
+    tagline: "Mélodie accrocheuse, moderne et accessible.",
+  },
+
+  piano_voix: {
+    label: "Piano-voix",
+    tagline: "Intime, minimaliste et très émotionnel.",
+  },
+
+  jazz: {
+    label: "Jazz",
+    tagline: "Élégant, doux et sophistiqué.",
+  },
+
+  rap_hiphop: {
+    label: "Rap / Hip-hop",
+    tagline: "Moderne, personnel et rythmé.",
+  },
+
+  afro_soul: {
+    label: "Afro-soul",
+    tagline: "Mélange d'Afrobeat et de soul, parfait pour les déclarations.",
+  },
+},
     relationships: {
       mother: "ma mère",
       father: "mon père",
@@ -588,11 +647,17 @@ autre: {
       other: "autre",
     },
   },
-
-  tunnel: {
+tunnel: {
+    common: {
+      continue: "Continuer"
+    },
     occasion: {
       title: "Pour quelle occasion ?",
       subtitle: "Un clic suffit : la chanson s'adapte au ton dès maintenant.",
+      customModalTitle: "Autre occasion",
+      customLabel: "Précisez votre occasion :",
+      customPlaceholder: "Ex. Promotion, Départ en retraite...",
+      customError: "Veuillez préciser l'occasion avant de continuer."
     },
     recipient: {
       pickFromContacts: "Ou choisissez parmi vos proches",
@@ -709,6 +774,88 @@ autre: {
       reformulateDisabled: "Reformuler (indisponible pour vos paroles)",
       freeAttempt: "Cet essai est gratuit.",
       generatePreview: "Générer l'extrait",
+    },
+  },
+
+  landing: {
+    nav: {
+      howItWorks: "Comment ça marche",
+      faq: "Questions",
+      login: "Se connecter",
+      start: "Commencer",
+      menuOpen: "Ouvrir le menu",
+      menuClose: "Fermer le menu",
+      menu: "Menu",
+    },
+    hero: {
+      badge: "L'émotion en musique",
+      titlePrefix: "Une chanson pour",
+      rotatingWord1: "son anniversaire",
+      rotatingWord2: "votre mariage",
+      rotatingWord3: "lui dire je t'aime",
+      rotatingWord4: "sa réussite",
+      rotatingWord5: "honorer sa mémoire",
+      subtitle: "Racontez son histoire. Recevez une chanson chantée, prête à offrir.",
+      freeTrialNote: "Le premier essai est offert. Vous écoutez avant de payer.",
+      playerBadgeTitle: "Extrait personnalisé",
+      playerBadgeSubtitle: "Prêt à écouter",
+      imageAlt: "Chanson sur mesure",
+    },
+    marquee: {
+      occasion1: "Baptême",
+      occasion2: "Réussite",
+      occasion3: "Hommage",
+      occasion4: "Déclaration",
+      occasion5: "Encouragement",
+      occasion6: "Anniversaire",
+      occasion7: "Mariage",
+    },
+    howItWorks: {
+      title: "Trois minutes,",
+      titleHighlight: "et c'est fait",
+      step1Title: "Racontez votre histoire",
+      step1Body: "Quelques phrases suffisent, pas besoin d'être écrivain.",
+      step2Title: "Écoutez la chanson",
+      step2Body: "Le premier essai est offert, vous jugez par vous-même.",
+      step3Title: "Offrez-la",
+      step3Body: "Le fichier est à vous, à envoyer où vous voulez.",
+    },
+    trial: {
+      badge: "Sans risque",
+      title: "Vous n'achetez rien à l'aveugle",
+      point1: "Le premier essai de chaque chanson ne coûte rien.",
+      point2: "Vous l'écoutez en entier avant de décider.",
+      point3: "Vous ne payez que si vous voulez la garder.",
+      cta: "Créer ma chanson",
+    },
+    faq: {
+      title: "Questions",
+      titleHighlight: "fréquentes",
+      question1: "Puis-je mettre un prénom dans la chanson ?",
+      answer1: "Oui : le prénom de la personne à qui la chanson est destinée, et le vôtre si vous le souhaitez, sont tissés directement dans les paroles.",
+      question2: "Pour quelles occasions puis-je créer une chanson ?",
+      answer2: "Anniversaire, mariage, déclaration d'amour, réussite, hommage, baptême, encouragement, et tout autre moment qui mérite d'être marqué.",
+      question3: "Est-ce que je choisis le style musical ?",
+      answer3: "Oui, vous choisissez l'ambiance qui correspond à la personne et au moment, avant que la chanson soit composée.",
+      question4: "Combien de temps ça prend ?",
+      answer4: "Quelques minutes pour raconter l'histoire, puis votre chanson est prête à écouter très rapidement.",
+      question5: "Comment je reçois ma chanson ?",
+      answer5: "Le fichier audio est à vous : téléchargeable et prêt à être envoyé où vous voulez, dès que vous la gardez.",
+      question6: "Et si le résultat ne me plaît pas ?",
+      answer6: "Vous ne payez que si vous voulez la garder : le premier essai ne coûte rien, sans engagement.",
+    },
+    finalCta: {
+      title: "Une histoire à raconter ? Elle mérite sa chanson.",
+    },
+    footer: {
+      privacy: "Confidentialité",
+      terms: "Conditions",
+      tagline: "Fait au Bénin, pour tout le monde.",
+    },
+    prenomForm: {
+      srLabel: "Pour qui est cette chanson ?",
+      placeholder: "Pour qui est cette chanson ?",
+      cta: "Créer ma chanson",
     },
   },
 } as const;

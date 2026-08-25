@@ -325,6 +325,18 @@ const FR_OCCASION_PONT_LINES: Record<Occasion, string[]> = {
     "Rien de ce que tu as donné n'a disparu",
     "Ce que tu m'as appris me porte encore",
   ],
+  celebration: [
+    "Ce moment mérite d'être chanté",
+    "Que cette joie reste gravée",
+    "Un instant comme celui-là ne s'oublie pas",
+    "Que la fête continue encore un peu",
+  ],
+  autre: [
+    "Ce moment mérite d'être chanté",
+    "Que cet instant reste gravé",
+    "Rien de tout cela ne s'oublie",
+    "Et ça restera vrai demain aussi",
+  ],
 };
 
 const FR_PACK: RaconteLanguagePack = {
@@ -506,6 +518,18 @@ const EN_OCCASION_PONT_LINES: Record<Occasion, string[]> = {
     "Your memory lives in every gesture",
     "Nothing that you gave is gone",
     "What you taught me still carries me",
+  ],
+  celebration: [
+    "This moment deserves to be sung",
+    "May this joy stay etched in time",
+    "A moment like this isn't forgotten",
+    "May the celebration carry on",
+  ],
+  autre: [
+    "This moment deserves to be sung",
+    "May this moment stay etched in time",
+    "None of this ever fades",
+    "And it stays true tomorrow too",
   ],
 };
 

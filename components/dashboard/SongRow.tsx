@@ -7,7 +7,7 @@ import { getSongAction } from "@/components/dashboard/songAction";
 import { Reveal } from "@/components/ui/Reveal";
 import { formatDate } from "@/lib/format/date";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import { occasionLabel, relationshipLabel, styleLabel } from "@/lib/i18n/catalog";
+import { occasionLabel, styleLabel } from "@/lib/i18n/catalog";
 import type { Song } from "@/lib/types";
 
 export function SongRow({ song, index = 0 }: { song: Song; index?: number }) {
@@ -30,7 +30,6 @@ export function SongRow({ song, index = 0 }: { song: Song; index?: number }) {
     >
       <td className="py-3.5 pl-5 pr-3 text-sm font-medium text-ink">
         {song.recipientFirstName}
-        <span className="block text-xs font-normal text-ink-muted">{relationshipLabel(t, song.relationship)}</span>
       </td>
       <td className="px-3 py-3.5 text-sm text-ink-muted">{occasionLabel(t, song.occasion)}</td>
       <td className="px-3 py-3.5 text-sm text-ink-muted">{styleLabel(t, song.style)}</td>

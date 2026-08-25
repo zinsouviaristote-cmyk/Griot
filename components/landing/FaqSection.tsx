@@ -4,34 +4,15 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { Reveal } from "@/components/ui/Reveal";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
-const FAQ_ITEMS = [
-  {
-    question: "Puis-je mettre un prénom dans la chanson ?",
-    answer:
-      "Oui : le prénom de la personne à qui la chanson est destinée, et le vôtre si vous le souhaitez, sont tissés directement dans les paroles.",
-  },
-  {
-    question: "Pour quelles occasions puis-je créer une chanson ?",
-    answer:
-      "Anniversaire, mariage, déclaration d'amour, réussite, hommage, baptême, encouragement, et tout autre moment qui mérite d'être marqué.",
-  },
-  {
-    question: "Est-ce que je choisis le style musical ?",
-    answer: "Oui, vous choisissez l'ambiance qui correspond à la personne et au moment, avant que la chanson soit composée.",
-  },
-  {
-    question: "Combien de temps ça prend ?",
-    answer: "Quelques minutes pour raconter l'histoire, puis votre chanson est prête à écouter très rapidement.",
-  },
-  {
-    question: "Comment je reçois ma chanson ?",
-    answer: "Le fichier audio est à vous : téléchargeable et prêt à être envoyé où vous voulez, dès que vous la gardez.",
-  },
-  {
-    question: "Et si le résultat ne me plaît pas ?",
-    answer: "Vous ne payez que si vous voulez la garder : le premier essai ne coûte rien, sans engagement.",
-  },
+const FAQ_ITEM_KEYS = [
+  { questionKey: "landing.faq.question1", answerKey: "landing.faq.answer1" },
+  { questionKey: "landing.faq.question2", answerKey: "landing.faq.answer2" },
+  { questionKey: "landing.faq.question3", answerKey: "landing.faq.answer3" },
+  { questionKey: "landing.faq.question4", answerKey: "landing.faq.answer4" },
+  { questionKey: "landing.faq.question5", answerKey: "landing.faq.answer5" },
+  { questionKey: "landing.faq.question6", answerKey: "landing.faq.answer6" },
 ];
 
 function FaqItem({
@@ -78,6 +59,7 @@ function FaqItem({
 }
 
 export function FaqSection() {
+  const { t } = useLanguage();
   // Tout fermé au chargement — à l'utilisateur de choisir ce qu'il veut lire.
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
@@ -88,15 +70,15 @@ export function FaqSection() {
     >
       <div className="mx-auto max-w-2xl">
         <SectionTitle as="h2" size="lg" align="center" animated>
-          Questions <span className="text-brand">fréquentes</span>
+          {t("landing.faq.title")} <span className="text-brand">{t("landing.faq.titleHighlight")}</span>
         </SectionTitle>
 
         <div className="mt-12 flex flex-col gap-3">
-          {FAQ_ITEMS.map((item, index) => (
-            <Reveal key={item.question} delayMs={index * 60}>
+          {FAQ_ITEM_KEYS.map((item, index) => (
+            <Reveal key={item.questionKey} delayMs={index * 60}>
               <FaqItem
-                question={item.question}
-                answer={item.answer}
+                question={t(item.questionKey)}
+                answer={t(item.answerKey)}
                 open={openIndex === index}
                 onToggle={() => setOpenIndex((current) => (current === index ? null : index))}
               />

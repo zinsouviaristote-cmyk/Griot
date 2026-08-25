@@ -8,8 +8,8 @@ import { useLanguage } from "@/lib/i18n/LanguageContext";
 import type { Locale } from "@/lib/i18n/locale";
 
 const LINKS = [
-  { href: "#comment-ca-marche", label: "Comment ça marche" },
-  { href: "#questions", label: "Questions" },
+  { href: "#comment-ca-marche", labelKey: "landing.nav.howItWorks" },
+  { href: "#questions", labelKey: "landing.nav.faq" },
 ];
 
 // Même mécanique et mêmes classes que le sélecteur de langue de la sidebar
@@ -119,7 +119,7 @@ function MobileMenu() {
         onClick={() => setOpen((current) => !current)}
         aria-haspopup="menu"
         aria-expanded={open}
-        aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
+        aria-label={open ? t("landing.nav.menuClose") : t("landing.nav.menuOpen")}
         className="flex h-11 w-11 items-center justify-center rounded-control text-ink-muted transition-colors duration-150 hover:bg-brand-soft/60 hover:text-ink"
       >
         {open ? <X className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" /> : <Menu className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />}
@@ -128,7 +128,7 @@ function MobileMenu() {
       {open && (
         <div
           role="menu"
-          aria-label="Menu"
+          aria-label={t("landing.nav.menu")}
           className="fixed right-4 top-[84px] z-50 w-64 max-w-[calc(100vw-2rem)] animate-pop-in overflow-hidden rounded-card border border-border bg-surface shadow-card-hover"
         >
           <div className="px-4 py-3">
@@ -161,7 +161,7 @@ function MobileMenu() {
               onClick={() => setOpen(false)}
               className="flex min-h-11 items-center px-4 text-sm font-medium text-ink transition-colors hover:bg-brand-soft"
             >
-              Se connecter
+              {t("landing.nav.login")}
             </Link>
           </div>
 
@@ -170,7 +170,7 @@ function MobileMenu() {
               href="/creer"
               className="flex min-h-11 items-center px-4 text-sm font-medium text-brand transition-colors hover:bg-brand-soft"
             >
-              Commencer
+              {t("landing.nav.start")}
             </Link>
           </div>
         </div>
@@ -183,6 +183,7 @@ function MobileMenu() {
 // recentrée dès qu'on défile — jamais de fond opaque plein écran, qui
 // pèserait visuellement sur le héros avant même d'avoir défilé.
 export function LandingNav() {
+  const { t } = useLanguage();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -214,7 +215,7 @@ export function LandingNav() {
                 href={link.href}
                 className="text-sm font-medium text-ink-muted transition-colors hover:text-ink"
               >
-                {link.label}
+                {t(link.labelKey)}
               </a>
             </li>
           ))}
@@ -226,7 +227,7 @@ export function LandingNav() {
             href="/connexion"
             className="hidden min-h-11 items-center rounded-control px-3.5 text-sm font-medium text-ink-muted transition-all duration-150 ease-magnetic hover:bg-brand-soft/60 hover:text-ink sm:inline-flex"
           >
-            Se connecter
+            {t("landing.nav.login")}
           </Link>
           <MobileMenu />
         </div>

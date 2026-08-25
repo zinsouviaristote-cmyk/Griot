@@ -529,6 +529,7 @@ export const en: DeepDictionary<typeof fr> = {
     sending: "Sending…",
     receiveLink: "Get a sign-in link",
     linkSendFailed: "The link couldn't be sent. Try again.",
+    linkSentToast: "Magic link sent by email!",
     checkYourInbox: "Check your inbox",
     linkSentToBefore: "A sign-in link was sent to ",
     linkSentToAfter: ". Open it on this device to continue.",
@@ -568,13 +569,72 @@ autre: {
   tagline: "Create a song for any occasion",
 },
     },
-    styles: {
-      afrobeat: { label: "Afrobeat", tagline: "Upbeat rhythm, rolling groove." },
-      coupe_decale: { label: "Coupé-décalé", tagline: "Festive energy, made for dancing." },
-      gospel: { label: "Gospel", tagline: "Choral voices, warmth and reverence." },
-      ballade_acoustique: { label: "Acoustic ballad", tagline: "Guitar, piano, all softness." },
-      zouk: { label: "Zouk", tagline: "A slow, close-together dance." },
-    },
+   styles: {
+  afrobeat: {
+    label: "Afrobeat",
+    tagline: "Upbeat rhythm, rolling groove.",
+  },
+
+  coupe_decale: {
+    label: "Coupé-décalé",
+    tagline: "Festive energy, made for dancing.",
+  },
+
+  gospel: {
+    label: "Gospel",
+    tagline: "Choral voices, warmth and reverence.",
+  },
+
+  zouk: {
+    label: "Zouk",
+    tagline: "Slow, sensual rhythm for two.",
+  },
+
+  rnb: {
+    label: "R&B",
+    tagline: "Sensual, modern and emotional.",
+  },
+
+  afropop: {
+    label: "Afropop",
+    tagline: "Melodic, modern and warm.",
+  },
+
+  amapiano: {
+    label: "Amapiano",
+    tagline: "Smooth groove, deep bass and a danceable vibe.",
+  },
+
+  reggae: {
+    label: "Reggae",
+    tagline: "Relaxed, warm and uplifting.",
+  },
+
+  pop: {
+    label: "Pop",
+    tagline: "Catchy, modern and accessible.",
+  },
+
+  piano_voix: {
+    label: "Piano & Voice",
+    tagline: "Intimate, minimal and deeply emotional.",
+  },
+
+  jazz: {
+    label: "Jazz",
+    tagline: "Elegant, smooth and sophisticated.",
+  },
+
+  rap_hiphop: {
+    label: "Rap / Hip-hop",
+    tagline: "Modern, personal and rhythmic.",
+  },
+
+  afro_soul: {
+    label: "Afro-soul",
+    tagline: "A blend of Afrobeat and soul, perfect for heartfelt songs.",
+  },
+},
     relationships: {
       mother: "my mother",
       father: "my father",
@@ -590,10 +650,17 @@ autre: {
     },
   },
 
-  tunnel: {
+ tunnel: {
+    common: {
+      continue: "Continue"
+    },
     occasion: {
       title: "What's the occasion?",
       subtitle: "One tap is enough: the song adapts its tone right away.",
+      customModalTitle: "Other occasion",
+      customLabel: "Specify your occasion:",
+      customPlaceholder: "E.g. Promotion, Retirement party...",
+      customError: "Please specify the occasion before continuing."
     },
     recipient: {
       pickFromContacts: "Or choose from your loved ones",
@@ -710,6 +777,88 @@ autre: {
       reformulateDisabled: "Rephrase (unavailable for your lyrics)",
       freeAttempt: "This attempt is free.",
       generatePreview: "Generate the preview",
+    },
+  },
+
+  landing: {
+    nav: {
+      howItWorks: "How it works",
+      faq: "Questions",
+      login: "Log in",
+      start: "Get started",
+      menuOpen: "Open the menu",
+      menuClose: "Close the menu",
+      menu: "Menu",
+    },
+    hero: {
+      badge: "Emotion, set to music",
+      titlePrefix: "A song for",
+      rotatingWord1: "their birthday",
+      rotatingWord2: "your wedding",
+      rotatingWord3: "saying I love you",
+      rotatingWord4: "their success",
+      rotatingWord5: "honoring their memory",
+      subtitle: "Tell their story. Get a sung song, ready to give.",
+      freeTrialNote: "The first attempt is free. You listen before you pay.",
+      playerBadgeTitle: "Personalized preview",
+      playerBadgeSubtitle: "Ready to listen",
+      imageAlt: "A song made for you",
+    },
+    marquee: {
+      occasion1: "Christening",
+      occasion2: "Success",
+      occasion3: "Tribute",
+      occasion4: "Declaration",
+      occasion5: "Encouragement",
+      occasion6: "Birthday",
+      occasion7: "Wedding",
+    },
+    howItWorks: {
+      title: "Three minutes,",
+      titleHighlight: "and it's done",
+      step1Title: "Tell your story",
+      step1Body: "A few sentences are enough, no need to be a writer.",
+      step2Title: "Listen to the song",
+      step2Body: "The first attempt is free, you judge for yourself.",
+      step3Title: "Give it",
+      step3Body: "The file is yours, send it wherever you want.",
+    },
+    trial: {
+      badge: "Risk-free",
+      title: "You're not buying blind",
+      point1: "The first attempt at each song costs nothing.",
+      point2: "You listen to it in full before deciding.",
+      point3: "You only pay if you want to keep it.",
+      cta: "Create my song",
+    },
+    faq: {
+      title: "Frequently asked",
+      titleHighlight: "questions",
+      question1: "Can I include a first name in the song?",
+      answer1: "Yes: the first name of the person the song is for, and yours too if you'd like, are woven directly into the lyrics.",
+      question2: "What occasions can I create a song for?",
+      answer2: "Birthday, wedding, declaration of love, success, tribute, christening, encouragement, and any other moment worth marking.",
+      question3: "Do I choose the musical style?",
+      answer3: "Yes, you choose the mood that matches the person and the moment, before the song is composed.",
+      question4: "How long does it take?",
+      answer4: "A few minutes to tell the story, then your song is ready to listen to very quickly.",
+      question5: "How do I receive my song?",
+      answer5: "The audio file is yours: downloadable and ready to send wherever you want, as soon as you keep it.",
+      question6: "What if I don't like the result?",
+      answer6: "You only pay if you want to keep it: the first attempt costs nothing, no commitment.",
+    },
+    finalCta: {
+      title: "A story to tell? It deserves its song.",
+    },
+    footer: {
+      privacy: "Privacy",
+      terms: "Terms",
+      tagline: "Made in Benin, for everyone.",
+    },
+    prenomForm: {
+      srLabel: "Who is this song for?",
+      placeholder: "Who is this song for?",
+      cta: "Create my song",
     },
   },
 } satisfies DeepDictionary<typeof fr>;

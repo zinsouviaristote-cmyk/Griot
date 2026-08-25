@@ -4,29 +4,16 @@ import { BookOpenText, Headphones, Gift } from "lucide-react";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { Reveal } from "@/components/ui/Reveal";
 import { useInView } from "@/lib/landing/useInView";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 const STEPS = [
-  {
-    number: "01",
-    icon: BookOpenText,
-    title: "Racontez votre histoire",
-    body: "Quelques phrases suffisent, pas besoin d'être écrivain.",
-  },
-  {
-    number: "02",
-    icon: Headphones,
-    title: "Écoutez la chanson",
-    body: "Le premier essai est offert, vous jugez par vous-même.",
-  },
-  {
-    number: "03",
-    icon: Gift,
-    title: "Offrez-la",
-    body: "Le fichier est à vous, à envoyer où vous voulez.",
-  },
+  { number: "01", icon: BookOpenText, titleKey: "landing.howItWorks.step1Title", bodyKey: "landing.howItWorks.step1Body" },
+  { number: "02", icon: Headphones, titleKey: "landing.howItWorks.step2Title", bodyKey: "landing.howItWorks.step2Body" },
+  { number: "03", icon: Gift, titleKey: "landing.howItWorks.step3Title", bodyKey: "landing.howItWorks.step3Body" },
 ];
 
 export function HowItWorks() {
+  const { t } = useLanguage();
   const { ref, inView } = useInView<HTMLDivElement>();
 
   return (
@@ -36,7 +23,7 @@ export function HowItWorks() {
     >
       <div className="mx-auto max-w-4xl">
         <SectionTitle as="h2" size="lg" align="center" animated>
-          Trois minutes, <span className="text-brand">et c&apos;est fait</span>
+          {t("landing.howItWorks.title")} <span className="text-brand">{t("landing.howItWorks.titleHighlight")}</span>
         </SectionTitle>
 
         <div ref={ref} className="relative mt-14 grid gap-8 sm:grid-cols-3 sm:gap-6">
@@ -80,8 +67,8 @@ export function HowItWorks() {
                 <span className="relative flex h-14 w-14 items-center justify-center rounded-full bg-brand-soft text-brand">
                   <step.icon className="h-7 w-7" strokeWidth={1.5} aria-hidden="true" />
                 </span>
-                <p className="relative mt-5 font-display text-lg font-semibold text-ink">{step.title}</p>
-                <p className="relative mt-1.5 text-sm leading-relaxed text-ink-muted">{step.body}</p>
+                <p className="relative mt-5 font-display text-lg font-semibold text-ink">{t(step.titleKey)}</p>
+                <p className="relative mt-1.5 text-sm leading-relaxed text-ink-muted">{t(step.bodyKey)}</p>
               </div>
             </Reveal>
           ))}

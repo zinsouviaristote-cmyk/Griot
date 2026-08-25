@@ -6,12 +6,12 @@ import { useLanguage } from "@/lib/i18n/LanguageContext";
 import type { SongStatus } from "@/lib/types";
 
 const STATUS_OPTIONS: { status: SongStatus; labelKey: string }[] = [
-  { status: "draft", labelKey: "library.status.draft" },
-  { status: "generating", labelKey: "library.status.generating" },
-  { status: "preview_ready", labelKey: "library.status.previewReady" },
-  { status: "awaiting_payment", labelKey: "library.status.awaitingPayment" },
-  { status: "paid", labelKey: "library.status.paid" },
-  { status: "failed", labelKey: "library.status.failed" },
+  { status: "draft", labelKey: "history.status.draft" },
+  { status: "generating", labelKey: "history.status.generating" },
+  { status: "preview_ready", labelKey: "history.status.previewReady" },
+  { status: "awaiting_payment", labelKey: "history.status.awaitingPayment" },
+  { status: "paid", labelKey: "history.status.paid" },
+  { status: "failed", labelKey: "history.status.failed" },
 ];
 
 /**
@@ -50,20 +50,20 @@ export function HistoryFiltersPanel({
         }`}
       >
         <SlidersHorizontal className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
-        {active.size > 0 ? t("library.filters.buttonWithCount", { count: active.size }) : t("library.filters.button")}
+        {active.size > 0 ? t("history.filters.buttonWithCount", { count: active.size }) : t("history.filters.button")}
       </button>
 
       {open && (
         <>
           <button
             type="button"
-            aria-label={t("library.filters.close")}
+            aria-label={t("history.filters.close")}
             onClick={() => setOpen(false)}
             className="fixed inset-0 z-40 cursor-default"
           />
           <div className="absolute left-0 top-full z-50 mt-2 w-64 animate-pop-in rounded-card border border-border bg-surface p-3 shadow-card-hover sm:left-auto sm:right-0">
             <div className="flex items-center justify-between px-1">
-              <p className="text-label-sm font-medium uppercase tracking-wide text-ink-muted">{t("library.filters.stateLabel")}</p>
+              <p className="text-label-sm font-medium uppercase tracking-wide text-ink-muted">{t("history.filters.stateLabel")}</p>
               {active.size > 0 && (
                 <button
                   type="button"
@@ -71,7 +71,7 @@ export function HistoryFiltersPanel({
                   className="flex items-center gap-1 text-xs font-medium text-brand hover:underline"
                 >
                   <X className="h-3 w-3" strokeWidth={1.5} aria-hidden="true" />
-                  {t("library.filters.reset")}
+                  {t("history.filters.reset")}
                 </button>
               )}
             </div>

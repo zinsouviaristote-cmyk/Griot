@@ -73,7 +73,6 @@ export async function fetchAdminRecentSongs(): Promise<Song[]> {
   return (data as unknown as Array<{
     id: string;
     recipient_first_name: string;
-    relationship: string;
     occasion: string;
     style: string;
     status: string;
@@ -88,7 +87,6 @@ export async function fetchAdminRecentSongs(): Promise<Song[]> {
   }>).map((song) => ({
     id: song.id,
     recipientFirstName: song.recipient_first_name,
-    relationship: song.relationship,
     occasion: song.occasion as Song["occasion"],
     style: song.style as Song["style"],
     status: song.status as Song["status"],

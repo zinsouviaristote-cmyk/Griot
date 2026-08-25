@@ -23,36 +23,24 @@ export type Occasion =
   | "hommage"
   | "autre";
 
-// Vocabulaire du lien avec le destinataire, utilisé par le tunnel (écran
-// destinataire) — un seul endroit pour cette liste fermée, jamais une chaîne
-// libre dupliquée.
-export const RELATIONSHIP_OPTIONS = [
-  "ma mère",
-  "mon père",
-  "ma femme",
-  "mon mari",
-  "mon frère",
-  "ma sœur",
-  "mon ami·e",
-  "mon enfant",
-  "ma grand-mère",
-  "mon grand-père",
-  "autre",
-] as const;
-
-export type Relationship = (typeof RELATIONSHIP_OPTIONS)[number];
-
 export type MusicStyle =
   | "afrobeat"
   | "coupe_decale"
   | "gospel"
-  | "ballade_acoustique"
-  | "zouk";
+  | "zouk"
+  | "rnb"
+  | "afropop"
+  | "amapiano"
+  | "reggae"
+  | "pop"
+  | "piano_voix"
+  | "jazz"
+  | "rap_hiphop"
+  | "afro_soul";
 
 export interface Song {
   id: string;
   recipientFirstName: string;
-  relationship: string;
   occasion: Occasion;
   style: MusicStyle;
   status: SongStatus;
@@ -77,10 +65,6 @@ export interface Song {
 export interface Contact {
   id: string;
   firstName: string;
-  relationship: Relationship;
-
-  // "YYYY-MM-DD" — seuls le mois et le jour comptent dans tous les calculs.
-  birthday: string;
 
   phone: string | null;
   note: string | null;

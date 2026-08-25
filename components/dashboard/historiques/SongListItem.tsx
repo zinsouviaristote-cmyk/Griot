@@ -20,7 +20,7 @@ import { SongActionsMenu } from "./SongActionsMenu";
 import { formatDuration } from "@/lib/format/duration";
 import { getPublishedEntryForSong } from "@/lib/data/mock-explorer";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import { occasionLabel, relationshipLabel, styleLabel } from "@/lib/i18n/catalog";
+import { occasionLabel, styleLabel } from "@/lib/i18n/catalog";
 import type { PlayerTrack } from "@/lib/player/PlayerContext";
 import type { PublishedSong, Song } from "@/lib/types";
 import { mockDeleteSong } from "@/lib/data/mockHistoryActions";
@@ -28,7 +28,6 @@ import { mockDeleteSong } from "@/lib/data/mockHistoryActions";
 function tunnelHref(song: Song): string {
   const params = new URLSearchParams({
     prenom: song.recipientFirstName,
-    lien: song.relationship,
     occasion: song.occasion,
   });
   return `/creer?${params.toString()}`;
@@ -73,7 +72,7 @@ export function SongListItem({ song, index = 0, queue }: { song: Song; index?: n
   async function handleShare() {
     try {
       await navigator.clipboard.writeText(`${window.location.origin}${detailHref}`);
-      showToast(t("library.item.linkCopied"), "success");
+      showToast(t("history.item.linkCopied"), "success");
     } catch {
       showToast(t("history.item.linkCopyFailed"), "danger");
     }
@@ -155,7 +154,6 @@ export function SongListItem({ song, index = 0, queue }: { song: Song; index?: n
               </Link>
               <StatusBadge status={song.status} />
             </div>
-            <p className="truncate text-xs text-ink-muted">{relationshipLabel(t, song.relationship)}</p>
             <p className="mt-1 truncate text-xs text-ink-muted">
               {occasionLabel(t, song.occasion)} · {styleLabel(t, song.style)} · {formatDate(song.createdAt, locale)}
             </p>

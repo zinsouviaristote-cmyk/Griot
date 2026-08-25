@@ -1,11 +1,24 @@
-const OCCASIONS = ["Baptême", "Réussite", "Hommage", "Déclaration", "Encouragement", "Anniversaire", "Mariage"];
+"use client";
+
+import { useLanguage } from "@/lib/i18n/LanguageContext";
+
+const OCCASION_KEYS = [
+  "landing.marquee.occasion1",
+  "landing.marquee.occasion2",
+  "landing.marquee.occasion3",
+  "landing.marquee.occasion4",
+  "landing.marquee.occasion5",
+  "landing.marquee.occasion6",
+  "landing.marquee.occasion7",
+];
 
 function MarqueeContent() {
+  const { t } = useLanguage();
   return (
     <>
-      {OCCASIONS.map((occasion) => (
-        <span key={occasion} className="flex items-center gap-6 sm:gap-8">
-          <span className="text-sm font-semibold uppercase tracking-[0.15em] text-ink-muted">{occasion}</span>
+      {OCCASION_KEYS.map((key) => (
+        <span key={key} className="flex items-center gap-6 sm:gap-8">
+          <span className="text-sm font-semibold uppercase tracking-[0.15em] text-ink-muted">{t(key)}</span>
           <span className="text-brand" aria-hidden="true">
             ◆
           </span>

@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 // Champ d'appel à l'action du héros et du bloc final — un seul geste, sans
 // détour par une page de formulaire : le prénom saisi ici part directement en
@@ -17,6 +18,7 @@ import { ArrowRight } from "lucide-react";
 // après le titre, il doit se voir avant tout le reste. Le bloc final garde la
 // taille par défaut, plus discrète en fin de parcours.
 export function PrenomForm({ className = "", size = "md" }: { className?: string; size?: "md" | "lg" }) {
+  const { t } = useLanguage();
   const router = useRouter();
   const [prenom, setPrenom] = useState("");
   const [attention, setAttention] = useState(false);
@@ -41,7 +43,7 @@ export function PrenomForm({ className = "", size = "md" }: { className?: string
       className={`flex w-full flex-col gap-2.5 sm:flex-row sm:gap-3 ${isLg ? "max-w-lg" : "max-w-md"} ${className}`}
     >
       <label className="block flex-1 text-left">
-        <span className="sr-only">Pour qui est cette chanson ?</span>
+        <span className="sr-only">{t("landing.prenomForm.srLabel")}</span>
         <input
           ref={inputRef}
           type="text"
@@ -51,7 +53,7 @@ export function PrenomForm({ className = "", size = "md" }: { className?: string
             if (attention) setAttention(false);
           }}
           onAnimationEnd={() => setAttention(false)}
-          placeholder="Pour qui est cette chanson ?"
+          placeholder={t("landing.prenomForm.placeholder")}
           className={`w-full rounded-control border border-border bg-surface text-ink placeholder:text-ink-muted transition-colors focus:border-brand focus:outline-none focus:shadow-ring-focus ${
             isLg ? "min-h-14 px-5 text-base" : "min-h-11 px-4 text-sm"
           } ${attention ? "animate-attn-shake border-brand" : ""}`}
@@ -63,7 +65,7 @@ export function PrenomForm({ className = "", size = "md" }: { className?: string
           isLg ? "min-h-14 px-7 text-base" : "min-h-11 px-5 text-sm"
         }`}
       >
-        Créer ma chanson
+        {t("landing.prenomForm.cta")}
         <ArrowRight className={isLg ? "h-5 w-5" : "h-4 w-4"} strokeWidth={1.5} aria-hidden="true" />
       </button>
     </form>

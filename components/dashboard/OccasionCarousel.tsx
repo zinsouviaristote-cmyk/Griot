@@ -7,10 +7,7 @@ import { Reveal } from "@/components/ui/Reveal";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { occasionCatalog } from "@/lib/data/mock-dashboard";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import {
-  occasionLabel,
-  occasionTagline,
-} from "@/lib/i18n/catalog";
+import { occasionLabel, occasionTagline } from "@/lib/i18n/catalog";
 
 export function OccasionCarousel() {
   const { t } = useLanguage();
