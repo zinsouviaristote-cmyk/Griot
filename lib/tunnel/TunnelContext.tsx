@@ -31,6 +31,7 @@ interface TunnelContextValue {
   canGoBack: boolean;
   notesBalance: number;
   spendNote: () => void;
+  reset: () => void;
 }
 
 const TunnelContext = createContext<TunnelContextValue | null>(null);
@@ -87,12 +88,13 @@ export function TunnelProvider({
     }
   }, [initialData]);
 
-  // 🟢 2. Restauration depuis le localStorage (uniquement si les valeurs de l'URL ne sont pas présentes)
+  // 🟢 2. Restauration depuis le localStorage UNIQUEMENT lors du retour d'auth
   useEffect(() => {
     if (hydrated.current) return;
     hydrated.current = true;
     const stored = readStoredTunnel();
 
+    // Restaure le brouillon seulement si l'utilisateur revient d'une redirection OAuth
     if (resumeAuth && stored.step && stored.data) {
       setStep(stored.step);
       setData((current) => {
@@ -102,26 +104,6 @@ export function TunnelProvider({
           restored.authProvider = resumeAuth.provider ?? "google";
         }
         return restored;
-      });
-    } else {
-      setData((current) => {
-        const merged = { ...current };
-        let changed = false;
-        
-        // On n'écrase JAMAIS une donnée déjà explicitement passée en initialData/URL
-        for (const key of Object.keys(stored.data ?? {}) as (keyof TunnelData)[]) {
-          const currentValue = current[key];
-          const hasInitialValue = initialData && initialData[key] !== undefined && initialData[key] !== null && initialData[key] !== "";
-          
-          const isEmpty = currentValue === "" || currentValue === null;
-          const storedValue = stored.data![key];
-
-          if (!hasInitialValue && isEmpty && storedValue !== undefined && storedValue !== "" && storedValue !== null) {
-            (merged as Record<string, unknown>)[key] = storedValue;
-            changed = true;
-          }
-        }
-        return changed ? merged : current;
       });
     }
 
@@ -133,7 +115,7 @@ export function TunnelProvider({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Sauvegarde automatique de la session dans le localStorage
+  // 🟢 3. Sauvegarde automatique de la session en cours dans le localStorage
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
@@ -143,6 +125,18 @@ export function TunnelProvider({
       // Ignorer si indisponible
     }
   }, [step, data]);
+
+  // 🟢 4. Fonction permettant de réinitialiser complètement le formulaire
+  const reset = () => {
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem(STORAGE_KEY);
+    }
+    setData({
+      ...EMPTY_TUNNEL_DATA,
+      songLanguage: getStoredOrDetectedLocale(),
+    });
+    setStep("occasion");
+  };
 
   const value = useMemo<TunnelContextValue>(() => {
     const stepIndex = TUNNEL_STEPS.indexOf(step);
@@ -158,6 +152,7 @@ export function TunnelProvider({
       canGoBack: stepIndex > 0 && stepIndex <= LAST_EDITABLE_STEP_INDEX,
       notesBalance,
       spendNote: () => setNotesBalance((current) => Math.max(0, current - 1)),
+      reset,
     };
   }, [step, data, notesBalance]);
 
