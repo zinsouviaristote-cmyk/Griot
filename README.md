@@ -28,7 +28,6 @@ tout nouvel utilisateur (aucune chanson, aucun crédit).
 ## État actuel du projet
 
 Phase 1 du plan d'implémentation, en cours : tableau de bord et navigation
-construits sur des **données fictives** (`lib/data/mock-dashboard.ts`) —
 aucune base de données, aucune authentification, aucun appel au moteur
 musical pour l'instant. Ce module est isolé pour être remplacé sans toucher
 aux composants lorsque Supabase arrive (Phase 2 du plan).
