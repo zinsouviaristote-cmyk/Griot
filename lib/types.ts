@@ -10,9 +10,18 @@ export type SongStatus =
   | "awaiting_payment"
   | "paid"
   | "delivered"
-  | "failed"; 
+  | "failed";
 
-export type Occasion = "anniversaire" | "amour" | "mariage" | "reussite" | "hommage";
+// Occasions disponibles pour la création d'une chanson.
+// Cette liste est volontairement courte afin de garder l'interface simple.
+export type Occasion =
+  | "anniversaire"
+  | "amour"
+  | "mariage"
+  | "reussite"
+  | "celebration"
+  | "hommage"
+  | "autre";
 
 // Vocabulaire du lien avec le destinataire, utilisé par le tunnel (écran
 // destinataire) — un seul endroit pour cette liste fermée, jamais une chaîne
@@ -49,23 +58,19 @@ export interface Song {
   status: SongStatus;
   createdAt: string;
   durationSeconds: number | null;
-  // Non nul dès l'extrait généré (preview_ready et au-delà) ; les paroles ne le
-  // sont qu'après paiement (paid/delivered) — le paiement débloque du contenu
-  // réel, pas seulement une étiquette d'état.
+
+  // Non nul dès l'extrait généré (preview_ready et au-delà) ;
+  // les paroles ne le sont qu'après paiement (paid/delivered).
   audioUrl: string | null;
   lyrics: string | null;
-  // Lien vers Mes proches quand la chanson a été créée pour un contact enregistré
-  // (via le tunnel ou "Créer une chanson pour X"). Nul pour les chansons plus
-  // anciennes ou dont le contact a depuis été supprimé — la chanson reste
-  // affichable, seule cette référence croisée disparaît.
+
+  // Lien vers Mes proches quand la chanson a été créée pour un contact enregistré.
   contactId: string | null;
-  // Nombre de lectures de l'extrait ou de la chanson complète, tous appareils
-  // confondus — 0 tant qu'aucun audio n'existe (draft, generating, failed).
+
+  // Nombre de lectures de l'extrait ou de la chanson complète.
   listens: number;
-  // Pochette téléversée par l'utilisateur (recadrée en carré) — voir
-  // resolveSongArt (components/player/SongArt.tsx) pour l'ordre de priorité
-  // complet : cette image d'abord, sinon la photo de profil, sinon le
-  // dégradé d'occasion. Jamais de rectangle gris.
+
+  // Pochette téléversée par l'utilisateur.
   imageUrl: string | null;
 }
 
@@ -73,17 +78,17 @@ export interface Contact {
   id: string;
   firstName: string;
   relationship: Relationship;
-  // "YYYY-MM-DD" — seuls le mois et le jour comptent dans tous les calculs
-  // (prochaine occurrence, rappel), l'année de naissance n'est jamais affichée.
+
+  // "YYYY-MM-DD" — seuls le mois et le jour comptent dans tous les calculs.
   birthday: string;
+
   phone: string | null;
   note: string | null;
 }
 
 // Contrairement à `Song`/`Contact`, cette interface ne porte plus `label`
-// ni `tagline` : les deux sont désormais des traductions (voir
-// lib/i18n/catalog.ts, occasionLabel/occasionTagline), jamais un texte figé
-// dans les données — seule l'icône reste propre à l'occasion elle-même.
+// ni `tagline` : les deux sont désormais des traductions
+// (voir lib/i18n/catalog.ts).
 export interface OccasionMeta {
   id: Occasion;
   icon: LucideIcon;
@@ -92,25 +97,20 @@ export interface OccasionMeta {
 export interface DashboardUser {
   firstName: string;
   initials: string;
-  // Adresse du compte Google lié — seule identité du produit depuis le retrait
-  // du mot de passe, non modifiable directement (voir Paramètres > Mon profil).
+
+  // Adresse du compte Google lié.
   email: string;
+
   creditBalance: number;
-  // Facultatif : sert uniquement aux rappels et à la livraison WhatsApp (voir
-  // Paramètres > Notifications), plus jamais un identifiant de connexion.
+
+  // Facultatif : sert uniquement aux rappels et à la livraison WhatsApp.
   phone: string | null;
-  // Photo de profil (voir ProfilePhotoField) — sert aussi de pochette de
-  // repli pour une chanson sans image propre (voir resolveSongArt). Publier
-  // une chanson qui l'utilise rend ce visage visible publiquement dans
-  // Explorer : PublishModal doit le signaler et proposer le dégradé à la place.
+
+  // Photo de profil.
   photoUrl: string | null;
 }
 
-// Une chanson publiée dans Explorer — entité distincte de Song : la publication
-// est un choix explicite et réversible, jamais un attribut permanent de la
-// chanson d'origine. `sourceSongId` relie une publication à une chanson réelle
-// de la bibliothèque de son auteur quand elle existe (nul pour les publications
-// fictives d'autres utilisateurs dans les données de démonstration).
+// Une chanson publiée dans Explorer.
 export interface PublishedSong {
   id: string;
   sourceSongId: string | null;
@@ -123,45 +123,34 @@ export interface PublishedSong {
   audioUrl: string;
   likes: number;
   listens: number;
-  // Téléchargements du MP3 depuis cette publication précisément (Statistiques) —
-  // distinct des téléchargements possibles depuis la bibliothèque privée, jamais
-  // comptés ici : cette page ne parle que de ce que le public a fait.
+
+  // Téléchargements du MP3 depuis cette publication précisément.
   downloads: number;
+
   publishedAt: string;
-  // Le pseudonyme public de l'auteur (celui qui a offert la chanson, pas le
-  // destinataire) — affiché avec un avatar d'initiales dans Explorer, jamais
-  // une photo : distinct de la pochette (voir imageUrl), qui elle peut en
-  // porter une.
+
+  // Pseudonyme public de l'auteur.
   authorName: string;
-  // Pochette résolue et figée AU MOMENT de la publication — la propre image de
-  // la chanson, ou une copie de la photo de profil si l'auteur l'a autorisé
-  // (voir l'avertissement de PublishModal), ou `null` pour retomber sur le
-  // dégradé d'occasion. Jamais recalculée après coup : si l'auteur change sa
-  // photo de profil plus tard, une publication existante ne doit pas se mettre
-  // à afficher un visage qu'elle n'a jamais montré au moment de publier.
+
+  // Pochette résolue et figée au moment de la publication.
   imageUrl: string | null;
-  // Courtes lignes de paroles, pour l'aperçu (première ligne) et la
-  // surimpression "Paroles" du lecteur immersif d'Explorer.
+
+  // Courtes lignes de paroles pour l'aperçu.
   lyrics: string[];
 }
 
-// Un mouvement du solde de Notes — achat (Mobile Money/carte), essai (une
-// génération audio ; 0 pour le premier essai gratuit d'une chanson) ou
-// remboursement (échec de génération). `balanceAfter` est stocké plutôt que
-// recalculé : l'historique reste lisible ligne par ligne, sans dépendre de
-// l'ordre d'affichage pour rester cohérent.
+// Un mouvement du solde de Notes.
 export type CreditMotif = "achat" | "essai" | "remboursement";
 
 export interface CreditTransaction {
   id: string;
   date: string;
   motif: CreditMotif;
-  // Clé de traduction (espace de noms recharge.history.transactions) plutôt
-  // qu'un texte déjà composé — une ligne d'historique doit s'afficher dans la
-  // langue d'interface courante, jamais figée dans celle où la donnée a été
-  // écrite.
+
+  // Clé de traduction.
   labelKey: string;
   labelParams?: Record<string, string | number>;
+
   delta: number;
   balanceAfter: number;
 }

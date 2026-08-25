@@ -557,6 +557,15 @@ export const fr = {
       mariage: { label: "Mariage", tagline: "Un cadeau qui reste, longtemps après la fête." },
       reussite: { label: "Réussite", tagline: "Célébrez un diplôme, une promotion, une victoire." },
       hommage: { label: "Hommage", tagline: "Une mélodie pour honorer un être cher." },
+      celebration: {
+  label: "Célébration",
+  tagline: "Pour fêter un moment spécial",
+},
+
+autre: {
+  label: "Autre occasion",
+  tagline: "Créez une chanson pour toute occasion",
+},
     },
     styles: {
       afrobeat: { label: "Afrobeat", tagline: "Rythme entraînant, groove chaloupé." },

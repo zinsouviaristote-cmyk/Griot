@@ -3,11 +3,18 @@ import { ArrowUpRight } from "lucide-react";
 import { OCCASION_TONES } from "@/lib/occasionTones";
 import type { OccasionMeta } from "@/lib/types";
 
-// `label`/`tagline` n'existent plus sur OccasionMeta lui-même (voir lib/types.ts) :
-// l'appelant (OccasionCarousel) les fournit déjà traduits, à chaque rendu.
-type TranslatedOccasion = OccasionMeta & { label: string; tagline: string };
+// `label`/`tagline` n'existent plus sur OccasionMeta lui-même.
+// Ils sont fournis par le système de traduction.
+type TranslatedOccasion = OccasionMeta & {
+  label: string;
+  tagline: string;
+};
 
-export function OccasionCard({ occasion }: { occasion: TranslatedOccasion }) {
+export function OccasionCard({
+  occasion,
+}: {
+  occasion: TranslatedOccasion;
+}) {
   const tone = OCCASION_TONES[occasion.id];
 
   return (
@@ -19,17 +26,32 @@ export function OccasionCard({ occasion }: { occasion: TranslatedOccasion }) {
         <span
           className={`flex h-9 w-9 items-center justify-center rounded-full transition-transform duration-300 ease-magnetic group-hover:scale-110 ${tone.chip}`}
         >
-          <occasion.icon className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+          <occasion.icon
+            className="h-4 w-4"
+            strokeWidth={1.5}
+            aria-hidden="true"
+          />
         </span>
+
         <span
           className={`flex h-7 w-7 items-center justify-center rounded-full text-ink-muted transition-all duration-200 ease-magnetic group-hover:translate-x-0.5 group-hover:-translate-y-0.5 ${tone.hoverArrow}`}
         >
-          <ArrowUpRight className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+          <ArrowUpRight
+            className="h-4 w-4"
+            strokeWidth={1.5}
+            aria-hidden="true"
+          />
         </span>
       </div>
+
       <div>
-        <p className="font-display text-lg font-semibold text-ink">{occasion.label}</p>
-        <p className="mt-1 text-xs leading-snug text-ink-muted">{occasion.tagline}</p>
+        <p className="font-display text-lg font-semibold text-ink">
+          {occasion.label}
+        </p>
+
+        <p className="mt-1 text-xs leading-snug text-ink-muted">
+          {occasion.tagline}
+        </p>
       </div>
     </Link>
   );

@@ -1,4 +1,12 @@
-import { Cake, Feather, Gem, Heart, Trophy } from "lucide-react";
+import {
+  Cake,
+  Feather,
+  Gem,
+  Heart,
+  Trophy,
+  PartyPopper,
+  Sparkles,
+} from "lucide-react";
 import type { DashboardUser, OccasionMeta, Song } from "@/lib/types";
 
 // Module unique de données fictives pour le tableau de bord.
@@ -16,18 +24,38 @@ export const mockUser: DashboardUser = {
   photoUrl: null,
 };
 
-// Les occasions se distinguent par leur icône et une nuance propre — toujours
-// dérivée du violet de marque (voir occasion.* dans tailwind.config.ts), jamais
-// une couleur indépendante. Le mapping id → classes vit dans OccasionCard.tsx,
-// au même endroit que les autres lookups de teinte du produit (TONE_CLASSES).
-// Libellé et accroche ne sont plus stockés ici : voir lib/i18n/catalog.ts
-// (occasionLabel, occasionTagline), qui les tire du dictionnaire courant.
+// Les occasions se distinguent par leur icône et une nuance propre.
+// Libellé et accroche ne sont pas stockés ici : voir lib/i18n/catalog.ts
+// (occasionLabel, occasionTagline).
 export const occasionCatalog: OccasionMeta[] = [
-  { id: "anniversaire", icon: Cake },
-  { id: "amour", icon: Heart },
-  { id: "mariage", icon: Gem },
-  { id: "reussite", icon: Trophy },
-  { id: "hommage", icon: Feather },
+  {
+    id: "anniversaire",
+    icon: Cake,
+  },
+  {
+    id: "amour",
+    icon: Heart,
+  },
+  {
+    id: "mariage",
+    icon: Gem,
+  },
+  {
+    id: "reussite",
+    icon: Trophy,
+  },
+  {
+    id: "celebration",
+    icon: PartyPopper,
+  },
+  {
+    id: "hommage",
+    icon: Feather,
+  },
+  {
+    id: "autre",
+    icon: Sparkles,
+  },
 ];
 
 const FATOU_LYRICS = `Fatou, ma mère,
@@ -37,7 +65,7 @@ depuis toujours tu illumines mes jours.
 Je me souviens de tes mains qui berçaient,
 de ta voix douce quand le soir tombait.
 Aujourd'hui c'est à moi de te le dire,
-merci maman, pour ce que tu as bâti.
+merci maman, pour tout ce que tu as bâti.
 
 [Refrain]
 Fatou, Fatou,
@@ -199,8 +227,11 @@ export function getSongById(id: string): Song | undefined {
   return mockSongs.find((song) => song.id === id);
 }
 
-// Identifiants de style, dans l'ordre d'affichage du produit — libellé et
-// accroche vivent désormais dans lib/i18n/catalog.ts (styleLabel, styleTagline),
-// jamais un texte figé ici.
-export const MUSIC_STYLE_IDS: Song["style"][] = ["afrobeat", "coupe_decale", "gospel", "ballade_acoustique", "zouk"];
-
+// Identifiants de style, dans l'ordre d'affichage du produit.
+export const MUSIC_STYLE_IDS: Song["style"][] = [
+  "afrobeat",
+  "coupe_decale",
+  "gospel",
+  "ballade_acoustique",
+  "zouk",
+];

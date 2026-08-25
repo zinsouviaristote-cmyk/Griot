@@ -558,6 +558,15 @@ export const en: DeepDictionary<typeof fr> = {
       mariage: { label: "Wedding", tagline: "A gift that lasts long after the party." },
       reussite: { label: "Achievement", tagline: "Celebrate a diploma, a promotion, a win." },
       hommage: { label: "Tribute", tagline: "A melody to honor someone dear." },
+          celebration: {
+  label: "Celebration",
+  tagline: "For celebrating a special moment",
+},
+
+autre: {
+  label: "Other occasion",
+  tagline: "Create a song for any occasion",
+},
     },
     styles: {
       afrobeat: { label: "Afrobeat", tagline: "Upbeat rhythm, rolling groove." },
