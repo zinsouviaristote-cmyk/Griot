@@ -30,7 +30,7 @@ function RotatingWord() {
       setIndex((current) => (current + 1) % words.length);
     }, WORD_INTERVAL_MS);
     return () => window.clearInterval(id);
-  }, []);
+  }, [words.length]); // ← Ajout de la dépendance
 
   return (
     <span className="relative inline-grid whitespace-nowrap text-brand">
