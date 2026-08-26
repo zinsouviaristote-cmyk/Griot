@@ -58,7 +58,7 @@ export function ProfileMenu({
           <Link
             key={item.href}
             href={item.href}
-            className="group flex min-h-[52px] items-center gap-3 border-b border-border px-4 text-sm font-medium text-ink transition-colors last:border-0 hover:bg-brand-soft"
+            className="group flex min-h-[52px] items-center gap-3 border-b border-border px-4 text-sm font-medium text-ink transition-colors last:border-0 hover:bg-page"
           >
             <item.icon
               className="h-4 w-4 shrink-0 text-ink-muted transition-transform duration-150 ease-magnetic group-hover:translate-x-0.5"

@@ -53,7 +53,7 @@ export function SongRow({ song, index = 0 }: { song: Song; index?: number }) {
           <Link
             href={action.href}
             onClick={(event) => event.stopPropagation()}
-            className="group/action inline-flex items-center gap-1.5 rounded-control px-3 py-1.5 text-xs font-semibold text-brand transition-all duration-150 ease-magnetic hover:bg-brand-soft active:scale-95"
+            className="group/action inline-flex items-center gap-1.5 rounded-control px-3 py-1.5 text-xs font-semibold text-brand transition-all duration-150 ease-magnetic hover:bg-page active:scale-95"
           >
             <action.icon
               className="h-3.5 w-3.5 transition-transform duration-150 ease-magnetic group-hover/action:translate-x-0.5"

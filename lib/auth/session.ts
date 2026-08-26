@@ -46,14 +46,3 @@ export async function signOutUser() {
     document.cookie = `${SESSION_COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax`;
   }
 }
-
-// Fonctions de compatibilité de session locale pour le préchargement SSR
-export function markMockSessionActive(): void {
-  if (typeof document === "undefined") return;
-  document.cookie = `${SESSION_COOKIE_NAME}=1; path=/; max-age=${30 * 24 * 60 * 60}; SameSite=Lax`;
-}
-
-export function clearMockSession(): void {
-  if (typeof document === "undefined") return;
-  document.cookie = `${SESSION_COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax`;
-}

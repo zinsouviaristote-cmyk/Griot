@@ -44,7 +44,7 @@ export function TunnelShell() {
             onClick={goBack}
             disabled={!canGoBack}
             aria-label={t("tunnel.shell.previousStep")}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-ink-muted transition-all duration-150 ease-magnetic hover:bg-brand-soft/60 hover:text-ink active:scale-90 disabled:pointer-events-none disabled:opacity-0"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-ink-muted transition-all duration-150 ease-magnetic hover:bg-page hover:text-ink active:scale-90 disabled:pointer-events-none disabled:opacity-0"
           >
             <ArrowLeft className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
           </button>
@@ -56,7 +56,7 @@ export function TunnelShell() {
           <Link
             href="/"
             aria-label={t("tunnel.shell.closeToDashboard")}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-ink-muted transition-all duration-150 ease-magnetic hover:bg-brand-soft/60 hover:text-ink active:scale-90"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-ink-muted transition-all duration-150 ease-magnetic hover:bg-page hover:text-ink active:scale-90"
           >
             <X className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
           </Link>

@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { getPublishedSongById } from "@/lib/data/mock-explorer";
+import { fetchPublicSongById } from "@/lib/supabase/publicAdapters";
 import { fr } from "@/lib/i18n/dictionaries/fr";
 
 export const size = { width: 1200, height: 630 };
@@ -17,7 +17,7 @@ const OCCASION_GRADIENT_HEX: Record<string, [string, string]> = {
   hommage: ["#4a3b66", "#191c1e"],
 };
 
-function displayName(entry: NonNullable<ReturnType<typeof getPublishedSongById>>): string {
+function displayName(entry: NonNullable<Awaited<ReturnType<typeof fetchPublicSongById>>>): string {
   if (entry.publicTitle) return entry.publicTitle;
   if (!entry.hideFirstName) return entry.recipientFirstName;
   return fr.explorer.surpriseSong;
@@ -27,7 +27,7 @@ function displayName(entry: NonNullable<ReturnType<typeof getPublishedSongById>>
 // la chanson si elle existe, sinon le même dégradé d'occasion que la pochette
 // dans l'app, jamais une image cassée ou un fond neutre.
 export default async function OpengraphImage({ params }: { params: { id: string } }) {
-  const entry = getPublishedSongById(params.id);
+  const entry = await fetchPublicSongById(params.id);
   const [from, to] = OCCASION_GRADIENT_HEX[entry?.occasion ?? "anniversaire"];
   const name = entry ? displayName(entry) : "Griot";
   const occasionLabel = entry ? fr.catalog.occasions[entry.occasion].label : null;

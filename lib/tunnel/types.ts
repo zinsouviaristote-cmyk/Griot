@@ -202,6 +202,11 @@ export function formatPackEquivalence(
 // futur PATCH /api/tunnel/:id enverrait pour persister la progression côté
 // serveur, sans que les écrans aient à changer.
 export interface TunnelData {
+  // Rempli dès que le brouillon existe réellement en base (voir GenerationStep) —
+  // avant l'authentification, nul : aucune ligne `songs` ne peut exister sans
+  // `auth.uid()` (RLS).
+  songId: string | null;
+
   occasion: Occasion | null;
 
   // Rempli uniquement lorsque l'utilisateur choisit "Autre occasion".
@@ -244,6 +249,14 @@ export interface TunnelData {
 
   attempts: SongAttempt[];
 
+  // Essai de génération en cours côté serveur, non encore résolu — persisté
+  // pour que l'écran de génération retrouve exactement où il en est s'il est
+  // remonté (retour d'onglet, reconnexion) pendant que le travail continue en
+  // arrière-plan (voir GenerationStep, supabase/functions/generate-song).
+  pendingAttemptId: string | null;
+
+  pendingAttemptIsFree: boolean;
+
   selectedAttemptId: string | null;
 
   // L'essai retenu, une fois choisi.
@@ -258,6 +271,7 @@ export interface TunnelData {
 }
 
 export const EMPTY_TUNNEL_DATA: TunnelData = {
+  songId: null,
   occasion: null,
 
   // Aucun texte personnalisé par défaut.
@@ -276,6 +290,8 @@ export const EMPTY_TUNNEL_DATA: TunnelData = {
   lyricsDraft: null,
   reformulateCount: 0,
   attempts: [],
+  pendingAttemptId: null,
+  pendingAttemptIsFree: false,
   selectedAttemptId: null,
   audioUrl: null,
   lyrics: null,

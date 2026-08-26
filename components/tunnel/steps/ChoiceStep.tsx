@@ -90,7 +90,7 @@ export function ChoiceStep() {
             <button
               type="button"
               onClick={handleRetry}
-              className="mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-control border border-brand/40 px-4 text-sm font-semibold text-brand transition-all duration-150 ease-magnetic hover:bg-brand-soft active:scale-95"
+              className="mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-control border border-brand/40 px-4 text-sm font-semibold text-brand transition-all duration-150 ease-magnetic hover:bg-page active:scale-95"
             >
               <RotateCcw className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
               {t("tunnel.choice.retry")}

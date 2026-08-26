@@ -1,4 +1,4 @@
-import { Download, Loader2, Play, RotateCcw, Wand2, type LucideIcon } from "lucide-react";
+import { Download, Loader2, RotateCcw, Wand2, type LucideIcon } from "lucide-react";
 import type { Song } from "@/lib/types";
 
 interface SongAction {
@@ -34,10 +34,10 @@ export function getSongAction(song: Song, t: Translate): SongAction {
         disabled: true,
         spin: true,
       };
+    // Une Note déjà dépensée couvre l'intégralité de la chanson — aucun
+    // second paiement à l'unité : dès que l'extrait existe, elle est acquise.
     case "preview_ready":
-      return { label: t("history.action.listenPreview"), href: `/historiques/${song.id}`, icon: Play };
     case "awaiting_payment":
-      return { label: t("history.action.pay"), href: `/historiques/${song.id}`, icon: Wand2 };
     case "paid":
     case "delivered":
       return { label: t("history.action.download"), href: `/historiques/${song.id}`, icon: Download };

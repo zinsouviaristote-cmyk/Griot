@@ -4,10 +4,8 @@ import {
   type AuthResumeResult,
 } from "@/lib/tunnel/TunnelContext";
 import { TunnelShell } from "@/components/tunnel/TunnelShell";
-import {
-  occasionCatalog,
-  mockUser,
-} from "@/lib/data/mock-dashboard";
+import { occasionCatalog } from "@/lib/songCatalog";
+import { fetchServerUserProfile } from "@/lib/supabase/serverDataAdapters";
 import {
   type TunnelStep,
 } from "@/lib/tunnel/types";
@@ -60,10 +58,9 @@ export default async function CreerPage({
     initialStep = "recipient";
   }
 
+  const user = params.credits === undefined ? await fetchServerUserProfile() : null;
   const creditBalance =
-    params.credits !== undefined
-      ? Number(params.credits) || 0
-      : mockUser.creditBalance;
+    params.credits !== undefined ? Number(params.credits) || 0 : (user?.creditBalance ?? 0);
 
   const authParam = params.auth;
 

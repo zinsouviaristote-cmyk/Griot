@@ -28,6 +28,7 @@ export interface PlayerTrack {
   // public) ou une icône statique (rien à aimer tant que ce n'est pas publié).
   publishedId?: string;
   likes?: number;
+  likedByMe?: boolean;
   // Pochette déjà résolue (voir resolveSongArt, lib/songArt.ts) — jamais
   // recalculée ici : `null`/absente veut dire "dégradé d'occasion".
   imageUrl?: string | null;

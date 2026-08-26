@@ -48,10 +48,10 @@ export function AdminDashboardView() {
     loadData();
   }, []);
 
-  const balance = userProfile?.creditBalance ?? 6;
-  const initials = userProfile?.initials ?? "AK";
-  const name = userProfile?.firstName ?? "Aïcha";
-  const email = userProfile?.email ?? "aicha.k@example.com";
+  const balance = userProfile?.creditBalance ?? 0;
+  const initials = userProfile?.initials ?? "";
+  const name = userProfile?.firstName ?? "";
+  const email = userProfile?.email ?? "";
 
   return (
     <DashboardShell

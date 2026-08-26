@@ -44,7 +44,7 @@ function OptionList({ options }: { options: OptionRow[] }) {
           disabled={option.soon}
           onClick={option.onSelect}
           className={`flex min-h-[44px] w-full items-center justify-between gap-3 px-4 text-left text-sm transition-colors ${
-            option.soon ? "cursor-not-allowed text-ink-muted/50" : "text-ink hover:bg-brand-soft"
+            option.soon ? "cursor-not-allowed text-ink-muted/50" : "text-ink hover:bg-page"
           }`}
         >
           <span className="flex items-center gap-2">
@@ -133,7 +133,7 @@ export function SidebarUserMenu({
         onClick={() => setOpen((current) => !current)}
         aria-expanded={open}
         aria-haspopup="menu"
-        className="flex w-full items-center gap-2.5 rounded-control px-2 py-2 text-left transition-colors duration-150 hover:bg-brand-soft/60"
+        className="flex w-full items-center gap-2.5 rounded-control px-2 py-2 text-left transition-colors duration-150 hover:bg-page"
       >
         <Avatar initials={initials} avatarUrl={avatarUrl} size="sm" />
         <span className="min-w-0 flex-1">
@@ -161,7 +161,7 @@ export function SidebarUserMenu({
                 href="/parametres"
                 onClick={close}
                 role="menuitem"
-                className="flex min-h-[44px] items-center gap-3 px-4 text-sm text-ink transition-colors hover:bg-brand-soft"
+                className="flex min-h-[44px] items-center gap-3 px-4 text-sm text-ink transition-colors hover:bg-page"
               >
                 <User className="h-4 w-4 text-ink-muted" strokeWidth={1.5} aria-hidden="true" />
                 {t("accountMenu.account")}
@@ -171,7 +171,7 @@ export function SidebarUserMenu({
                   href="/admin"
                   onClick={close}
                   role="menuitem"
-                  className="flex min-h-[44px] items-center gap-3 px-4 text-sm font-semibold text-brand transition-colors hover:bg-brand-soft"
+                  className="flex min-h-[44px] items-center gap-3 px-4 text-sm font-semibold text-brand transition-colors hover:bg-page"
                 >
                   <ShieldCheck className="h-4 w-4 text-brand" strokeWidth={1.5} aria-hidden="true" />
                   Administration
@@ -181,7 +181,7 @@ export function SidebarUserMenu({
                 type="button"
                 onClick={() => setPanel("langue")}
                 role="menuitem"
-                className="flex w-full min-h-[44px] items-center justify-between gap-3 px-4 text-sm text-ink transition-colors hover:bg-brand-soft"
+                className="flex w-full min-h-[44px] items-center justify-between gap-3 px-4 text-sm text-ink transition-colors hover:bg-page"
               >
                 <span className="flex items-center gap-3">
                   <Globe className="h-4 w-4 text-ink-muted" strokeWidth={1.5} aria-hidden="true" />
@@ -193,7 +193,7 @@ export function SidebarUserMenu({
                 type="button"
                 onClick={() => setPanel("theme")}
                 role="menuitem"
-                className="flex w-full min-h-[44px] items-center justify-between gap-3 px-4 text-sm text-ink transition-colors hover:bg-brand-soft"
+                className="flex w-full min-h-[44px] items-center justify-between gap-3 px-4 text-sm text-ink transition-colors hover:bg-page"
               >
                 <span className="flex items-center gap-3">
                   <SunMedium className="h-4 w-4 text-ink-muted" strokeWidth={1.5} aria-hidden="true" />
@@ -205,7 +205,7 @@ export function SidebarUserMenu({
                 href="/aide"
                 onClick={close}
                 role="menuitem"
-                className="flex min-h-[44px] items-center gap-3 px-4 text-sm text-ink transition-colors hover:bg-brand-soft"
+                className="flex min-h-[44px] items-center gap-3 px-4 text-sm text-ink transition-colors hover:bg-page"
               >
                 <CircleHelp className="h-4 w-4 text-ink-muted" strokeWidth={1.5} aria-hidden="true" />
                 {t("accountMenu.help")}

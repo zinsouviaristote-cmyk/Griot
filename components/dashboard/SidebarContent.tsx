@@ -53,7 +53,7 @@ function NavSection({
                 className={`group relative flex items-center gap-3 rounded-control px-3 py-2.5 text-sm font-medium transition-all duration-150 ease-magnetic active:scale-[0.98] ${
                   isActive
                     ? "bg-brand-soft text-brand"
-                    : "text-ink-muted hover:translate-x-0.5 hover:bg-brand-soft/60 hover:text-ink"
+                    : "text-ink-muted hover:translate-x-0.5 hover:bg-page hover:text-ink"
                 }`}
               >
                 <span

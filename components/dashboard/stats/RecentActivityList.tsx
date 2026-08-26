@@ -4,7 +4,7 @@ import { Ear, Heart, Radio } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { formatRelativeTime } from "@/lib/format/date";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import type { ActivityEntry } from "@/lib/data/mock-stats";
+import type { ActivityEntry } from "@/lib/types";
 
 // Jamais "qui" a aimé ou écouté (voir LikeButton — Griot ne suit aucune
 // identité côté auditeur), seulement quoi et quand : chaque ligne nomme la

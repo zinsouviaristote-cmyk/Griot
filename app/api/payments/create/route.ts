@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { productId, userId, email, firstName, lastName, phone, packId, notesAmount } = body;
+    const { productId, userId, email, firstName, lastName, phone, packId, notesAmount, songId, redirectPath } = body;
 
     if (!productId || !userId || !email) {
       return NextResponse.json(
@@ -48,10 +48,11 @@ export async function POST(request: Request) {
         // Meta-données transmises au Webhook
         custom_metadata: {
           user_id: userId,
-          pack_id: packId,
-          notes_amount: String(notesAmount),
+          pack_id: packId || undefined,
+          notes_amount: notesAmount ? String(notesAmount) : undefined,
+          song_id: songId || undefined,
         },
-        redirect_url: `${appUrl}/tableau-de-bord?status=success`,
+        redirect_url: `${appUrl}${typeof redirectPath === "string" && redirectPath.startsWith("/") ? redirectPath : "/tableau-de-bord"}?status=success`,
       }),
     });
 

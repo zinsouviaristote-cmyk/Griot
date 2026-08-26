@@ -4,10 +4,9 @@ import { useMemo, useState } from "react";
 import { Music4, Search, X } from "lucide-react";
 import { SongListItem } from "@/components/dashboard/historiques/SongListItem";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { getPublishedEntryForSong } from "@/lib/data/mock-explorer";
 import { songsToQueue } from "@/lib/player/songToTrack";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import type { Song, SongStatus } from "@/lib/types";
+import type { PublishedSong, Song, SongStatus } from "@/lib/types";
 import { HistoryFiltersPanel } from "./HistoryFiltersPanel";
 
 type Shortcut = "toutes" | "publiees" | "telechargees";
@@ -25,12 +24,26 @@ const SORT_LABEL_KEYS: Record<SortMode, string> = {
   ecoutees: "history.sort.mostListened",
 };
 
-export function HistoryView({ songs, initialSearch = "" }: { songs: Song[]; initialSearch?: string }) {
+export function HistoryView({
+  songs,
+  publishedSongs,
+  onPublishedSongsChange,
+  onSongDeleted,
+  initialSearch = "",
+}: {
+  songs: Song[];
+  publishedSongs: PublishedSong[];
+  onPublishedSongsChange: (next: PublishedSong[]) => void;
+  onSongDeleted: (songId: string) => void;
+  initialSearch?: string;
+}) {
   const { t } = useLanguage();
   const [search, setSearch] = useState(initialSearch);
   const [shortcut, setShortcut] = useState<Shortcut>("toutes");
   const [statusFilters, setStatusFilters] = useState<Set<SongStatus>>(new Set());
   const [sort, setSort] = useState<SortMode>("recentes");
+
+  const isPublished = (songId: string) => publishedSongs.some((entry) => entry.sourceSongId === songId);
 
   const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -39,8 +52,12 @@ export function HistoryView({ songs, initialSearch = "" }: { songs: Song[]; init
       const matchesStatus = statusFilters.size === 0 || statusFilters.has(song.status);
       const matchesShortcut =
         shortcut === "toutes" ||
-        (shortcut === "publiees" && !!getPublishedEntryForSong(song.id)) ||
-        (shortcut === "telechargees" && (song.status === "paid" || song.status === "delivered"));
+        (shortcut === "publiees" && isPublished(song.id)) ||
+        (shortcut === "telechargees" &&
+          (song.status === "preview_ready" ||
+            song.status === "awaiting_payment" ||
+            song.status === "paid" ||
+            song.status === "delivered"));
       return matchesSearch && matchesStatus && matchesShortcut;
     });
     return [...result].sort((a, b) => {
@@ -48,12 +65,18 @@ export function HistoryView({ songs, initialSearch = "" }: { songs: Song[]; init
       const delta = new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       return sort === "anciennes" ? -delta : delta;
     });
-  }, [songs, search, statusFilters, shortcut, sort]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [songs, search, statusFilters, shortcut, sort, publishedSongs]);
 
   const hasAnySongs = songs.length > 0;
   const hasResults = filtered.length > 0;
   const isFiltering = statusFilters.size > 0 || shortcut !== "toutes" || search.trim() !== "";
-  const queue = useMemo(() => songsToQueue(filtered, t), [filtered, t]);
+  const queue = useMemo(() => songsToQueue(filtered, t, publishedSongs), [filtered, t, publishedSongs]);
+
+  function handlePublishedChange(song: Song, entry: PublishedSong | null) {
+    const withoutThisSong = publishedSongs.filter((item) => item.sourceSongId !== song.id);
+    onPublishedSongsChange(entry ? [...withoutThisSong, entry] : withoutThisSong);
+  }
 
   if (!hasAnySongs) {
     return (
@@ -123,7 +146,15 @@ export function HistoryView({ songs, initialSearch = "" }: { songs: Song[]; init
       {hasResults ? (
         <div className="mt-5 flex flex-col gap-3">
           {filtered.map((song, index) => (
-            <SongListItem key={song.id} song={song} index={index} queue={queue} />
+            <SongListItem
+              key={song.id}
+              song={song}
+              publishedEntry={publishedSongs.find((entry) => entry.sourceSongId === song.id) ?? null}
+              index={index}
+              queue={queue}
+              onPublishedChange={(entry) => handlePublishedChange(song, entry)}
+              onDeleted={onSongDeleted}
+            />
           ))}
         </div>
       ) : (

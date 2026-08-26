@@ -9,7 +9,6 @@ const STATUS_OPTIONS: { status: SongStatus; labelKey: string }[] = [
   { status: "draft", labelKey: "history.status.draft" },
   { status: "generating", labelKey: "history.status.generating" },
   { status: "preview_ready", labelKey: "history.status.previewReady" },
-  { status: "awaiting_payment", labelKey: "history.status.awaitingPayment" },
   { status: "paid", labelKey: "history.status.paid" },
   { status: "failed", labelKey: "history.status.failed" },
 ];

@@ -89,7 +89,7 @@ export function PersistentPlayerBar() {
 
         <div className="flex w-40 shrink-0 items-center justify-end gap-1">
           {current.publishedId ? (
-            <LikeButton publishedSongId={current.publishedId} likes={current.likes ?? 0} />
+            <LikeButton publishedSongId={current.publishedId} likes={current.likes ?? 0} initialLiked={current.likedByMe ?? false} />
           ) : (
             <span className="flex min-h-8 items-center px-2.5 text-ink-muted/40" aria-hidden="true">
               <Heart className="h-4 w-4" strokeWidth={1.5} />

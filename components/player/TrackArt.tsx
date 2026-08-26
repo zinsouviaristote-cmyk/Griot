@@ -1,5 +1,5 @@
 import { OCCASION_GRADIENTS } from "@/lib/occasionTones";
-import { occasionCatalog } from "@/lib/data/mock-dashboard";
+import { occasionCatalog } from "@/lib/songCatalog";
 import type { Occasion } from "@/lib/types";
 
 // Pochette unique pour tout le produit : le lecteur persistant, les lignes de

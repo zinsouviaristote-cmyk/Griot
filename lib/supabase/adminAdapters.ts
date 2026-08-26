@@ -40,7 +40,7 @@ export async function checkIsAdmin(): Promise<boolean> {
 
 export async function fetchAdminStats(): Promise<AdminStats> {
   const supabase = createClient();
-  const { data, error } = await supabase.rpc("get_admin_stats", {});
+  const { data, error } = await supabase.rpc("get_admin_stats");
 
   if (error) throw new Error(`Impossible de récupérer les statistiques réelles : ${error.message}`);
   if (!data) throw new Error("Aucune statistique réelle n'a été renvoyée par Supabase.");
@@ -66,7 +66,7 @@ export async function fetchAdminStats(): Promise<AdminStats> {
 
 export async function fetchAdminRecentSongs(): Promise<Song[]> {
   const supabase = createClient();
-  const { data, error } = await supabase.rpc("get_admin_recent_songs", {});
+  const { data, error } = await supabase.rpc("get_admin_recent_songs");
   if (error) throw new Error(`Impossible de récupérer les chansons récentes : ${error.message}`);
   if (!data) return [];
 
@@ -102,7 +102,7 @@ export async function fetchAdminRecentSongs(): Promise<Song[]> {
 
 export async function fetchAdminOverview(): Promise<AdminOverview> {
   const supabase = createClient();
-  const { data, error } = await supabase.rpc("get_admin_overview_data", {});
+  const { data, error } = await supabase.rpc("get_admin_overview_data");
   if (error) throw new Error(`Impossible de récupérer les données détaillées : ${error.message}`);
 
   const overview = (data ?? {}) as unknown as {

@@ -4,9 +4,14 @@ import { StatisticsView } from "@/components/dashboard/stats/StatisticsView";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { Reveal } from "@/components/ui/Reveal";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import type { PublishedSong, Song } from "@/lib/types";
+import type { ActivityEntry, PublishedSong, Song } from "@/lib/types";
 
 const EMPTY_TOTALS = { listens: 0, likes: 0, downloads: 0, listeningSeconds: 0, publishedCount: 0 };
+
+// Aucune infrastructure de suivi de parrainage n'existe (pas de table dédiée
+// pour "ouvertures de lien" distinctes des écoutes) : la carte reste dans son
+// état vide tant qu'elle n'est pas construite, jamais une valeur inventée.
+const EMPTY_REFERRAL = { pageOpens: 0, songsCreated: 0 };
 
 // Ajoutez ?vide=1 pour prévisualiser l'état d'un compte qui n'a encore rien
 // publié — même convention que sur la bibliothèque et le tableau de bord.
@@ -14,10 +19,12 @@ export function StatistiquesPageBody({
   isEmptyPreview,
   songs,
   published,
+  recentActivity,
 }: {
   isEmptyPreview: boolean;
   songs: Song[];
   published: PublishedSong[];
+  recentActivity: ActivityEntry[];
 }) {
   const { t } = useLanguage();
   const popularSongs = published
@@ -50,8 +57,9 @@ export function StatistiquesPageBody({
         <StatisticsView
           totals={isEmptyPreview ? EMPTY_TOTALS : totals}
           popularSongs={isEmptyPreview ? [] : popularSongs}
-          recentActivity={[]}
-          referral={{ pageOpens: 0, songsCreated: 0 }}
+          publishedSongs={isEmptyPreview ? [] : published}
+          recentActivity={isEmptyPreview ? [] : recentActivity}
+          referral={EMPTY_REFERRAL}
         />
       </Reveal>
     </div>

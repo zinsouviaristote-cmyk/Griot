@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getPublishedSongById } from "@/lib/data/mock-explorer";
+import { fetchPublicSongById } from "@/lib/supabase/publicAdapters";
 import { TrackArt } from "@/components/player/TrackArt";
+import { PublicSongAudioPlayer } from "@/components/player/PublicSongAudioPlayer";
 import { Logo } from "@/components/ui/Logo";
 import { fr } from "@/lib/i18n/dictionaries/fr";
 
@@ -12,14 +13,14 @@ import { fr } from "@/lib/i18n/dictionaries/fr";
 // pochette (voir PublishedSong.imageUrl, déjà résolue au moment de la
 // publication) sert aussi d'image d'aperçu du lien via opengraph-image.tsx,
 // dans le même dossier.
-function displayName(entry: NonNullable<ReturnType<typeof getPublishedSongById>>): string {
+function displayName(entry: NonNullable<Awaited<ReturnType<typeof fetchPublicSongById>>>): string {
   if (entry.publicTitle) return entry.publicTitle;
   if (!entry.hideFirstName) return entry.recipientFirstName;
   return fr.explorer.surpriseSong;
 }
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  const entry = getPublishedSongById(params.id);
+  const entry = await fetchPublicSongById(params.id);
   if (!entry) return { title: "Griot" };
   const name = displayName(entry);
   const occasionLabel = fr.catalog.occasions[entry.occasion].label;
@@ -29,8 +30,8 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   };
 }
 
-export default function PublicSongPage({ params }: { params: { id: string } }) {
-  const entry = getPublishedSongById(params.id);
+export default async function PublicSongPage({ params }: { params: { id: string } }) {
+  const entry = await fetchPublicSongById(params.id);
   if (!entry) notFound();
 
   const name = displayName(entry);
@@ -54,9 +55,7 @@ export default function PublicSongPage({ params }: { params: { id: string } }) {
         </p>
 
         <div className="mt-6 w-full rounded-feature border border-border bg-surface p-4 shadow-card">
-          {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-          <audio controls preload="metadata" src={entry.audioUrl} className="w-full">
-          </audio>
+          <PublicSongAudioPlayer publishedSongId={entry.id} audioUrl={entry.audioUrl} />
         </div>
 
         <Link

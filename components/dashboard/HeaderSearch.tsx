@@ -65,7 +65,7 @@ export function HeaderSearch() {
             type="button"
             onClick={() => setOpen(false)}
             aria-label={t("dashboard.search.close")}
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-brand-soft/60 hover:text-ink"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-page hover:text-ink"
           >
             <X className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
           </button>
@@ -75,7 +75,7 @@ export function HeaderSearch() {
           type="button"
           onClick={() => setOpen(true)}
           aria-label={t("dashboard.search.open")}
-          className="flex h-11 w-11 items-center justify-center rounded-full text-ink-muted transition-all duration-150 ease-magnetic hover:bg-brand-soft/60 active:scale-90"
+          className="flex h-11 w-11 items-center justify-center rounded-full text-ink-muted transition-all duration-150 ease-magnetic hover:bg-page active:scale-90"
         >
           <Search className="h-[18px] w-[18px]" strokeWidth={1.5} aria-hidden="true" />
         </button>

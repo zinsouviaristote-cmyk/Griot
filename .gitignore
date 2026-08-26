@@ -38,3 +38,6 @@ next-env.d.ts
 
 # captures de vérification locale (Playwright MCP)
 /.playwright-mcp/
+
+# etat local du CLI Supabase
+/supabase/.temp/

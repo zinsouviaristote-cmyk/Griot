@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { OccasionCard } from "@/components/dashboard/OccasionCard";
 import { Reveal } from "@/components/ui/Reveal";
 import { SectionTitle } from "@/components/ui/SectionTitle";
-import { occasionCatalog } from "@/lib/data/mock-dashboard";
+import { occasionCatalog } from "@/lib/songCatalog";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { occasionLabel, occasionTagline } from "@/lib/i18n/catalog";
 

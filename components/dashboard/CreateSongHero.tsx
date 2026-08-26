@@ -4,7 +4,7 @@ import { useState, type FocusEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, TriangleAlert, Wand2 } from "lucide-react";
 import { SectionTitle } from "@/components/ui/SectionTitle";
-import { occasionCatalog } from "@/lib/data/mock-dashboard";
+import { occasionCatalog } from "@/lib/songCatalog";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { occasionLabel } from "@/lib/i18n/catalog";
 import type { Occasion } from "@/lib/types";

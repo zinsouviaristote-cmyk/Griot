@@ -9,8 +9,7 @@ import { ListensChart } from "@/components/dashboard/stats/ListensChart";
 import { Reveal } from "@/components/ui/Reveal";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import type { ActivityEntry, MyStatsTotals, ReferralStats } from "@/lib/data/mock-stats";
-import type { Song } from "@/lib/types";
+import type { ActivityEntry, MyStatsTotals, PublishedSong, ReferralStats, Song } from "@/lib/types";
 
 // Cette page ne parle que des chansons publiées — jamais des brouillons, des
 // extraits privés ou des chansons jamais partagées, qui n'ont ni public ni
@@ -19,11 +18,13 @@ import type { Song } from "@/lib/types";
 export function StatisticsView({
   totals,
   popularSongs,
+  publishedSongs,
   recentActivity,
   referral,
 }: {
   totals: MyStatsTotals;
   popularSongs: Song[];
+  publishedSongs: PublishedSong[];
   recentActivity: ActivityEntry[];
   referral: ReferralStats;
 }) {
@@ -54,7 +55,7 @@ export function StatisticsView({
         <div className="rounded-feature border border-border bg-surface p-5 shadow-card">
           <SectionTitle>{t("stats.listensChart.title")}</SectionTitle>
           <div className="mt-5">
-            <ListensChart hasListens={hasListens} />
+            <ListensChart hasListens={hasListens} publishedSongIds={publishedSongs.map((entry) => entry.id)} />
           </div>
         </div>
       </Reveal>
@@ -62,7 +63,7 @@ export function StatisticsView({
       <Reveal delayMs={120} className="mt-6">
         <SectionTitle>{t("stats.popularSongs.title")}</SectionTitle>
         <div className="mt-5">
-          <PopularSongsList songs={popularSongs} />
+          <PopularSongsList songs={popularSongs} publishedSongs={publishedSongs} />
         </div>
       </Reveal>
 

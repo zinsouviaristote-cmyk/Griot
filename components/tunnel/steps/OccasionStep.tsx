@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTunnel } from "@/lib/tunnel/TunnelContext";
-import { occasionCatalog } from "@/lib/data/mock-dashboard";
+import { occasionCatalog } from "@/lib/songCatalog";
 import { OCCASION_TONES } from "@/lib/occasionTones";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { useLanguage } from "@/lib/i18n/LanguageContext";

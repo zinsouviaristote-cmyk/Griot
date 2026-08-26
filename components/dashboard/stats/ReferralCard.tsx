@@ -4,7 +4,7 @@ import { ArrowRight, Share2, Sparkles } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { CountUp } from "@/components/ui/CountUp";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import type { ReferralStats } from "@/lib/data/mock-stats";
+import type { ReferralStats } from "@/lib/types";
 
 // L'indicateur le plus important du produit : pas l'audience, mais si elle se
 // reproduit — chaque ouverture de page partagée qui débouche sur une nouvelle

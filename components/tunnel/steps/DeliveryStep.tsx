@@ -2,21 +2,38 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Check, Copy, Download, Share2 } from "lucide-react";
 import { useTunnel } from "@/lib/tunnel/TunnelContext";
 import { useToast } from "@/components/ui/Toast";
-import { PublishModal } from "@/components/publish/PublishModal";
+import { PublishModal, type PublishModalOutput } from "@/components/publish/PublishModal";
 import { SongImageField } from "@/components/dashboard/SongImageField";
-import { mockUser } from "@/lib/data/mock-dashboard";
+import { publishSong } from "@/lib/supabase/dataAdapters";
+import { useUserProfile } from "@/lib/hooks/useUserProfile";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 export function DeliveryStep() {
   const { t } = useLanguage();
-  const { data, update } = useTunnel();
+  const { data, update, notesBalance } = useTunnel();
+  const router = useRouter();
   const showToast = useToast();
+  const { profile } = useUserProfile();
   const [copied, setCopied] = useState(false);
   const [publishOpen, setPublishOpen] = useState(false);
   const [published, setPublished] = useState(false);
+
+  // On a écouté avant de payer (le premier essai est offert) — télécharger la
+  // chanson est le moment où le paiement devient nécessaire : sans Notes
+  // (jamais rechargé, ou solde épuisé), direction /recharger plutôt que le
+  // fichier. Ce contrôle ne dépense rien lui-même — voir credits.explainer,
+  // seule une génération dépense une Note.
+  function handleDownloadClick(event: React.MouseEvent<HTMLAnchorElement>) {
+    if (notesBalance <= 0) {
+      event.preventDefault();
+      showToast(t("credits.downloadGate"), "default");
+      router.push("/recharger");
+    }
+  }
 
   async function handleCopyLyrics() {
     if (!data.lyrics) return;
@@ -49,15 +66,16 @@ export function DeliveryStep() {
         </p>
       </div>
 
-      {data.occasion && (
+      {data.occasion && data.songId && (
         <div
           style={{ animationDelay: "60ms" }}
           className="mt-6 flex animate-reveal-up justify-center"
         >
           <SongImageField
+            songId={data.songId}
             occasion={data.occasion}
             imageUrl={data.imageUrl}
-            fallbackImageUrl={mockUser.photoUrl}
+            fallbackImageUrl={profile?.photoUrl ?? null}
             onChange={(imageUrl) => update({ imageUrl })}
           />
         </div>
@@ -66,6 +84,7 @@ export function DeliveryStep() {
       <a
         href={data.audioUrl ?? "#"}
         download={`griot-${data.recipientFirstName || "chanson"}.wav`}
+        onClick={handleDownloadClick}
         style={{ animationDelay: "90ms" }}
         className="mt-8 flex min-h-11 w-full animate-reveal-up items-center justify-center gap-2 rounded-control bg-brand px-5 py-3 text-sm font-semibold text-white transition-all duration-200 ease-magnetic hover:brightness-90 active:scale-[0.98]"
       >
@@ -110,7 +129,7 @@ export function DeliveryStep() {
           <button
             type="button"
             onClick={() => setPublishOpen(true)}
-            className="shrink-0 rounded-control border border-brand/40 px-3.5 py-2 text-xs font-semibold text-brand transition-all duration-150 ease-magnetic hover:bg-brand-soft active:scale-95"
+            className="shrink-0 rounded-control border border-brand/40 px-3.5 py-2 text-xs font-semibold text-brand transition-all duration-150 ease-magnetic hover:bg-page active:scale-95"
           >
             {t("tunnel.delivery.publish")}
           </button>
@@ -132,7 +151,7 @@ export function DeliveryStep() {
         </p>
       )}
 
-      {data.occasion && data.style && (
+      {data.occasion && data.style && data.songId && data.audioUrl && (
         <PublishModal
           open={publishOpen}
           onClose={() => setPublishOpen(false)}
@@ -140,11 +159,26 @@ export function DeliveryStep() {
           occasion={data.occasion}
           style={data.style}
           songImageUrl={data.imageUrl}
-          profilePhotoUrl={mockUser.photoUrl}
-          onPublish={() => {
-            setPublishOpen(false);
-            setPublished(true);
-            showToast(t("tunnel.delivery.publishedToast"), "success");
+          profilePhotoUrl={profile?.photoUrl ?? null}
+          onPublish={async ({ hideFirstName, publicTitle, imageUrl: publishedImageUrl }: PublishModalOutput) => {
+            try {
+              await publishSong({
+                sourceSongId: data.songId!,
+                recipientFirstName: data.recipientFirstName || t("tunnel.delivery.readyForFallback"),
+                hideFirstName,
+                publicTitle,
+                occasion: data.occasion!,
+                style: data.style!,
+                audioUrl: data.audioUrl!,
+                imageUrl: publishedImageUrl,
+                lyrics: data.lyrics ? data.lyrics.split("\n").filter(Boolean) : [],
+              });
+              setPublishOpen(false);
+              setPublished(true);
+              showToast(t("tunnel.delivery.publishedToast"), "success");
+            } catch (error) {
+              showToast(error instanceof Error ? error.message : t("tunnel.delivery.publishedToast"), "danger");
+            }
           }}
         />
       )}

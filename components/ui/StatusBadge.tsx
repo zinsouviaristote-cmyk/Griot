@@ -25,17 +25,20 @@ export const STATUS_CONFIG: Record<
     // la pulsation dit "ça travaille", discrètement, sans texte qui clignote.
     pulse: true,
   },
+  // Une Note dépensée couvre déjà toute la chanson : dès que l'extrait
+  // existe, elle est acquise — même traitement visuel que "paid"/"delivered",
+  // jamais un état intermédiaire "en attente".
   preview_ready: {
     labelKey: "history.status.previewReady",
-    text: "text-brand",
-    bg: "bg-brand/10",
-    dot: "bg-brand",
+    text: "text-success",
+    bg: "bg-success/10",
+    dot: "bg-success",
   },
   awaiting_payment: {
     labelKey: "history.status.awaitingPayment",
-    text: "text-warning",
-    bg: "bg-warning/10",
-    dot: "bg-warning",
+    text: "text-success",
+    bg: "bg-success/10",
+    dot: "bg-success",
   },
   paid: {
     labelKey: "history.status.paid",

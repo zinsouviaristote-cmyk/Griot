@@ -59,6 +59,47 @@ interface DBPublishedSong {
   listens_count: number;
   downloads_count: number;
   published_at: string;
+  author_name: string;
+  author_photo_url: string | null;
+}
+
+function mapDbSong(s: DBSong): Song {
+  return {
+    id: s.id,
+    recipientFirstName: s.recipient_first_name,
+    occasion: s.occasion as Occasion,
+    style: s.style as MusicStyle,
+    status: s.status as SongStatus,
+    createdAt: s.created_at.split("T")[0],
+    durationSeconds: s.duration_seconds,
+    audioUrl: s.audio_path || s.preview_audio_path || null,
+    lyrics: s.lyrics,
+    contactId: s.contact_id,
+    listens: s.listens_count,
+    imageUrl: s.image_url,
+  };
+}
+
+function mapDbPublishedSong(p: DBPublishedSong, mine: boolean): PublishedSong {
+  return {
+    id: p.id,
+    sourceSongId: p.source_song_id,
+    mine,
+    recipientFirstName: p.recipient_first_name,
+    hideFirstName: p.hide_first_name,
+    publicTitle: p.public_title,
+    occasion: p.occasion as Occasion,
+    style: p.style as MusicStyle,
+    audioUrl: p.audio_url,
+    likes: p.likes_count,
+    listens: p.listens_count,
+    downloads: p.downloads_count,
+    publishedAt: p.published_at.split("T")[0],
+    authorName: p.author_name,
+    authorPhotoUrl: p.author_photo_url,
+    imageUrl: p.image_url,
+    lyrics: p.lyrics || [],
+  };
 }
 
 // ==========================================
@@ -83,6 +124,7 @@ export async function fetchUserProfile(): Promise<DashboardUser | null> {
 
     if (error || !data) {
       return {
+        id: user.id,
         firstName: user.user_metadata?.full_name || user.user_metadata?.first_name || fallbackName,
         initials: (user.email?.slice(0, 2) || fallbackName.slice(0, 2)).toUpperCase(),
         email: user.email || "",
@@ -102,6 +144,7 @@ export async function fetchUserProfile(): Promise<DashboardUser | null> {
       profile.photo_url === "" ? null : profile.photo_url || user.user_metadata?.avatar_url || null;
 
     return {
+      id: user.id,
       firstName: name,
       initials: name.slice(0, 2).toUpperCase(),
       email: profile.email || user.email || "",
@@ -289,21 +332,49 @@ export async function fetchUserSongs(): Promise<Song[]> {
   if (error) throw error;
   if (!data) return [];
 
-  const songs = data as unknown as DBSong[];
-  return songs.map((s) => ({
-    id: s.id,
-    recipientFirstName: s.recipient_first_name,
-    occasion: s.occasion as Occasion,
-    style: s.style as MusicStyle,
-    status: s.status as SongStatus,
-    createdAt: s.created_at.split("T")[0],
-    durationSeconds: s.duration_seconds,
-    audioUrl: s.audio_path || s.preview_audio_path || null,
-    lyrics: s.lyrics,
-    contactId: s.contact_id,
-    listens: s.listens_count,
-    imageUrl: s.image_url,
-  }));
+  return (data as unknown as DBSong[]).map(mapDbSong);
+}
+
+export async function fetchSongById(id: string): Promise<Song | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase.from("songs").select("*").eq("id", id).maybeSingle();
+  if (error) throw error;
+  if (!data) return null;
+  return mapDbSong(data as unknown as DBSong);
+}
+
+export async function deleteSong(id: string): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.from("songs").delete().eq("id", id);
+  if (error) throw error;
+}
+
+export async function updateSongImage(id: string, imageUrl: string | null): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.from("songs").update({ image_url: imageUrl }).eq("id", id);
+  if (error) throw error;
+}
+
+export async function uploadSongCover(songId: string, file: File): Promise<string> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Authentification requise pour changer la pochette.");
+
+  if (!file.type.startsWith("image/")) throw new Error("Le fichier doit être une image.");
+  if (file.size > 5 * 1024 * 1024) throw new Error("La pochette doit faire moins de 5 Mo.");
+
+  const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
+  const path = `${user.id}/${songId}.${extension}`;
+  const { error: uploadError } = await supabase.storage.from("song-covers").upload(path, file, {
+    cacheControl: "3600",
+    contentType: file.type,
+    upsert: true,
+  });
+  if (uploadError) throw uploadError;
+
+  const publicUrl = supabase.storage.from("song-covers").getPublicUrl(path).data.publicUrl;
+  await updateSongImage(songId, publicUrl);
+  return publicUrl;
 }
 
 export async function createSongDraft(song: {
@@ -338,22 +409,7 @@ export async function createSongDraft(song: {
     .single();
 
   if (error) throw error;
-
-  const s = data as unknown as DBSong;
-  return {
-    id: s.id,
-    recipientFirstName: s.recipient_first_name,
-    occasion: s.occasion as Occasion,
-    style: s.style as MusicStyle,
-    status: s.status as SongStatus,
-    createdAt: s.created_at.split("T")[0],
-    durationSeconds: s.duration_seconds,
-    audioUrl: s.audio_path || s.preview_audio_path || null,
-    lyrics: s.lyrics,
-    contactId: s.contact_id,
-    listens: s.listens_count,
-    imageUrl: s.image_url,
-  };
+  return mapDbSong(data as unknown as DBSong);
 }
 
 // ==========================================
@@ -373,22 +429,111 @@ export async function fetchPublishedExplorerSongs(): Promise<PublishedSong[]> {
   const { data: { user } } = await supabase.auth.getUser();
 
   const publications = data as unknown as DBPublishedSong[];
-  return publications.map((p) => ({
-    id: p.id,
-    sourceSongId: p.source_song_id,
-    mine: user ? p.user_id === user.id : false,
-    recipientFirstName: p.recipient_first_name,
-    hideFirstName: p.hide_first_name,
-    publicTitle: p.public_title,
-    occasion: p.occasion as Occasion,
-    style: p.style as MusicStyle,
-    audioUrl: p.audio_url,
-    likes: p.likes_count,
-    listens: p.listens_count,
-    downloads: p.downloads_count,
-    publishedAt: p.published_at.split("T")[0],
-    authorName: "Griot",
-    imageUrl: p.image_url,
-    lyrics: p.lyrics || [],
-  }));
+  return publications.map((p) => mapDbPublishedSong(p, user ? p.user_id === user.id : false));
+}
+
+export async function fetchMyPublishedSongs(): Promise<PublishedSong[]> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data, error } = await supabase
+    .from("published_songs")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("published_at", { ascending: false });
+
+  if (error) throw error;
+  if (!data) return [];
+
+  return (data as unknown as DBPublishedSong[]).map((p) => mapDbPublishedSong(p, true));
+}
+
+export async function publishSong(input: {
+  sourceSongId: string;
+  recipientFirstName: string;
+  hideFirstName: boolean;
+  publicTitle: string | null;
+  occasion: string;
+  style: string;
+  audioUrl: string;
+  imageUrl: string | null;
+  lyrics: string[];
+}): Promise<PublishedSong> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Authentification requise pour publier une chanson.");
+
+  const { data: profileData } = await supabase.from("profiles").select("first_name, photo_url").eq("id", user.id).maybeSingle();
+  const profile = profileData as unknown as { first_name?: string; photo_url?: string | null } | null;
+  const authorName =
+    profile?.first_name ||
+    user.user_metadata?.full_name ||
+    (user.email ?? "").split("@")[0] ||
+    "";
+  // Même résolution que fetchUserProfile : "" = photo explicitement retirée
+  // (jamais de repli sur Google dans ce cas), `null` = jamais configurée.
+  const authorPhotoUrl =
+    profile?.photo_url === "" ? null : profile?.photo_url || user.user_metadata?.avatar_url || null;
+
+  const { data, error } = await supabase
+    .from("published_songs")
+    .insert({
+      user_id: user.id,
+      source_song_id: input.sourceSongId,
+      recipient_first_name: input.recipientFirstName,
+      hide_first_name: input.hideFirstName,
+      public_title: input.publicTitle,
+      occasion: input.occasion,
+      style: input.style,
+      audio_url: input.audioUrl,
+      image_url: input.imageUrl,
+      lyrics: input.lyrics,
+      author_name: authorName,
+      author_photo_url: authorPhotoUrl,
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return mapDbPublishedSong(data as unknown as DBPublishedSong, true);
+}
+
+export async function unpublishSong(publishedSongId: string): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.from("published_songs").delete().eq("id", publishedSongId);
+  if (error) throw error;
+}
+
+export async function fetchMyLikedPublishedSongIds(): Promise<Set<string>> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return new Set();
+
+  const { data, error } = await supabase.from("song_likes").select("published_song_id").eq("user_id", user.id);
+  if (error) throw error;
+  return new Set((data as unknown as { published_song_id: string }[] | null)?.map((row) => row.published_song_id) ?? []);
+}
+
+export async function toggleSongLike(publishedSongId: string): Promise<{ liked: boolean; likesCount: number }> {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc("toggle_song_like", { p_published_song_id: publishedSongId });
+  if (error) throw error;
+  const result = data as unknown as { liked: boolean; likes_count: number };
+  return { liked: result.liked, likesCount: result.likes_count };
+}
+
+export async function recordSongListen(input: { songId?: string; publishedSongId?: string }): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.rpc("increment_listen", {
+    p_song_id: input.songId,
+    p_published_song_id: input.publishedSongId,
+  });
+  if (error) throw error;
+}
+
+export async function recordSongDownload(publishedSongId: string): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.rpc("increment_download", { p_published_song_id: publishedSongId });
+  if (error) throw error;
 }

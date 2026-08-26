@@ -79,6 +79,8 @@ export interface OccasionMeta {
 }
 
 export interface DashboardUser {
+  id: string;
+
   firstName: string;
   initials: string;
 
@@ -116,6 +118,10 @@ export interface PublishedSong {
   // Pseudonyme public de l'auteur.
   authorName: string;
 
+  // Photo de profil de l'auteur⋅ice au moment de la publication — nulle si
+  // iel n'en avait pas, l'avatar retombe alors sur ses initiales.
+  authorPhotoUrl: string | null;
+
   // Pochette résolue et figée au moment de la publication.
   imageUrl: string | null;
 
@@ -137,4 +143,35 @@ export interface CreditTransaction {
 
   delta: number;
   balanceAfter: number;
+}
+
+// Totaux agrégés des publications Explorer de l'utilisateur courant — voir
+// lib/supabase/statsAdapters.ts.
+export interface MyStatsTotals {
+  listens: number;
+  likes: number;
+  downloads: number;
+  listeningSeconds: number;
+  publishedCount: number;
+}
+
+export interface ListenPoint {
+  date: string;
+  label: string;
+  count: number;
+}
+
+export interface ActivityEntry {
+  id: string;
+  type: "like" | "listen";
+  displayName: string;
+  minutesAgo: number;
+}
+
+// Aucune infrastructure de suivi de parrainage n'existe encore (pas de table
+// dédiée) : ces deux nombres restent à 0 tant qu'elle n'est pas construite —
+// jamais une valeur inventée pour remplir la carte.
+export interface ReferralStats {
+  pageOpens: number;
+  songsCreated: number;
 }

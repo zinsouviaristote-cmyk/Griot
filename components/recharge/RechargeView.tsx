@@ -68,11 +68,7 @@ export function RechargeView({
     const productId = CHARIOW_KEYS[selectedIndex];
 
     if (!productId) {
-      setErrorMsg(
-        `L'identifiant Chariow pour le Pack N°${
-          selectedIndex + 1
-        } n'est pas configuré dans le .env`
-      );
+      setErrorMsg(t("recharge.chariowNotConfigured", { pack: selectedIndex + 1 }));
 
       setLoading(false);
       return;
@@ -98,10 +94,7 @@ export function RechargeView({
       const data = await response.json();
 
       if (!response.ok || !data.checkoutUrl) {
-        throw new Error(
-          data.error ||
-            "Erreur lors de la création du paiement"
-        );
+        throw new Error(data.error || t("recharge.paymentCreateError"));
       }
 
       // Redirection vers le guichet Chariow
@@ -112,7 +105,7 @@ export function RechargeView({
       const errorMessage =
         err instanceof Error
           ? err.message
-          : "Impossible d'initier le paiement";
+          : t("recharge.paymentInitError");
 
       setErrorMsg(errorMessage);
       setLoading(false);
@@ -127,19 +120,9 @@ export function RechargeView({
     <div className="w-full max-w-full px-4 py-4 sm:px-6 lg:px-8">
       <div className="mx-auto w-full max-w-6xl">
 
-        {/* =================================================
-            EN-TÊTE
-        ================================================= */}
-
-        <div className="mb-6 text-center">
-          <h2 className="font-display text-2xl font-bold leading-tight text-ink sm:text-3xl lg:text-4xl">
-            Recharge tes crédits
-          </h2>
-
-          <p className="mt-1 text-xs text-ink-muted sm:text-sm">
-            Choisis le pack qui correspond à tes besoins.
-          </p>
-        </div>
+        {/* Pas d'en-tête ici : RechargerPageBody affiche déjà le titre et le
+            sous-titre de la page (recharge.pageTitle/pageSubtitle) juste
+            au-dessus — un second en-tête ici ferait doublon. */}
 
         {/* =================================================
             CARTES DES PACKS
@@ -171,9 +154,15 @@ export function RechargeView({
                   duration-200
                   ease-magnetic
                   active:scale-[0.98]
-                  ${isSelected
-                    ? "border-brand bg-brand-soft shadow-card"
-                    : "border-border bg-surface hover:border-brand/40"
+                  ${
+                    // `bg-surface` + bordure/ombre pour marquer la sélection —
+                    // jamais `bg-brand-soft` en fond de carte entière : ce jeton
+                    // reste un violet pâle fixe en mode sombre, alors que le
+                    // texte (`text-ink`) s'inverse en clair, ce qui le rendrait
+                    // illisible sur cette carte précisément.
+                    isSelected
+                      ? "border-brand bg-surface shadow-card"
+                      : "border-border bg-surface hover:border-brand/40"
                   }
                 `}
               >
@@ -192,7 +181,7 @@ export function RechargeView({
                     <span className="text-[10px] font-semibold uppercase tracking-wider text-ink-muted">
                       {p.featured
                         ? `★ ${t("recharge.mostChosen")}`
-                        : "Pack"}
+                        : t("recharge.packLabel")}
                     </span>
                   </div>
                 </div>
@@ -235,11 +224,11 @@ export function RechargeView({
                         ? "bg-brand text-white shadow-sm"
                         : p.featured
                           ? "bg-brand text-white"
-                          : "border border-border text-ink group-hover:bg-brand-soft"
+                          : "border border-border text-ink group-hover:bg-page group-hover:text-brand"
                       }
                     `}
                   >
-                    {isSelected ? "Sélectionné" : "Choisir"}
+                    {isSelected ? t("recharge.selected") : t("recharge.choose")}
                   </div>
                 </div>
 
@@ -268,10 +257,10 @@ export function RechargeView({
 
             <div className="min-w-0 flex-1">
               <p className="text-xs font-semibold text-ink">
-                Paiement sécurisé
+                {t("recharge.securePayment")}
               </p>
               <p className="truncate text-[10px] text-ink-muted sm:text-xs">
-                MTN Mobile Money, Moov, Wave, Carte Bancaire
+                {t("recharge.paymentMethodsList")}
               </p>
             </div>
 
@@ -284,7 +273,7 @@ export function RechargeView({
             className="w-full sm:w-auto sm:min-w-[200px]"
           >
             {loading
-              ? "Chargement du paiement..."
+              ? t("recharge.processingPayment")
               : t("recharge.payButton", {
                   price: formatFcfa(pack.priceFcfa),
                 })}
@@ -297,7 +286,7 @@ export function RechargeView({
         ================================================= */}
 
         {errorMsg && (
-          <p className="mt-3 text-center text-xs font-medium text-red-600">
+          <p className="mt-3 text-center text-xs font-medium text-danger">
             {errorMsg}
           </p>
         )}

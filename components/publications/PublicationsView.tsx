@@ -4,20 +4,26 @@ import { Heart, Megaphone } from "lucide-react";
 import { SongListItem } from "@/components/dashboard/historiques/SongListItem";
 import { CountUp } from "@/components/ui/CountUp";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { getPublishedEntryForSong } from "@/lib/data/mock-explorer";
 import { songsToQueue } from "@/lib/player/songToTrack";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import type { Song } from "@/lib/types";
+import type { PublishedSong, Song } from "@/lib/types";
 
 /**
  * Mêmes lignes que l'historique (SongListItem), un sous-ensemble de
- * chansons : celles qui ont un enregistrement dans mock-explorer.ts. Dépublier
- * une ligne (menu « … ») retire son enregistrement local, exactement comme
- * avant — seule la présentation a changé, pas la mécanique.
+ * chansons : celles présentes dans `publishedSongs` (les publications
+ * Explorer réelles de l'utilisateur courant).
  */
-export function PublicationsView({ songs }: { songs: Song[] }) {
+export function PublicationsView({
+  songs,
+  publishedSongs,
+  onPublishedSongsChange,
+}: {
+  songs: Song[];
+  publishedSongs: PublishedSong[];
+  onPublishedSongsChange: (next: PublishedSong[]) => void;
+}) {
   const { t, tn } = useLanguage();
-  const published = songs.filter((song) => getPublishedEntryForSong(song.id));
+  const published = songs.filter((song) => publishedSongs.some((entry) => entry.sourceSongId === song.id));
 
   if (published.length === 0) {
     return (
@@ -31,8 +37,8 @@ export function PublicationsView({ songs }: { songs: Song[] }) {
     );
   }
 
-  const totalLikes = published.reduce((sum, song) => sum + (getPublishedEntryForSong(song.id)?.likes ?? 0), 0);
-  const queue = songsToQueue(published, t);
+  const totalLikes = publishedSongs.reduce((sum, entry) => sum + entry.likes, 0);
+  const queue = songsToQueue(published, t, publishedSongs);
 
   return (
     <div>
@@ -49,7 +55,17 @@ export function PublicationsView({ songs }: { songs: Song[] }) {
 
       <div className="mt-6 flex flex-col gap-3">
         {published.map((song, index) => (
-          <SongListItem key={song.id} song={song} index={index} queue={queue} />
+          <SongListItem
+            key={song.id}
+            song={song}
+            publishedEntry={publishedSongs.find((entry) => entry.sourceSongId === song.id) ?? null}
+            index={index}
+            queue={queue}
+            onPublishedChange={(entry) => {
+              const withoutThisSong = publishedSongs.filter((item) => item.sourceSongId !== song.id);
+              onPublishedSongsChange(entry ? [...withoutThisSong, entry] : withoutThisSong);
+            }}
+          />
         ))}
       </div>
     </div>

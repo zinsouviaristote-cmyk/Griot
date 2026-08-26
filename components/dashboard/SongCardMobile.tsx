@@ -5,7 +5,7 @@ import Link from "next/link";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { TrackArt } from "@/components/player/TrackArt";
 import { getSongAction } from "@/components/dashboard/songAction";
-import { mockUser } from "@/lib/data/mock-dashboard";
+import { useDashboardUser } from "@/lib/auth/DashboardUserContext";
 import { resolveSongArt } from "@/lib/songArt";
 import { formatDate } from "@/lib/format/date";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
@@ -15,6 +15,7 @@ import type { Song } from "@/lib/types";
 export function SongCardMobile({ song }: { song: Song }) {
   const { t, locale } = useLanguage();
   const router = useRouter();
+  const user = useDashboardUser();
   const action = getSongAction(song, t);
   const detailHref = `/historiques/${song.id}`;
 
@@ -33,7 +34,7 @@ export function SongCardMobile({ song }: { song: Song }) {
         <div className="flex min-w-0 items-center gap-3">
           <TrackArt
             occasion={song.occasion}
-            imageUrl={resolveSongArt(song.imageUrl, mockUser.photoUrl)}
+            imageUrl={resolveSongArt(song.imageUrl, user.photoUrl)}
             className="h-11 w-11 rounded-control"
           />
           <div className="min-w-0">

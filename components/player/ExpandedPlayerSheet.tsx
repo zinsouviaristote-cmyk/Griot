@@ -76,7 +76,7 @@ export function ExpandedPlayerSheet() {
             onClick={() => player.setExpanded(false)}
             onPointerDown={(event) => event.stopPropagation()}
             aria-label={t("player.collapse")}
-            className="flex h-11 w-11 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-brand-soft/60 active:scale-90"
+            className="flex h-11 w-11 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-page active:scale-90"
           >
             <ChevronDown className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
           </button>
@@ -132,7 +132,7 @@ export function ExpandedPlayerSheet() {
             onPointerDown={(event) => event.stopPropagation()}
           >
             {current.publishedId ? (
-              <LikeButton publishedSongId={current.publishedId} likes={current.likes ?? 0} />
+              <LikeButton publishedSongId={current.publishedId} likes={current.likes ?? 0} initialLiked={current.likedByMe ?? false} />
             ) : (
               <span className="flex items-center gap-1.5 text-xs font-medium text-ink-muted/50">
                 <Heart className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />

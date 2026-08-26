@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Download, Ear, Heart, Share2 } from "lucide-react";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Modal } from "@/components/ui/Modal";
@@ -13,17 +14,17 @@ import { PublishModal, type PublishModalOutput } from "@/components/publish/Publ
 import { TrackArt } from "@/components/player/TrackArt";
 import { TrackPlayButton } from "@/components/player/TrackPlayButton";
 import { getSongAction } from "@/components/dashboard/songAction";
-import { mockUser } from "@/lib/data/mock-dashboard";
+import { useDashboardUser } from "@/lib/auth/DashboardUserContext";
+import { useCreditsBalance } from "@/lib/hooks/useCreditsBalance";
 import { resolveSongArt } from "@/lib/songArt";
 import { formatDate } from "@/lib/format/date";
 import { SongActionsMenu } from "./SongActionsMenu";
 import { formatDuration } from "@/lib/format/duration";
-import { getPublishedEntryForSong } from "@/lib/data/mock-explorer";
+import { deleteSong, publishSong, recordSongDownload, unpublishSong } from "@/lib/supabase/dataAdapters";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { occasionLabel, styleLabel } from "@/lib/i18n/catalog";
 import type { PlayerTrack } from "@/lib/player/PlayerContext";
 import type { PublishedSong, Song } from "@/lib/types";
-import { mockDeleteSong } from "@/lib/data/mockHistoryActions";
 
 function tunnelHref(song: Song): string {
   const params = new URLSearchParams({
@@ -39,22 +40,47 @@ function tunnelHref(song: Song): string {
  * changement). Sert aussi de base à Mes publications : mêmes lignes, un
  * sous-ensemble de chansons (voir PublicationsView).
  */
-export function SongListItem({ song, index = 0, queue }: { song: Song; index?: number; queue: PlayerTrack[] }) {
+export function SongListItem({
+  song,
+  publishedEntry: publishedEntryProp,
+  index = 0,
+  queue,
+  onPublishedChange,
+  onDeleted,
+}: {
+  song: Song;
+  publishedEntry?: PublishedSong | null;
+  index?: number;
+  queue: PlayerTrack[];
+  onPublishedChange?: (entry: PublishedSong | null) => void;
+  onDeleted?: (songId: string) => void;
+}) {
   const { t, locale } = useLanguage();
+  const router = useRouter();
   const showToast = useToast();
-  const [publishedEntry, setPublishedEntry] = useState<PublishedSong | null>(
-    () => getPublishedEntryForSong(song.id) ?? null,
-  );
+  const user = useDashboardUser();
+  const creditBalance = useCreditsBalance(user.id, user.creditBalance);
+  const [publishedEntry, setPublishedEntry] = useState<PublishedSong | null>(publishedEntryProp ?? null);
   const [publishOpen, setPublishOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleted, setDeleted] = useState(false);
 
+  useEffect(() => {
+    setPublishedEntry(publishedEntryProp ?? null);
+  }, [publishedEntryProp]);
+
   const detailHref = `/historiques/${song.id}`;
   const action = getSongAction(song, t);
-  const isUnlocked = song.status === "paid" || song.status === "delivered";
+  // Une Note dépensée couvre l'intégralité de la chanson : dès que l'extrait
+  // existe, elle est acquise — aucun second paiement à l'unité.
+  const isUnlocked =
+    song.status === "preview_ready" ||
+    song.status === "awaiting_payment" ||
+    song.status === "paid" ||
+    song.status === "delivered";
 
-  const resolvedArt = resolveSongArt(song.imageUrl, mockUser.photoUrl);
+  const resolvedArt = resolveSongArt(song.imageUrl, user.photoUrl);
 
   const track: PlayerTrack | null = song.audioUrl
     ? {
@@ -78,40 +104,53 @@ export function SongListItem({ song, index = 0, queue }: { song: Song; index?: n
     }
   }
 
-  function handlePublish({ hideFirstName, publicTitle, imageUrl }: PublishModalOutput) {
-    setPublishedEntry({
-      id: `pub_local_${song.id}`,
-      sourceSongId: song.id,
-      mine: true,
-      recipientFirstName: song.recipientFirstName,
-      hideFirstName,
-      publicTitle,
-      occasion: song.occasion,
-      style: song.style,
-      audioUrl: song.audioUrl ?? "/mock-audio.wav",
-      likes: 0,
-      listens: 0,
-      downloads: 0,
-      publishedAt: new Date().toISOString().slice(0, 10),
-      authorName: mockUser.firstName,
-      imageUrl,
-      lyrics: song.lyrics ? song.lyrics.split("\n").filter(Boolean) : [],
-    });
-    setPublishOpen(false);
-    showToast(t("history.item.publishedToast"), "success");
+  async function handlePublish({ hideFirstName, publicTitle, imageUrl }: PublishModalOutput) {
+    if (!song.audioUrl) return;
+    try {
+      const entry = await publishSong({
+        sourceSongId: song.id,
+        recipientFirstName: song.recipientFirstName,
+        hideFirstName,
+        publicTitle,
+        occasion: song.occasion,
+        style: song.style,
+        audioUrl: song.audioUrl,
+        imageUrl,
+        lyrics: song.lyrics ? song.lyrics.split("\n").filter(Boolean) : [],
+      });
+      setPublishedEntry(entry);
+      onPublishedChange?.(entry);
+      setPublishOpen(false);
+      showToast(t("history.item.publishedToast"), "success");
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : t("history.item.publishedToast"), "danger");
+    }
   }
 
-  function handleUnpublish() {
-    setPublishedEntry(null);
-    showToast(t("history.item.unpublishedToast", { name: song.recipientFirstName }), "default");
+  async function handleUnpublish() {
+    if (!publishedEntry) return;
+    try {
+      await unpublishSong(publishedEntry.id);
+      setPublishedEntry(null);
+      onPublishedChange?.(null);
+      showToast(t("history.item.unpublishedToast", { name: song.recipientFirstName }), "default");
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : t("history.item.unpublishedToast", { name: song.recipientFirstName }), "danger");
+    }
   }
 
   async function handleDelete() {
     setDeleting(true);
-    await mockDeleteSong(song.id);
-    showToast(t("history.item.deletedToast", { name: song.recipientFirstName }), "default");
-    setDeleteOpen(false);
-    setDeleted(true);
+    try {
+      await deleteSong(song.id);
+      showToast(t("history.item.deletedToast", { name: song.recipientFirstName }), "default");
+      setDeleteOpen(false);
+      setDeleted(true);
+      onDeleted?.(song.id);
+    } catch (error) {
+      setDeleting(false);
+      showToast(error instanceof Error ? error.message : t("history.item.deletedToast", { name: song.recipientFirstName }), "danger");
+    }
   }
 
   if (deleted) return null;
@@ -127,13 +166,16 @@ export function SongListItem({ song, index = 0, queue }: { song: Song; index?: n
         <div className="flex gap-3">
           <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-control">
             <TrackArt occasion={song.occasion} imageUrl={resolvedArt} className="h-full w-full" />
+            {/* `bg-black`, jamais `bg-ink` : ce badge et ce voile assombrissent
+                une vignette photo, ils doivent rester sombres dans les deux
+                thèmes — `ink` s'inverse en clair en mode sombre. */}
             {song.durationSeconds != null && (
-              <span className="absolute bottom-1 right-1 rounded bg-ink/70 px-1 py-0.5 font-mono text-[10px] leading-none text-white">
+              <span className="absolute bottom-1 right-1 rounded bg-black/70 px-1 py-0.5 font-mono text-[10px] leading-none text-white">
                 {formatDuration(song.durationSeconds)}
               </span>
             )}
             {track && (
-              <div className="absolute inset-0 flex items-center justify-center bg-ink/0 transition-colors duration-150 group-hover:bg-ink/25">
+              <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors duration-150 group-hover:bg-black/25">
                 <TrackPlayButton
                   track={track}
                   queue={queue}
@@ -182,6 +224,18 @@ export function SongListItem({ song, index = 0, queue }: { song: Song; index?: n
                 <a
                   href={track.audioUrl}
                   download={`griot-${song.recipientFirstName}.wav`}
+                  onClick={(event) => {
+                    // On a écouté avant de payer (premier essai offert) — sans
+                    // Notes, le téléchargement renvoie vers /recharger plutôt
+                    // que de livrer le fichier.
+                    if (creditBalance <= 0) {
+                      event.preventDefault();
+                      showToast(t("credits.downloadGate"), "default");
+                      router.push("/recharger");
+                      return;
+                    }
+                    if (publishedEntry) recordSongDownload(publishedEntry.id).catch(() => {});
+                  }}
                   aria-label={t("history.item.downloadAriaLabel")}
                   className="flex h-11 w-11 items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:bg-page hover:text-brand active:scale-90"
                 >
@@ -234,7 +288,7 @@ export function SongListItem({ song, index = 0, queue }: { song: Song; index?: n
         occasion={song.occasion}
         style={song.style}
         songImageUrl={song.imageUrl}
-        profilePhotoUrl={mockUser.photoUrl}
+        profilePhotoUrl={user.photoUrl}
         onPublish={handlePublish}
       />
 

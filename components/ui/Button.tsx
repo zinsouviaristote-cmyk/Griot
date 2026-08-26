@@ -9,8 +9,8 @@ const VARIANT_CLASSES: Record<Variant, string> = {
   primary:
     "bg-brand text-white hover:brightness-90 hover:scale-[1.02] hover:shadow-card active:scale-[0.98]",
   secondary:
-    "border border-border bg-surface text-brand hover:border-brand/40 hover:bg-brand-soft active:scale-[0.98]",
-  ghost: "text-ink-muted hover:text-ink hover:bg-brand-soft active:scale-[0.98]",
+    "border border-border bg-surface text-brand hover:border-brand/40 hover:bg-page active:scale-[0.98]",
+  ghost: "text-ink-muted hover:text-ink hover:bg-page active:scale-[0.98]",
 };
 
 // min-h-11 (44px) : zone tactile minimale, même quand py-3 + text-sm ne suffit pas à l'atteindre.

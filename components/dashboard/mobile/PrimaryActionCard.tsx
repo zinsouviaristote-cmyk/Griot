@@ -20,7 +20,11 @@ export function PrimaryActionCard({ hasSongs }: { hasSongs: boolean }) {
   return (
     <Link
       href="/creer"
-      className="group flex items-center gap-4 rounded-card border-2 border-brand bg-brand-soft p-4 shadow-card transition-all duration-200 ease-magnetic hover:shadow-card-hover active:scale-[0.98]"
+      // `bg-surface`, jamais `bg-brand-soft` : ce jeton reste un violet pâle
+      // fixe en mode sombre, alors que `text-ink` ci-dessous s'inverse en
+      // clair — illisible sur cette carte précisément. La bordure épaisse
+      // reste la seule emphase, comme voulu (voir commentaire ci-dessus).
+      className="group flex items-center gap-4 rounded-card border-2 border-brand bg-surface p-4 shadow-card transition-all duration-200 ease-magnetic hover:shadow-card-hover active:scale-[0.98]"
     >
       <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-card bg-brand text-white transition-transform duration-300 ease-magnetic group-hover:scale-105 group-hover:-rotate-3 group-active:scale-95">
         <Wand2 className="h-6 w-6" strokeWidth={1.5} aria-hidden="true" />

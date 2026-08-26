@@ -83,8 +83,10 @@ export function LyricsSheet({
   return (
     <>
       {/* Fond assombri, mobile seulement : sur desktop le panneau pousse le
-          contenu plutôt que de le couvrir, rien à obscurcir derrière lui. */}
-      <div aria-hidden="true" onClick={onClose} className="fixed inset-0 z-40 bg-ink/40 lg:hidden" />
+          contenu plutôt que de le couvrir, rien à obscurcir derrière lui.
+          `bg-black`, jamais `bg-ink` : ce voile doit rester sombre dans les
+          deux thèmes, alors que `ink` s'inverse en clair en mode sombre. */}
+      <div aria-hidden="true" onClick={onClose} className="fixed inset-0 z-40 bg-black/40 lg:hidden" />
 
       <aside
         role="dialog"

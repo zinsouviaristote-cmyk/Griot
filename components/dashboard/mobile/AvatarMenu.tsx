@@ -96,7 +96,7 @@ export function AvatarMenu({
                     <button
                       type="button"
                       onClick={() => setPanel("admin")}
-                      className="group flex w-full min-h-[44px] items-center justify-between gap-3 border-b border-brand/20 px-4 text-sm font-semibold text-brand transition-colors hover:bg-brand-soft"
+                      className="group flex w-full min-h-[44px] items-center justify-between gap-3 border-b border-brand/20 px-4 text-sm font-semibold text-brand transition-colors hover:bg-page"
                     >
                       <span className="flex items-center gap-3">
                         <ShieldCheck className="h-4 w-4 text-brand transition-transform duration-150 ease-magnetic group-hover:translate-x-0.5" strokeWidth={1.5} aria-hidden="true" />
@@ -112,7 +112,7 @@ export function AvatarMenu({
                   <Link
                     href="/parametres"
                     onClick={close}
-                    className="group flex min-h-[44px] items-center gap-3 px-4 text-sm text-ink transition-colors hover:bg-brand-soft"
+                    className="group flex min-h-[44px] items-center gap-3 px-4 text-sm text-ink transition-colors hover:bg-page"
                   >
                     <Settings className="h-4 w-4 text-ink-muted transition-transform duration-150 ease-magnetic group-hover:translate-x-0.5" strokeWidth={1.5} aria-hidden="true" />
                     {t("accountMenu.settings")}
@@ -121,7 +121,7 @@ export function AvatarMenu({
                   <button
                     type="button"
                     onClick={() => setPanel("langue")}
-                    className="group flex w-full min-h-[44px] items-center justify-between gap-3 px-4 text-sm text-ink transition-colors hover:bg-brand-soft"
+                    className="group flex w-full min-h-[44px] items-center justify-between gap-3 px-4 text-sm text-ink transition-colors hover:bg-page"
                   >
                     <span className="flex items-center gap-3">
                       <Globe className="h-4 w-4 text-ink-muted transition-transform duration-150 ease-magnetic group-hover:translate-x-0.5" strokeWidth={1.5} aria-hidden="true" />
@@ -132,7 +132,7 @@ export function AvatarMenu({
                   <button
                     type="button"
                     onClick={() => setPanel("theme")}
-                    className="group flex w-full min-h-[44px] items-center justify-between gap-3 px-4 text-sm text-ink transition-colors hover:bg-brand-soft"
+                    className="group flex w-full min-h-[44px] items-center justify-between gap-3 px-4 text-sm text-ink transition-colors hover:bg-page"
                   >
                     <span className="flex items-center gap-3">
                       <SunMedium className="h-4 w-4 text-ink-muted" strokeWidth={1.5} aria-hidden="true" />
@@ -143,7 +143,7 @@ export function AvatarMenu({
                   <Link
                     href="/aide"
                     onClick={close}
-                    className="group flex min-h-[44px] items-center gap-3 px-4 text-sm text-ink transition-colors hover:bg-brand-soft"
+                    className="group flex min-h-[44px] items-center gap-3 px-4 text-sm text-ink transition-colors hover:bg-page"
                   >
                     <CircleHelp className="h-4 w-4 text-ink-muted transition-transform duration-150 ease-magnetic group-hover:translate-x-0.5" strokeWidth={1.5} aria-hidden="true" />
                     {t("accountMenu.help")}
@@ -169,7 +169,7 @@ export function AvatarMenu({
                 <button
                   type="button"
                   onClick={() => setPanel("root")}
-                  className="flex min-h-[44px] w-full items-center gap-2 border-b border-border px-3 text-sm font-medium text-brand transition-colors hover:bg-brand-soft"
+                  className="flex min-h-[44px] w-full items-center gap-2 border-b border-border px-3 text-sm font-medium text-brand transition-colors hover:bg-page"
                 >
                   <ChevronLeft className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
                   <ShieldCheck className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
@@ -186,7 +186,7 @@ export function AvatarMenu({
                         className={`flex min-h-[44px] items-center gap-3 px-4 text-sm transition-colors ${
                           isActive
                             ? "bg-brand-soft text-brand font-semibold"
-                            : "text-ink hover:bg-brand-soft"
+                            : "text-ink hover:bg-page"
                         }`}
                       >
                         <item.icon className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
@@ -218,7 +218,7 @@ export function AvatarMenu({
                         setLocale(option);
                         close();
                       }}
-                      className="flex min-h-[44px] w-full items-center justify-between gap-3 px-4 text-left text-sm text-ink transition-colors hover:bg-brand-soft"
+                      className="flex min-h-[44px] w-full items-center justify-between gap-3 px-4 text-left text-sm text-ink transition-colors hover:bg-page"
                     >
                       <span>{t(option === "fr" ? "accountMenu.languageFrench" : "accountMenu.languageEnglish")}</span>
                       {locale === option && <Check className="h-4 w-4 text-brand" strokeWidth={1.5} aria-hidden="true" />}
@@ -234,7 +234,7 @@ export function AvatarMenu({
                         setTheme(option);
                         close();
                       }}
-                      className="flex min-h-[44px] w-full items-center justify-between gap-3 px-4 text-left text-sm text-ink transition-colors hover:bg-brand-soft"
+                      className="flex min-h-[44px] w-full items-center justify-between gap-3 px-4 text-left text-sm text-ink transition-colors hover:bg-page"
                     >
                       <span>{t(`accountMenu.theme${option === "light" ? "Light" : option === "dark" ? "Dark" : "System"}`)}</span>
                       {theme === option && <Check className="h-4 w-4 text-brand" strokeWidth={1.5} aria-hidden="true" />}

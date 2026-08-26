@@ -4,10 +4,21 @@ import { HistoryView } from "./HistoryView";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { Reveal } from "@/components/ui/Reveal";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import type { Song } from "@/lib/types";
+import type { PublishedSong, Song } from "@/lib/types";
 
-
-export function BibliothequePageBody({ songs, initialSearch = "" }: { songs: Song[]; initialSearch?: string }) {
+export function BibliothequePageBody({
+  songs,
+  publishedSongs,
+  onPublishedSongsChange,
+  onSongDeleted,
+  initialSearch = "",
+}: {
+  songs: Song[];
+  publishedSongs: PublishedSong[];
+  onPublishedSongsChange: (next: PublishedSong[]) => void;
+  onSongDeleted: (songId: string) => void;
+  initialSearch?: string;
+}) {
   const { t } = useLanguage();
   return (
     <div>
@@ -19,7 +30,13 @@ export function BibliothequePageBody({ songs, initialSearch = "" }: { songs: Son
       </div>
 
       <Reveal delayMs={80} className="mt-5">
-        <HistoryView songs={songs} initialSearch={initialSearch} />
+        <HistoryView
+          songs={songs}
+          publishedSongs={publishedSongs}
+          onPublishedSongsChange={onPublishedSongsChange}
+          onSongDeleted={onSongDeleted}
+          initialSearch={initialSearch}
+        />
       </Reveal>
     </div>
   );

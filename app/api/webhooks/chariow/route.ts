@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function POST(req: Request) {
   try {
@@ -37,15 +38,37 @@ export async function POST(req: Request) {
     // 3. On ne traite que les ventes réussies
     if (payload.event === "successful.sale" || payload.event === "sale.completed") {
       const metadata = payload.data?.custom_metadata || payload.custom_metadata || {};
-      const userId = metadata.user_id;
-      const notesAmount = parseInt(metadata.notes_amount || "0", 10);
+      const userId: string | undefined = metadata.user_id;
+      const songId: string | undefined = metadata.song_id || undefined;
+      // Les packs de Notes sont identifiés côté produit par pack1/pack3/pack5
+      // (voir lib/tunnel/types.ts, CREDIT_PACKS) mais la RPC process_payment_webhook
+      // attend l'énumération pack_2/pack_6/pack_10 (le nombre de Notes qu'elle
+      // crédite) — cette table de correspondance est le seul endroit qui les relie.
+      const PACK_ID_TO_RPC: Record<string, string> = { pack1: "pack_2", pack3: "pack_6", pack5: "pack_10" };
+      const rpcPackId = metadata.pack_id ? PACK_ID_TO_RPC[metadata.pack_id] ?? null : null;
+      const providerTxId: string =
+        payload.data?.id?.toString() || payload.data?.reference || payload.id?.toString() || deliveryId;
+      const amountFcfa = Number(payload.data?.amount ?? payload.amount ?? 0);
 
-      if (userId && notesAmount > 0) {
-        // TODO: Insérer la logique de mise à jour dans votre base de données (Supabase / Prisma)
-        // Exemple avec Supabase :
-        // await supabase.rpc('add_user_credits', { user_id_param: userId, credits_to_add: notesAmount });
-        
-        console.log(`[CHARIOW WEBHOOK] Succès : +${notesAmount} notes créditées à l'utilisateur ${userId} (Delivery ID: ${deliveryId})`);
+      if (!userId) {
+        console.error("[CHARIOW WEBHOOK] user_id absent des custom_metadata, paiement ignoré.", { deliveryId });
+      } else {
+        const adminSupabase = createAdminClient();
+        const { data, error } = await adminSupabase.rpc("process_payment_webhook", {
+          p_provider_tx_id: providerTxId,
+          p_user_id: userId,
+          p_amount: amountFcfa > 0 ? amountFcfa : 1,
+          p_pack_id: rpcPackId ?? undefined,
+          p_song_id: songId,
+          p_payment_method: "chariow",
+        });
+
+        if (error) {
+          console.error("[CHARIOW WEBHOOK] Échec de la RPC process_payment_webhook", error);
+          return NextResponse.json({ error: error.message }, { status: 500 });
+        }
+
+        console.log(`[CHARIOW WEBHOOK] Paiement traité pour ${userId} (Delivery ID: ${deliveryId})`, data);
       }
     }
 

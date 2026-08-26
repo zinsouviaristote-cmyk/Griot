@@ -9,7 +9,6 @@ import {
   Check,
   Copy,
   Download,
-  Loader2,
   Pencil,
   RotateCcw,
   Share2,
@@ -25,17 +24,14 @@ import { PublishModal, type PublishModalOutput } from "@/components/publish/Publ
 import { TrackHeroPlayer } from "@/components/player/TrackHeroPlayer";
 import { SongImageField } from "@/components/dashboard/SongImageField";
 import type { PlayerTrack } from "@/lib/player/PlayerContext";
-import { mockUser } from "@/lib/data/mock-dashboard";
+import { useDashboardUser } from "@/lib/auth/DashboardUserContext";
+import { useCreditsBalance } from "@/lib/hooks/useCreditsBalance";
+import { deleteSong, publishSong, recordSongDownload, unpublishSong } from "@/lib/supabase/dataAdapters";
 import { resolveSongArt } from "@/lib/songArt";
 import { formatDate, formatDayMonth, parseLocalDate } from "@/lib/format/date";
-import { formatFcfa } from "@/lib/format/currency";
-import { generateUnlockedLyrics, mockDeleteSong, mockPaySong } from "@/lib/data/mockHistoryActions";
-import { getPublishedEntryForSong } from "@/lib/data/mock-explorer";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { occasionLabel, styleLabel } from "@/lib/i18n/catalog";
 import type { PublishedSong, Song, SongStatus } from "@/lib/types";
-
-const UNLOCK_PRICE_FCFA = 1900;
 
 function tunnelHref(song: Song, includeOccasion: boolean): string {
   const params = new URLSearchParams({ prenom: song.recipientFirstName });
@@ -43,23 +39,19 @@ function tunnelHref(song: Song, includeOccasion: boolean): string {
   return `/creer?${params.toString()}`;
 }
 
-export function SongDetailView({ song }: { song: Song }) {
+export function SongDetailView({ song, publishedEntry: publishedEntryProp }: { song: Song; publishedEntry: PublishedSong | null }) {
   const { t, tn, locale } = useLanguage();
   const router = useRouter();
   const showToast = useToast();
+  const user = useDashboardUser();
 
-  // État local, optimiste : "payer" ici est un raccourci rapide (crédit déjà en
-  // poche), pas le tunnel de paiement complet — le changement ne survit pas au
-  // rechargement, cohérent avec "aucun appel réel" du reste du produit en phase 1.
-  const [status, setStatus] = useState<SongStatus>(song.status);
-  const [lyrics, setLyrics] = useState(song.lyrics);
-  const [payPhase, setPayPhase] = useState<"idle" | "confirm" | "paying">("idle");
+  const status: SongStatus = song.status;
+  const lyrics = song.lyrics;
+  const creditBalance = useCreditsBalance(user.id, user.creditBalance);
   const [copied, setCopied] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [publishedEntry, setPublishedEntry] = useState<PublishedSong | null>(
-    () => getPublishedEntryForSong(song.id) ?? null,
-  );
+  const [publishedEntry, setPublishedEntry] = useState<PublishedSong | null>(publishedEntryProp);
   const [publishOpen, setPublishOpen] = useState(false);
   const [imageUrl, setImageUrl] = useState(song.imageUrl);
 
@@ -80,10 +72,12 @@ export function SongDetailView({ song }: { song: Song }) {
     showToast(t("history.detail.birthdayReminderToast", { name: song.recipientFirstName }), "success");
   }
 
-  const isUnlocked = status === "paid" || status === "delivered";
-  const isAwaitingPayment = status === "preview_ready" || status === "awaiting_payment";
+  // Une Note dépensée couvre l'intégralité de la chanson : dès que l'extrait
+  // existe, elle est acquise — aucun second paiement à l'unité.
+  const isUnlocked =
+    status === "preview_ready" || status === "awaiting_payment" || status === "paid" || status === "delivered";
 
-  const resolvedArt = resolveSongArt(imageUrl, mockUser.photoUrl);
+  const resolvedArt = resolveSongArt(imageUrl, user.photoUrl);
 
   const track: PlayerTrack | null = song.audioUrl
     ? {
@@ -97,15 +91,6 @@ export function SongDetailView({ song }: { song: Song }) {
         imageUrl: resolvedArt,
       }
     : null;
-
-  async function handleConfirmPay() {
-    setPayPhase("paying");
-    await mockPaySong(song.id);
-    setStatus("paid");
-    setLyrics((current) => current ?? generateUnlockedLyrics(song));
-    setPayPhase("idle");
-    showToast(t("history.detail.unlockedToast"), "success");
-  }
 
   async function handleCopyLyrics() {
     if (!lyrics) return;
@@ -136,39 +121,49 @@ export function SongDetailView({ song }: { song: Song }) {
 
   async function handleDelete() {
     setDeleting(true);
-    await mockDeleteSong(song.id);
-    showToast(t("history.item.deletedToast", { name: song.recipientFirstName }), "default");
-    router.push("/historiques");
+    try {
+      await deleteSong(song.id);
+      showToast(t("history.item.deletedToast", { name: song.recipientFirstName }), "default");
+      router.push("/historiques");
+    } catch (error) {
+      setDeleting(false);
+      showToast(error instanceof Error ? error.message : t("history.item.deletedToast", { name: song.recipientFirstName }), "danger");
+    }
   }
 
-  function handlePublish({ hideFirstName, publicTitle, imageUrl: publishedImageUrl }: PublishModalOutput) {
-    setPublishedEntry({
-      id: `pub_local_${song.id}`,
-      sourceSongId: song.id,
-      mine: true,
-      recipientFirstName: song.recipientFirstName,
-      hideFirstName,
-      publicTitle,
-      occasion: song.occasion,
-      style: song.style,
-      audioUrl: song.audioUrl ?? "/mock-audio.wav",
-      likes: 0,
-      listens: 0,
-      downloads: 0,
-      publishedAt: new Date().toISOString().slice(0, 10),
-      authorName: mockUser.firstName,
-      imageUrl: publishedImageUrl,
-      lyrics: song.lyrics ? song.lyrics.split("\n").filter(Boolean) : [],
-    });
-    setPublishOpen(false);
-    showToast(t("history.detail.publishedToast"), "success");
+  async function handlePublish({ hideFirstName, publicTitle, imageUrl: publishedImageUrl }: PublishModalOutput) {
+    if (!song.audioUrl) return;
+    try {
+      const entry = await publishSong({
+        sourceSongId: song.id,
+        recipientFirstName: song.recipientFirstName,
+        hideFirstName,
+        publicTitle,
+        occasion: song.occasion,
+        style: song.style,
+        audioUrl: song.audioUrl,
+        imageUrl: publishedImageUrl,
+        lyrics: song.lyrics ? song.lyrics.split("\n").filter(Boolean) : [],
+      });
+      setPublishedEntry(entry);
+      setPublishOpen(false);
+      showToast(t("history.detail.publishedToast"), "success");
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : t("history.detail.publishedToast"), "danger");
+    }
   }
 
   // Aucune confirmation ici, volontairement — le risque à éviter est la
   // publication accidentelle, pas le retrait.
-  function handleUnpublish() {
-    setPublishedEntry(null);
-    showToast(t("history.detail.unpublishedToast"), "default");
+  async function handleUnpublish() {
+    if (!publishedEntry) return;
+    try {
+      await unpublishSong(publishedEntry.id);
+      setPublishedEntry(null);
+      showToast(t("history.detail.unpublishedToast"), "default");
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : t("history.detail.unpublishedToast"), "danger");
+    }
   }
 
   return (
@@ -230,9 +225,10 @@ export function SongDetailView({ song }: { song: Song }) {
 
         <div className="mt-5">
           <SongImageField
+            songId={song.id}
             occasion={song.occasion}
             imageUrl={imageUrl}
-            fallbackImageUrl={mockUser.photoUrl}
+            fallbackImageUrl={user.photoUrl}
             onChange={setImageUrl}
           />
         </div>
@@ -278,77 +274,53 @@ export function SongDetailView({ song }: { song: Song }) {
           </div>
         )}
 
-        {(isAwaitingPayment || isUnlocked) && track && (
+        {isUnlocked && track && (
           <div>
             <TrackHeroPlayer track={track} durationSeconds={song.durationSeconds} />
 
-            {isAwaitingPayment && (
-              <div className="mt-6">
-                <p className="text-sm text-ink-muted">{t("history.detail.paymentHint")}</p>
-                {payPhase === "confirm" ? (
-                  <div className="mt-3 rounded-card border border-border bg-page p-4">
-                    <p className="text-sm text-ink">
-                      {t("history.detail.unlockConfirm", { price: formatFcfa(UNLOCK_PRICE_FCFA) })}
-                    </p>
-                    <div className="mt-3 flex gap-2">
-                      <Button onClick={handleConfirmPay} disabled={payPhase !== "confirm"} className="flex-1">
-                        {t("history.detail.confirm")}
-                      </Button>
-                      <Button variant="ghost" onClick={() => setPayPhase("idle")} className="flex-1">
-                        {t("history.detail.cancel")}
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <Button onClick={() => setPayPhase("confirm")} className="mt-3 w-full sm:w-auto">
-                    {t("history.detail.payButton", { price: formatFcfa(UNLOCK_PRICE_FCFA) })}
-                  </Button>
-                )}
+            <a
+              href={track.audioUrl}
+              download={`griot-${song.recipientFirstName}.wav`}
+              onClick={(event) => {
+                // On a écouté avant de payer (premier essai offert) — sans
+                // Notes (jamais rechargé, ou solde épuisé), le téléchargement
+                // renvoie vers /recharger plutôt que de livrer le fichier.
+                if (creditBalance <= 0) {
+                  event.preventDefault();
+                  showToast(t("credits.downloadGate"), "default");
+                  router.push("/recharger");
+                  return;
+                }
+                if (publishedEntry) recordSongDownload(publishedEntry.id).catch(() => {});
+              }}
+              className="mt-6 flex min-h-11 w-full items-center justify-center gap-2 rounded-control bg-brand px-5 py-3 text-sm font-semibold text-white transition-all duration-200 ease-magnetic hover:brightness-90 active:scale-[0.98] sm:w-auto"
+            >
+              <Download className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+              {t("history.detail.downloadMp3")}
+            </a>
+
+            {lyrics && (
+              <div className="mt-6 border-t border-border pt-6">
+                <div className="flex items-center justify-between">
+                  <p className="text-label-md uppercase tracking-wide text-ink-muted">{t("history.detail.lyricsTitle")}</p>
+                  <button
+                    type="button"
+                    onClick={handleCopyLyrics}
+                    className="-my-3.5 flex min-h-11 items-center gap-1.5 text-label-sm font-medium text-brand hover:underline"
+                  >
+                    {copied ? (
+                      <Check className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />
+                    ) : (
+                      <Copy className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />
+                    )}
+                    {copied ? t("history.detail.copied") : t("history.detail.copy")}
+                  </button>
+                </div>
+                <pre className="mt-3 whitespace-pre-wrap font-sans text-sm leading-relaxed text-ink">
+                  {lyrics}
+                </pre>
               </div>
             )}
-
-            {isUnlocked && (
-              <>
-                <a
-                  href={track.audioUrl}
-                  download={`griot-${song.recipientFirstName}.wav`}
-                  className="mt-6 flex min-h-11 w-full items-center justify-center gap-2 rounded-control bg-brand px-5 py-3 text-sm font-semibold text-white transition-all duration-200 ease-magnetic hover:brightness-90 active:scale-[0.98] sm:w-auto"
-                >
-                  <Download className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
-                  {t("history.detail.downloadMp3")}
-                </a>
-
-                {lyrics && (
-                  <div className="mt-6 border-t border-border pt-6">
-                    <div className="flex items-center justify-between">
-                      <p className="text-label-md uppercase tracking-wide text-ink-muted">{t("history.detail.lyricsTitle")}</p>
-                      <button
-                        type="button"
-                        onClick={handleCopyLyrics}
-                        className="-my-3.5 flex min-h-11 items-center gap-1.5 text-label-sm font-medium text-brand hover:underline"
-                      >
-                        {copied ? (
-                          <Check className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />
-                        ) : (
-                          <Copy className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />
-                        )}
-                        {copied ? t("history.detail.copied") : t("history.detail.copy")}
-                      </button>
-                    </div>
-                    <pre className="mt-3 whitespace-pre-wrap font-sans text-sm leading-relaxed text-ink">
-                      {lyrics}
-                    </pre>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        )}
-
-        {payPhase === "paying" && (
-          <div className="mt-4 flex items-center gap-2 text-sm text-ink-muted">
-            <Loader2 className="h-4 w-4 animate-spin-slow" strokeWidth={1.5} aria-hidden="true" />
-            {t("history.detail.processing")}
           </div>
         )}
       </div>
@@ -383,7 +355,7 @@ export function SongDetailView({ song }: { song: Song }) {
               <button
                 type="button"
                 onClick={() => setPublishOpen(true)}
-                className="shrink-0 rounded-control border border-brand/40 px-3.5 py-2 text-xs font-semibold text-brand transition-all duration-150 ease-magnetic hover:bg-brand-soft active:scale-95"
+                className="shrink-0 rounded-control border border-brand/40 px-3.5 py-2 text-xs font-semibold text-brand transition-all duration-150 ease-magnetic hover:bg-page active:scale-95"
               >
                 {t("history.detail.publish")}
               </button>
@@ -408,7 +380,7 @@ export function SongDetailView({ song }: { song: Song }) {
         occasion={song.occasion}
         style={song.style}
         songImageUrl={imageUrl}
-        profilePhotoUrl={mockUser.photoUrl}
+        profilePhotoUrl={user.photoUrl}
         onPublish={handlePublish}
       />
 

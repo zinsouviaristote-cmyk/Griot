@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Maximize2, Minimize2, Redo2, TriangleAlert, Undo2 } from "lucide-react";
+import { Maximize2, Minimize2, Redo2, Undo2 } from "lucide-react";
 import { useTunnel } from "@/lib/tunnel/TunnelContext";
 import {
   LYRICS_MAX_LENGTH,
@@ -11,7 +11,6 @@ import {
   detectStoryMode,
   type StoryMode,
 } from "@/lib/tunnel/types";
-import { hasEnoughStoryMaterial } from "@/lib/tunnel/lyricsEngine";
 import { Button } from "@/components/ui/Button";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { useMobilePlayerBarVisible } from "@/lib/player/useMobilePlayerBarVisible";
@@ -45,13 +44,11 @@ export function StoryStep() {
   const length = data.story.trim().length;
   const remaining = STORY_MIN_LENGTH - length;
   const lengthOk = length >= STORY_MIN_LENGTH;
-  // En mode Simple, le moteur (voir lyricsEngine.ts) a besoin d'au moins deux
-  // éléments concrets pour composer des paroles vraies — jamais de vers creux
-  // pour compenser une histoire trop pauvre. Non pertinent en mode Avancé :
-  // les mots de la personne y sont transmis tels quels, sans extraction.
-  const hasMaterial = uiMode !== "simple" || hasEnoughStoryMaterial(data.story, data.songLanguage);
-  const canContinue = lengthOk && hasMaterial;
-  const showMaterialWarning = uiMode === "simple" && lengthOk && !hasMaterial;
+  // Le minimum de caractères est la seule exigence pour continuer — un filtre
+  // sur la présence de détails "concrets" bloquait trop de personnes qui
+  // avaient pourtant de quoi composer une chanson (voir lyricsEngine.ts,
+  // qui dégrade proprement avec peu d'ancrages plutôt que d'échouer).
+  const canContinue = lengthOk;
 
   function commitStory(nextValue: string) {
     const story = nextValue.slice(0, maxLength);
@@ -148,7 +145,7 @@ export function StoryStep() {
           onClick={undo}
           disabled={past.length === 0}
           aria-label={t("tunnel.story.undo")}
-          className="flex h-8 w-8 items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:bg-brand-soft/60 hover:text-ink active:scale-90 disabled:pointer-events-none disabled:opacity-30"
+          className="flex h-8 w-8 items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:bg-page hover:text-ink active:scale-90 disabled:pointer-events-none disabled:opacity-30"
         >
           <Undo2 className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
         </button>
@@ -157,7 +154,7 @@ export function StoryStep() {
           onClick={redo}
           disabled={future.length === 0}
           aria-label={t("tunnel.story.redo")}
-          className="flex h-8 w-8 items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:bg-brand-soft/60 hover:text-ink active:scale-90 disabled:pointer-events-none disabled:opacity-30"
+          className="flex h-8 w-8 items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:bg-page hover:text-ink active:scale-90 disabled:pointer-events-none disabled:opacity-30"
         >
           <Redo2 className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
         </button>
@@ -167,7 +164,7 @@ export function StoryStep() {
         onClick={() => setFullscreen((current) => !current)}
         aria-pressed={fullscreen}
         aria-label={fullscreen ? t("tunnel.story.fullscreenExit") : t("tunnel.story.fullscreenEnter")}
-        className="flex h-8 w-8 items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:bg-brand-soft/60 hover:text-ink active:scale-90"
+        className="flex h-8 w-8 items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:bg-page hover:text-ink active:scale-90"
       >
         {fullscreen ? (
           <Minimize2 className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
@@ -266,12 +263,6 @@ export function StoryStep() {
             className="mt-4 w-full resize-none rounded-card border border-border bg-surface p-4 text-sm leading-relaxed text-ink placeholder:text-ink-muted focus:border-brand focus:outline-none focus:shadow-ring-focus"
           />
           <div id="story-help">{counter}</div>
-          {showMaterialWarning && (
-            <p className="mt-3 flex items-start gap-2 rounded-card border border-warning/30 bg-warning/10 p-3 text-sm text-ink">
-              <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-warning" strokeWidth={1.5} aria-hidden="true" />
-              <span>{t("tunnel.story.needMoreDetail")}</span>
-            </p>
-          )}
         </>
       ) : (
         <div className="mt-4">

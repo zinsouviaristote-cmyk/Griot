@@ -64,8 +64,10 @@ export function ProfilePhotoField({
           ) : (
             <Avatar initials={initials} size="lg" />
           )}
+          {/* `bg-black`, jamais `bg-ink` : ce voile assombrit une photo au
+              survol, il doit rester sombre dans les deux thèmes. */}
           <span
-            className="absolute inset-0 rounded-full bg-ink/0 transition-colors duration-150 group-hover:bg-ink/20"
+            className="absolute inset-0 rounded-full bg-black/0 transition-colors duration-150 group-hover:bg-black/20"
             aria-hidden="true"
           />
         </button>

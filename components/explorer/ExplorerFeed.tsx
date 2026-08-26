@@ -5,7 +5,7 @@ import { SlidersHorizontal } from "lucide-react";
 import { FeedScreen } from "@/components/explorer/FeedScreen";
 import { FeedFiltersPanel } from "@/components/explorer/FeedFiltersPanel";
 import { usePlayer, type PlayerTrack } from "@/lib/player/PlayerContext";
-import { getPublicDisplayName } from "@/lib/data/mock-explorer";
+import { getPublicDisplayName } from "@/lib/explorer/displayName";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { occasionLabel, styleLabel } from "@/lib/i18n/catalog";
 import type { MusicStyle, Occasion, PublishedSong } from "@/lib/types";
@@ -15,7 +15,7 @@ import type { MusicStyle, Occasion, PublishedSong } from "@/lib/types";
 // gère le glissement au doigt et la molette nativement ; les flèches du
 // clavier appellent la même navigation programmatique que les boutons
 // précédent/suivant, pour rester en phase avec la lecture (voir goTo ci-dessous).
-export function ExplorerFeed({ entries }: { entries: PublishedSong[] }) {
+export function ExplorerFeed({ entries, likedIds }: { entries: PublishedSong[]; likedIds: Set<string> }) {
   const { t } = useLanguage();
   const player = usePlayer();
   const [occasionFilter, setOccasionFilter] = useState<Occasion | "toutes">("toutes");
@@ -45,10 +45,11 @@ export function ExplorerFeed({ entries }: { entries: PublishedSong[] }) {
         audioUrl: entry.audioUrl,
         publishedId: entry.id,
         likes: entry.likes,
+        likedByMe: likedIds.has(entry.id),
         imageUrl: entry.imageUrl,
         origin: "explorer" as const,
       })),
-    [filtered, t],
+    [filtered, t, likedIds],
   );
 
   const clampedIndex = Math.min(activeIndex, Math.max(filtered.length - 1, 0));
@@ -146,10 +147,19 @@ export function ExplorerFeed({ entries }: { entries: PublishedSong[] }) {
               isLast={index === filtered.length - 1}
               isActive={index === clampedIndex}
               queue={queue}
+              likedByMe={likedIds.has(entry.id)}
               onGoPrev={() => goTo(clampedIndex - 1)}
               onGoNext={() => goTo(clampedIndex + 1)}
             />
           ))}
+        </div>
+      ) : entries.length === 0 ? (
+        // Aucune chanson publiée nulle part, distinct d'un filtre trop
+        // restrictif ci-dessous — jamais le même message pour ces deux
+        // situations, qui n'appellent pas la même action de l'utilisateur.
+        <div className="flex h-full w-full flex-col items-center justify-center gap-2 px-6 text-center">
+          <p className="text-sm font-medium text-ink">{t("explorer.emptyFeed.title")}</p>
+          <p className="text-sm text-ink-muted">{t("explorer.emptyFeed.description")}</p>
         </div>
       ) : (
         <div className="flex h-full w-full flex-col items-center justify-center gap-3 px-6 text-center">

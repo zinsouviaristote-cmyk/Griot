@@ -3,7 +3,7 @@
 import { X } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
-import { occasionCatalog, MUSIC_STYLE_IDS } from "@/lib/data/mock-dashboard";
+import { occasionCatalog, MUSIC_STYLE_IDS } from "@/lib/songCatalog";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { occasionLabel, styleLabel } from "@/lib/i18n/catalog";
 import type { MusicStyle, Occasion } from "@/lib/types";

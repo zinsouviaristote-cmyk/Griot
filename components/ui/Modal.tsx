@@ -47,7 +47,11 @@ export function Modal({
   // enfin comparable globalement, ce que z-[100] seul ne garantissait pas.
   return createPortal(
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-ink/40" onClick={onClose} aria-hidden="true" />
+      {/* Voile d'arrière-plan volontairement fixe (jamais `bg-ink`) : un fond de
+          modale doit toujours assombrir ce qu'il y a derrière, dans les deux
+          thèmes — avec le jeton `ink` (qui s'inverse en clair la nuit), ce
+          voile aurait au contraire éclairci l'écran en mode sombre. */}
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} aria-hidden="true" />
       <div
         role="dialog"
         aria-modal="true"

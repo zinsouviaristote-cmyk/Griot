@@ -4,9 +4,17 @@ import { PublicationsView } from "@/components/publications/PublicationsView";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { Reveal } from "@/components/ui/Reveal";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import type { Song } from "@/lib/types";
+import type { PublishedSong, Song } from "@/lib/types";
 
-export function PublicationsPageBody({ songs }: { songs: Song[] }) {
+export function PublicationsPageBody({
+  songs,
+  publishedSongs,
+  onPublishedSongsChange,
+}: {
+  songs: Song[];
+  publishedSongs: PublishedSong[];
+  onPublishedSongsChange: (next: PublishedSong[]) => void;
+}) {
   const { t } = useLanguage();
   return (
     <div>
@@ -16,7 +24,7 @@ export function PublicationsPageBody({ songs }: { songs: Song[] }) {
       <p className="mt-2 max-w-xl text-body-md text-ink-muted">{t("publications.pageSubtitle")}</p>
 
       <Reveal delayMs={80} className="mt-6">
-        <PublicationsView songs={songs} />
+        <PublicationsView songs={songs} publishedSongs={publishedSongs} onPublishedSongsChange={onPublishedSongsChange} />
       </Reveal>
     </div>
   );

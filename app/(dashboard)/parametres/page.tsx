@@ -1,14 +1,26 @@
-import type { Metadata } from "next";
+"use client";
+
+import { useEffect, useState } from "react";
 import { ParametresPageBody } from "@/components/settings/ParametresPageBody";
-import { mockSongs } from "@/lib/data/mock-dashboard";
-import { getMyPublishedSongs } from "@/lib/data/mock-explorer";
-import { fetchServerUserProfile } from "@/lib/supabase/serverDataAdapters";
+import { useDashboardUser } from "@/lib/auth/DashboardUserContext";
+import { fetchUserSongs, fetchPublishedExplorerSongs } from "@/lib/supabase/dataAdapters";
 
-export const metadata: Metadata = {
-  title: "Paramètres : Griot",
-};
+export default function ParametresPage() {
+  const user = useDashboardUser();
+  const [songCount, setSongCount] = useState(0);
+  const [publishedCount, setPublishedCount] = useState(0);
 
-export default async function ParametresPage() {
-  const user = await fetchServerUserProfile();
-  return <ParametresPageBody user={user} songCount={mockSongs.length} publishedCount={getMyPublishedSongs().length} />;
+  useEffect(() => {
+    Promise.all([fetchUserSongs(), fetchPublishedExplorerSongs()])
+      .then(([songs, published]) => {
+        setSongCount(songs.length);
+        setPublishedCount(published.filter((entry) => entry.mine).length);
+      })
+      .catch(() => {
+        setSongCount(0);
+        setPublishedCount(0);
+      });
+  }, []);
+
+  return <ParametresPageBody user={user} songCount={songCount} publishedCount={publishedCount} />;
 }

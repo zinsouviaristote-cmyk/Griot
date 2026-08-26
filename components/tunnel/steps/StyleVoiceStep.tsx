@@ -73,7 +73,11 @@ export function StyleVoiceStep() {
             <div
               key={s.id}
               className={`flex items-center gap-3 rounded-card border p-3 transition-colors duration-150 ${
-                isSelected ? "border-brand bg-brand-soft" : "border-border bg-surface"
+                // `bg-surface` + bordure/ombre, jamais `bg-brand-soft` en fond de
+                // ligne entière : ce jeton reste un violet pâle fixe en mode
+                // sombre alors que `text-ink` s'inverse en clair, illisible sur
+                // ce fond précis (voir aussi RechargeView, même correction).
+                isSelected ? "border-brand bg-surface shadow-card" : "border-border bg-surface"
               }`}
             >
               <button

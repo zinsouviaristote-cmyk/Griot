@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Ear } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useInView } from "@/lib/landing/useInView";
-import { STATS_PERIODS, formatListenDate, getListensSeries, type StatsPeriod } from "@/lib/data/mock-stats";
+import { STATS_PERIODS, fetchListensSeries, formatListenDate, type StatsPeriod } from "@/lib/supabase/statsAdapters";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import type { ListenPoint } from "@/lib/types";
 
 const VBOX_WIDTH = 640;
 const VBOX_HEIGHT = 220;
@@ -49,20 +50,37 @@ function smoothPath(coords: { x: number; y: number }[]): string {
   return d;
 }
 
-function ChartCanvas({ period }: { period: StatsPeriod }) {
+function ChartCanvas({ period, publishedSongIds }: { period: StatsPeriod; publishedSongIds: string[] }) {
   const { t, locale } = useLanguage();
   const gradientId = useId();
   const { ref, inView } = useInView<HTMLDivElement>();
   const [mounted, setMounted] = useState(false);
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const [points, setPoints] = useState<ListenPoint[]>([]);
 
   useEffect(() => {
     const id = requestAnimationFrame(() => setMounted(true));
     return () => cancelAnimationFrame(id);
   }, []);
 
-  const points = useMemo(() => getListensSeries(period, locale), [period, locale]);
+  useEffect(() => {
+    let cancelled = false;
+    fetchListensSeries(publishedSongIds, period, locale)
+      .then((series) => {
+        if (!cancelled) setPoints(series);
+      })
+      .catch(() => {
+        if (!cancelled) setPoints([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [period, locale, publishedSongIds.join(",")]);
+
+  if (points.length === 0) return null;
+
   const max = niceMax(Math.max(...points.map((p) => p.count)));
   const yTicks = [0, max / 3, (max * 2) / 3, max];
 
@@ -222,7 +240,7 @@ function ChartCanvas({ period }: { period: StatsPeriod }) {
 // `key={period}` sur ChartCanvas force un remontage complet au changement, ce
 // qui rejoue tout l'effet d'apparition (fondu + tracé) — la façon la plus
 // simple d'obtenir une "transition animée" sans réanimation de tracé SVG.
-export function ListensChart({ hasListens }: { hasListens: boolean }) {
+export function ListensChart({ hasListens, publishedSongIds }: { hasListens: boolean; publishedSongIds: string[] }) {
   const { t } = useLanguage();
   const [period, setPeriod] = useState<StatsPeriod>(7);
 
@@ -258,7 +276,7 @@ export function ListensChart({ hasListens }: { hasListens: boolean }) {
       </div>
 
       <div className="mt-5">
-        <ChartCanvas key={period} period={period} />
+        <ChartCanvas key={period} period={period} publishedSongIds={publishedSongIds} />
       </div>
     </div>
   );

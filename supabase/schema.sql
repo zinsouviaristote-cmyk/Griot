@@ -295,7 +295,15 @@ CREATE TABLE IF NOT EXISTS public.published_songs (
   listens_count INT NOT NULL DEFAULT 0,
   downloads_count INT NOT NULL DEFAULT 0,
   published_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  -- Pseudonyme public de l'auteur⋅ice, capturé au moment de la publication
+  -- (jamais un live join vers profiles — un changement de nom ne doit pas
+  -- réécrire l'historique d'une publication déjà faite).
+  author_name TEXT NOT NULL DEFAULT '',
+  -- Même logique de capture figée pour la photo — voir
+  -- components/explorer/FeedScreen.tsx, qui l'affiche dans l'avatar de
+  -- chaque carte à la place des initiales quand elle est renseignée.
+  author_photo_url TEXT
 );
 
 ALTER TABLE public.published_songs ENABLE ROW LEVEL SECURITY;
@@ -640,4 +648,43 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION public.get_admin_overview_data() TO authenticated;
+
+-- ==========================================
+-- REALTIME
+-- ==========================================
+-- Active Supabase Realtime (postgres_changes) sur les tables suivies en direct
+-- côté client : l'avancement d'une génération (generation_attempts), le solde
+-- de Notes (profiles), et les compteurs sociaux d'Explorer (published_songs).
+-- REPLICA IDENTITY FULL est nécessaire pour que les payloads UPDATE contiennent
+-- toutes les colonnes (pas seulement la clé primaire), utilisé par le front
+-- pour lire directement status/preview_audio_path/credit_balance/likes_count
+-- sans requête supplémentaire après chaque événement.
+
+ALTER TABLE public.generation_attempts REPLICA IDENTITY FULL;
+ALTER TABLE public.profiles REPLICA IDENTITY FULL;
+ALTER TABLE public.published_songs REPLICA IDENTITY FULL;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'generation_attempts'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.generation_attempts;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'profiles'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.profiles;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'published_songs'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.published_songs;
+  END IF;
+END $$;
 

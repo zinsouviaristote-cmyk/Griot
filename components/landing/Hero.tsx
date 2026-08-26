@@ -114,7 +114,7 @@ function MusicStaffDecoration() {
 export function Hero() {
   const { t } = useLanguage();
   return (
-    <section className="relative scroll-mt-[var(--nav-clearance)] overflow-hidden bg-white px-4 pb-10 pt-16 sm:pb-14 sm:pt-20 lg:pt-24">
+    <section className="relative scroll-mt-[var(--nav-clearance)] overflow-hidden px-4 pb-10 pt-16 sm:pb-14 sm:pt-20 lg:pt-24">
       <div className="relative mx-auto grid max-w-6xl gap-10 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:gap-16">
 
         {/* Colonne Gauche */}

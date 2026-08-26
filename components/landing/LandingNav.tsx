@@ -47,7 +47,7 @@ function LanguageSwitcher() {
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={t("accountMenu.languageAriaLabel")}
-        className="flex min-h-11 items-center gap-1.5 rounded-control px-3 text-sm font-medium text-ink-muted transition-all duration-150 ease-magnetic hover:bg-brand-soft/60 hover:text-ink"
+        className="flex min-h-11 items-center gap-1.5 rounded-control px-3 text-sm font-medium text-ink-muted transition-all duration-150 ease-magnetic hover:bg-page hover:text-ink"
       >
         <Globe className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
         {locale.toUpperCase()}
@@ -70,7 +70,7 @@ function LanguageSwitcher() {
                   setLocale(option);
                   setOpen(false);
                 }}
-                className="flex min-h-11 w-full items-center justify-between gap-3 px-4 text-left text-sm text-ink transition-colors hover:bg-brand-soft"
+                className="flex min-h-11 w-full items-center justify-between gap-3 px-4 text-left text-sm text-ink transition-colors hover:bg-page"
               >
                 <span>{t(option === "fr" ? "accountMenu.languageFrench" : "accountMenu.languageEnglish")}</span>
                 {locale === option && <Check className="h-4 w-4 text-brand" strokeWidth={1.5} aria-hidden="true" />}
@@ -120,7 +120,7 @@ function MobileMenu() {
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={open ? t("landing.nav.menuClose") : t("landing.nav.menuOpen")}
-        className="flex h-11 w-11 items-center justify-center rounded-control text-ink-muted transition-colors duration-150 hover:bg-brand-soft/60 hover:text-ink"
+        className="flex h-11 w-11 items-center justify-center rounded-control text-ink-muted transition-colors duration-150 hover:bg-page hover:text-ink"
       >
         {open ? <X className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" /> : <Menu className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />}
       </button>
@@ -159,7 +159,7 @@ function MobileMenu() {
               href="/connexion"
               role="menuitem"
               onClick={() => setOpen(false)}
-              className="flex min-h-11 items-center px-4 text-sm font-medium text-ink transition-colors hover:bg-brand-soft"
+              className="flex min-h-11 items-center px-4 text-sm font-medium text-ink transition-colors hover:bg-page"
             >
               {t("landing.nav.login")}
             </Link>
@@ -168,7 +168,7 @@ function MobileMenu() {
           <div className="border-t border-border py-1.5">
             <Link
               href="/creer"
-              className="flex min-h-11 items-center px-4 text-sm font-medium text-brand transition-colors hover:bg-brand-soft"
+              className="flex min-h-11 items-center px-4 text-sm font-medium text-brand transition-colors hover:bg-page"
             >
               {t("landing.nav.start")}
             </Link>
@@ -225,7 +225,7 @@ export function LandingNav() {
           <LanguageSwitcher />
           <Link
             href="/connexion"
-            className="hidden min-h-11 items-center rounded-control px-3.5 text-sm font-medium text-ink-muted transition-all duration-150 ease-magnetic hover:bg-brand-soft/60 hover:text-ink sm:inline-flex"
+            className="hidden min-h-11 items-center rounded-control px-3.5 text-sm font-medium text-ink-muted transition-all duration-150 ease-magnetic hover:bg-page hover:text-ink sm:inline-flex"
           >
             {t("landing.nav.login")}
           </Link>

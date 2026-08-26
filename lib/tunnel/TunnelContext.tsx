@@ -5,6 +5,7 @@ import { EMPTY_TUNNEL_DATA, TUNNEL_STEPS, LAST_EDITABLE_STEP_INDEX, type TunnelD
 import { useToast } from "@/components/ui/Toast";
 import { getStoredOrDetectedLocale } from "@/lib/i18n/locale";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { createClient } from "@/lib/supabase/client";
 
 const STORAGE_KEY = "griot:tunnel";
 
@@ -31,6 +32,7 @@ interface TunnelContextValue {
   canGoBack: boolean;
   notesBalance: number;
   spendNote: () => void;
+  setNotesBalance: (value: number) => void;
   reset: () => void;
 }
 
@@ -115,6 +117,32 @@ export function TunnelProvider({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // 🟢 2bis. La personne peut arriver dans le tunnel déjà connectée (session
+  // Supabase déjà active, hors de tout retour OAuth/lien magique depuis cet
+  // écran) — sans cette vérification, GenerationStep ne le saurait jamais et
+  // redemanderait toujours de se connecter, même à quelqu'un déjà en ligne.
+  useEffect(() => {
+    if (resumeAuth) return; // déjà traité ci-dessus dans ce cas précis
+    let cancelled = false;
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (cancelled || !user?.email) return;
+      setData((current) =>
+        current.authEmail
+          ? current
+          : {
+              ...current,
+              authEmail: user.email ?? null,
+              authProvider: user.app_metadata?.provider === "google" ? "google" : "email",
+            },
+      );
+    });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // 🟢 3. Sauvegarde automatique de la session en cours dans le localStorage
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -152,6 +180,7 @@ export function TunnelProvider({
       canGoBack: stepIndex > 0 && stepIndex <= LAST_EDITABLE_STEP_INDEX,
       notesBalance,
       spendNote: () => setNotesBalance((current) => Math.max(0, current - 1)),
+      setNotesBalance,
       reset,
     };
   }, [step, data, notesBalance]);

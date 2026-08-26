@@ -11,9 +11,9 @@ import { FinalCta } from "@/components/landing/FinalCta";
 import { LandingFooter } from "@/components/landing/LandingFooter";
 
 // Page publique — jamais dans DashboardShell. Une personne déjà entrée (voir
-// lib/auth/session : cookie posé par le flux de connexion mock) n'a aucune
-// raison de revoir cet écran : elle repart directement vers son tableau de
-// bord, "/" ne lui appartient plus une fois connectée.
+// lib/auth/session : cookie posé par le callback OAuth/lien magique réel)
+// n'a aucune raison de revoir cet écran : elle repart directement vers son
+// tableau de bord, "/" ne lui appartient plus une fois connectée.
 export default function LandingPage() {
   const session = cookies().get(SESSION_COOKIE_NAME)?.value;
   if (session === "1") redirect("/tableau-de-bord");

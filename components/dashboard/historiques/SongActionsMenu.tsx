@@ -68,7 +68,7 @@ export function SongActionsMenu({
                 if (isPublished) onUnpublish();
                 else onPublish();
               }}
-              className="flex min-h-11 w-full items-center gap-3 px-4 text-left text-sm text-ink transition-colors hover:bg-brand-soft"
+              className="flex min-h-11 w-full items-center gap-3 px-4 text-left text-sm text-ink transition-colors hover:bg-page"
             >
               <Megaphone className="h-4 w-4 text-ink-muted" strokeWidth={1.5} aria-hidden="true" />
               {isPublished ? t("history.item.unpublish") : t("history.item.publishToExplore")}
@@ -76,7 +76,7 @@ export function SongActionsMenu({
             <Link
               href={redoHref}
               onClick={(event) => event.stopPropagation()}
-              className="flex min-h-11 w-full items-center gap-3 px-4 text-left text-sm text-ink transition-colors hover:bg-brand-soft"
+              className="flex min-h-11 w-full items-center gap-3 px-4 text-left text-sm text-ink transition-colors hover:bg-page"
             >
               <Wand2 className="h-4 w-4 text-ink-muted" strokeWidth={1.5} aria-hidden="true" />
               {redoLabel}

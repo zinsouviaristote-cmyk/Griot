@@ -75,6 +75,7 @@ export const fr = {
     explainer: "Une Note correspond à un essai. Le premier essai de chaque chanson est offert : vous écoutez avant de payer.",
     attemptsCount: { one: "{{count}} essai", other: "{{count}} essais" },
     enoughForSongs: { one: "de quoi faire {{count}} chanson", other: "de quoi faire {{count}} chansons" },
+    downloadGate: "Rechargez vos Notes pour télécharger votre chanson.",
   },
 
   dashboard: {
@@ -162,7 +163,7 @@ export const fr = {
     status: {
       draft: "Brouillon",
       generating: "En cours",
-      previewReady: "Extrait prêt",
+      previewReady: "Terminée",
       awaitingPayment: "En attente de paiement",
       paid: "Payée",
       delivered: "Livrée",
@@ -258,6 +259,14 @@ export const fr = {
     listensCount: "{{count}} écoutes",
     noResults: "Aucune chanson publiée ne correspond à ces critères.",
     resetFilters: "Réinitialiser les filtres",
+    emptyFeed: {
+      title: "Personne n'a encore publié de chanson",
+      description: "Soyez le premier : créez la vôtre et publiez-la depuis votre historique.",
+    },
+    loadError: {
+      description: "Impossible de charger Explorer pour l'instant.",
+      retry: "Réessayer",
+    },
     filterAriaLabel: "Filtrer par occasion ou style",
     createMine: "Créer la mienne",
     previousSong: "Chanson précédente",
@@ -349,7 +358,16 @@ export const fr = {
     pageTitle: "Recharger",
     pageSubtitle: "Choisissez un pack de Notes : le prix baisse à mesure que le pack grandit.",
     mostChosen: "Le plus choisi",
+    packLabel: "Pack",
     perSong: "{{price}} / chanson",
+    selected: "Sélectionné",
+    choose: "Choisir",
+    securePayment: "Paiement sécurisé",
+    paymentMethodsList: "MTN Mobile Money, Moov, Wave, Carte Bancaire",
+    processingPayment: "Chargement du paiement…",
+    paymentInitError: "Impossible d'initier le paiement.",
+    paymentCreateError: "Erreur lors de la création du paiement.",
+    chariowNotConfigured: "L'identifiant Chariow pour le Pack N°{{pack}} n'est pas configuré.",
     notesNeverExpire: "Les Notes n'expirent jamais.",
     paymentMethod: "Moyen de paiement",
     mobileMoney: "Mobile Money",
@@ -381,11 +399,17 @@ export const fr = {
       motif_achat: "Achat",
       motif_essai: "Essai",
       motif_remboursement: "Remboursement",
+      // Ces trois clés sont écrites telles quelles par les RPC serveur (voir
+      // supabase/schema.sql, `request_song_generation` et
+      // `process_payment_webhook`) — leur nom et les variables qu'elles
+      // utilisent doivent rester exactement synchronisés avec ce que la base
+      // envoie réellement (`recipient`, `notes`), jamais renommés seuls d'un
+      // côté sans l'autre : sinon `t()` retombe sur la clé brute affichée telle
+      // quelle (voir lib/i18n/LanguageContext.tsx).
       transactions: {
-        purchasePack: "Achat : pack de {{songs}} chansons ({{notes}} Notes)",
-        freeAttempt: "Essai {{index}} pour {{name}} (gratuit)",
-        attempt: "Essai {{index}} pour {{name}}",
-        refundFailed: "Remboursement : échec de génération ({{name}}, essai {{index}})",
+        purchase_pack: "Achat : {{notes}} Notes",
+        essay_free: "Essai offert pour {{recipient}}",
+        essay_paid: "Essai pour {{recipient}}",
       },
     },
   },
@@ -717,9 +741,12 @@ tunnel: {
       statusMixing: "Nous peaufinons le mix…",
       connectedAs: "Connecté avec {{email}}",
       connectedHint: "Vous retrouverez cette chanson dans votre bibliothèque.",
-      connectPrompt: "Connectez-vous pour la retrouver facilement",
-      connectOptional: "Facultatif : votre extrait gratuit reste disponible même sans compte.",
+      connectPrompt: "Connectez-vous pour générer votre chanson",
+      connectOptional: "La connexion est nécessaire pour lancer la génération et retrouver votre chanson ensuite.",
       or: "ou",
+      failedTitle: "La génération a échoué",
+      failedBody: "Un souci est survenu pendant la création de votre chanson. Vous pouvez réessayer sans perdre vos paroles.",
+      retry: "Réessayer",
     },
     choice: {
       title: "Écoutez et choisissez",

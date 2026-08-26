@@ -22,7 +22,7 @@ import { LyricsSheet } from "@/components/explorer/LyricsSheet";
 import { Avatar } from "@/components/ui/Avatar";
 import { useToast } from "@/components/ui/Toast";
 import { hasCountedListen, recordListen } from "@/lib/explorer/listens";
-import { getPublicDisplayName } from "@/lib/data/mock-explorer";
+import { getPublicDisplayName } from "@/lib/explorer/displayName";
 import { formatDuration } from "@/lib/format/duration";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { occasionLabel, styleLabel } from "@/lib/i18n/catalog";
@@ -41,6 +41,7 @@ export function FeedScreen({
   isActive,
   isLast,
   queue,
+  likedByMe,
   onGoPrev,
   onGoNext,
 }: {
@@ -50,6 +51,7 @@ export function FeedScreen({
   isActive: boolean;
   isLast: boolean;
   queue: PlayerTrack[];
+  likedByMe: boolean;
   onGoPrev: () => void;
   onGoNext: () => void;
 }) {
@@ -72,6 +74,7 @@ export function FeedScreen({
     audioUrl: entry.audioUrl,
     publishedId: entry.id,
     likes: entry.likes,
+    likedByMe,
     imageUrl: entry.imageUrl,
     origin: "explorer",
   };
@@ -123,7 +126,7 @@ export function FeedScreen({
           </div>
 
           <div className="flex items-center gap-2">
-            <Avatar initials={entry.authorName.slice(0, 1).toUpperCase()} size="sm" />
+            <Avatar initials={entry.authorName.slice(0, 1).toUpperCase()} avatarUrl={entry.authorPhotoUrl} size="sm" />
             <span className="text-sm font-medium text-ink">{entry.authorName}</span>
             <span className="rounded-full bg-brand-soft px-2.5 py-1 text-xs font-medium text-brand">
               {styleLabel(t, entry.style)}
@@ -186,7 +189,7 @@ export function FeedScreen({
               <Repeat className={`h-4 w-4 ${player.repeatOne ? "animate-spin-slow" : ""}`} strokeWidth={1.5} aria-hidden="true" />
             </button>
 
-            <LikeButton publishedSongId={entry.id} likes={entry.likes} />
+            <LikeButton publishedSongId={entry.id} likes={entry.likes} initialLiked={likedByMe} />
 
             <button
               type="button"
@@ -246,7 +249,7 @@ export function FeedScreen({
             type="button"
             onClick={onGoNext}
             disabled={isLast}
-            aria-label="Chanson suivante"
+            aria-label={t("explorer.nextSong")}
             className="flex h-9 w-9 animate-breathe items-center justify-center rounded-full bg-brand-soft text-brand transition-transform duration-150 ease-magnetic hover:scale-110 active:scale-95 disabled:animate-none disabled:opacity-30 disabled:pointer-events-none"
           >
             <ChevronDown className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />

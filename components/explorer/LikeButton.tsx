@@ -2,51 +2,67 @@
 
 import { useEffect, useState } from "react";
 import { Heart } from "lucide-react";
-import { hasLiked, recordLike, removeLike } from "@/lib/explorer/likes";
+import { toggleSongLike } from "@/lib/supabase/dataAdapters";
+import { useToast } from "@/components/ui/Toast";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
-// Toujours rendu "non aimé" côté serveur — l'état réel (par appareil, via
-// localStorage) ne peut être connu qu'après montage, sinon on risque un
-// décalage d'hydratation entre le HTML serveur et le premier rendu client.
+// `initialLiked`/`likes` reflètent l'état réel en base au moment du
+// chargement (voir song_likes, RPC toggle_song_like) — jamais localStorage :
+// aimer une chanson est un geste d'un compte, pas d'un appareil.
 export function LikeButton({
   publishedSongId,
   likes,
+  initialLiked = false,
   size = "md",
 }: {
   publishedSongId: string;
   likes: number;
+  initialLiked?: boolean;
   size?: "sm" | "md";
 }) {
   const { t } = useLanguage();
-  const [liked, setLiked] = useState(false);
+  const showToast = useToast();
+  const [liked, setLiked] = useState(initialLiked);
   const [count, setCount] = useState(likes);
   const [popping, setPopping] = useState(false);
+  const [pending, setPending] = useState(false);
 
+  // Réconciliation avec le like d'un⋅e autre utilisateur⋅rice sur cette même
+  // chanson (voir l'abonnement Realtime sur published_songs dans
+  // ExplorerFeed) — jamais pendant notre propre geste en attente, pour ne pas
+  // écraser l'affichage optimiste avant que le serveur ait répondu.
   useEffect(() => {
-    // Le compteur de base ne reflète jamais le like de cet appareil (rien n'est
-    // persisté hors localStorage) : sans ce +1, un rechargement montrerait un
-    // cœur plein à côté d'un chiffre qui, lui, serait retombé.
-    if (hasLiked(publishedSongId)) {
-      setLiked(true);
-      setCount(likes + 1);
-    }
-  }, [publishedSongId, likes]);
+    if (pending) return;
+    setCount(likes);
+  }, [likes, pending]);
 
   // Réversible : un second appui retire le like et décrémente le compteur —
-  // symétrique dans les deux sens, jamais un geste à sens unique.
-  function handleClick(event: React.MouseEvent) {
+  // symétrique dans les deux sens, jamais un geste à sens unique. Le geste
+  // s'affiche instantanément (avant la réponse du serveur) puis se réconcilie
+  // avec elle — et, pour tout autre spectateur de cette chanson, avec
+  // l'événement Realtime sur published_songs (voir ExplorerFeed).
+  async function handleClick(event: React.MouseEvent) {
     event.preventDefault();
     event.stopPropagation();
-    if (liked) {
-      if (!removeLike(publishedSongId)) return;
-      setLiked(false);
-      setCount((current) => current - 1);
-    } else {
-      if (!recordLike(publishedSongId)) return;
-      setLiked(true);
-      setCount((current) => current + 1);
-    }
+    if (pending) return;
+    const previousLiked = liked;
+    const previousCount = count;
+    const nextLiked = !liked;
+    setLiked(nextLiked);
+    setCount((current) => Math.max(0, current + (nextLiked ? 1 : -1)));
     setPopping(true);
+    setPending(true);
+    try {
+      const result = await toggleSongLike(publishedSongId);
+      setLiked(result.liked);
+      setCount(result.likesCount);
+    } catch (error) {
+      setLiked(previousLiked);
+      setCount(previousCount);
+      showToast(error instanceof Error ? error.message : t("explorer.likeButton.like"), "danger");
+    } finally {
+      setPending(false);
+    }
   }
 
   const iconSize = size === "sm" ? "h-3.5 w-3.5" : "h-4 w-4";
