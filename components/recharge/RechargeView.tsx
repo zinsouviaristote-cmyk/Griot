@@ -124,40 +124,33 @@ export function RechargeView({
   // ---------------------------------------------------------
 
   return (
-    <div className="flex min-h-[calc(100vh-var(--nav-clearance))] w-full items-center justify-center px-4 py-4 sm:px-6 lg:px-8">
-
-      <div className="w-full max-w-6xl">
+    <div className="w-full max-w-full px-4 py-4 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-6xl">
 
         {/* =================================================
             EN-TÊTE
         ================================================= */}
 
-        <div className="mb-4 text-center">
-          <h2 className="mt-2 font-display text-2xl font-bold leading-tight text-ink sm:text-3xl lg:text-4xl">
+        <div className="mb-6 text-center">
+          <h2 className="font-display text-2xl font-bold leading-tight text-ink sm:text-3xl lg:text-4xl">
             Recharge tes crédits
           </h2>
 
           <p className="mt-1 text-xs text-ink-muted sm:text-sm">
             Choisis le pack qui correspond à tes besoins.
           </p>
-
         </div>
 
         {/* =================================================
             CARTES DES PACKS
         ================================================= */}
 
-        <div className="grid w-full gap-3 sm:grid-cols-3">
+        <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-3">
 
           {CREDIT_PACKS.map((p) => {
             const isSelected = selectedPackId === p.id;
-
             const notes = packNotes(p);
-
-            const perSong =
-              p.songs > 0
-                ? p.priceFcfa / p.songs
-                : 0;
+            const perSong = p.songs > 0 ? p.priceFcfa / p.songs : 0;
 
             return (
               <button
@@ -178,75 +171,49 @@ export function RechargeView({
                   duration-200
                   ease-magnetic
                   active:scale-[0.98]
-
-                  ${
-                    isSelected
-                      ? "border-brand bg-brand-soft shadow-card"
-                      : "border-border bg-surface hover:border-brand/40"
+                  ${isSelected
+                    ? "border-brand bg-brand-soft shadow-card"
+                    : "border-border bg-surface hover:border-brand/40"
                   }
                 `}
               >
 
-                {/* -----------------------------------------
-                    ZONE BADGE
-                ----------------------------------------- */}
-
+                {/* BADGE */}
                 <div className="px-4 pt-4 sm:px-5 sm:pt-5">
-
                   <div className="flex items-center gap-2">
-
                     <span
                       className={`
                         h-2
                         w-2
                         rounded-full
-
-                        ${
-                          p.featured
-                            ? "bg-brand"
-                            : "bg-ink-muted/40"
-                        }
+                        ${p.featured ? "bg-brand" : "bg-ink-muted/40"}
                       `}
                     />
-
                     <span className="text-[10px] font-semibold uppercase tracking-wider text-ink-muted">
                       {p.featured
                         ? `★ ${t("recharge.mostChosen")}`
                         : "Pack"}
                     </span>
-
                   </div>
-
                 </div>
 
-                {/* -----------------------------------------
-                    ZONE PRIX — fond légèrement distinct
-                ----------------------------------------- */}
-
+                {/* PRIX */}
                 <div className="mx-4 mt-3 rounded-xl bg-ink/[0.03] px-3 py-3 sm:mx-5">
-
                   <p className="font-display text-2xl font-bold leading-none text-ink sm:text-3xl">
                     {formatFcfa(p.priceFcfa)}
                   </p>
-
                   <p className="mt-0.5 text-[11px] text-ink-muted">
                     {t("recharge.perSong", {
                       price: formatFcfa(perSong),
                     })}
                   </p>
-
                 </div>
 
-                {/* -----------------------------------------
-                    DESCRIPTION / ÉQUIVALENCE
-                ----------------------------------------- */}
-
+                {/* DESCRIPTION */}
                 <div className="px-4 pb-4 pt-3 sm:px-5 sm:pb-5">
-
                   <p className="text-sm font-medium text-ink">
                     {notes} {tn("credits.unit", notes)}
                   </p>
-
                   <p className="mt-0.5 min-h-[18px] text-xs text-ink-muted">
                     {formatPackEquivalence(p, tn)}
                   </p>
@@ -264,21 +231,16 @@ export function RechargeView({
                       text-xs
                       font-semibold
                       transition-all
-
-                      ${
-                        isSelected
-                          ? "bg-brand text-white shadow-sm"
-                          : p.featured
-                            ? "bg-brand text-white"
-                            : "border border-border text-ink group-hover:bg-brand-soft"
+                      ${isSelected
+                        ? "bg-brand text-white shadow-sm"
+                        : p.featured
+                          ? "bg-brand text-white"
+                          : "border border-border text-ink group-hover:bg-brand-soft"
                       }
                     `}
                   >
-                    {isSelected
-                      ? "Sélectionné"
-                      : "Choisir"}
+                    {isSelected ? "Sélectionné" : "Choisir"}
                   </div>
-
                 </div>
 
               </button>
@@ -291,46 +253,35 @@ export function RechargeView({
             ZONE INFÉRIEURE
         ================================================= */}
 
-        <div className="mt-3 grid gap-3 lg:grid-cols-[1fr_auto] lg:items-center">
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
-          {/* -----------------------------------------
-              INFORMATIONS DE PAIEMENT
-          ----------------------------------------- */}
-
-          <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface px-3 py-2.5">
+          {/* PAIEMENT */}
+          <div className="flex w-full items-center gap-3 rounded-2xl border border-border bg-surface px-3 py-2.5 sm:w-auto sm:min-w-[280px]">
 
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-soft text-brand">
-
               <Smartphone
                 className="h-4 w-4"
                 strokeWidth={1.5}
                 aria-hidden="true"
               />
-
             </span>
 
-            <div className="min-w-0">
-
+            <div className="min-w-0 flex-1">
               <p className="text-xs font-semibold text-ink">
                 Paiement sécurisé
               </p>
-
               <p className="truncate text-[10px] text-ink-muted sm:text-xs">
                 MTN Mobile Money, Moov, Wave, Carte Bancaire
               </p>
-
             </div>
 
           </div>
 
-          {/* -----------------------------------------
-              BOUTON PAYER
-          ----------------------------------------- */}
-
+          {/* BOUTON PAYER */}
           <Button
             onClick={handlePay}
             disabled={loading}
-            className="h-10 w-full px-6 text-xs sm:w-auto"
+            className="w-full sm:w-auto sm:min-w-[200px]"
           >
             {loading
               ? "Chargement du paiement..."
@@ -346,7 +297,7 @@ export function RechargeView({
         ================================================= */}
 
         {errorMsg && (
-          <p className="mt-2 text-center text-xs font-medium text-red-600">
+          <p className="mt-3 text-center text-xs font-medium text-red-600">
             {errorMsg}
           </p>
         )}
@@ -363,7 +314,7 @@ export function RechargeView({
           }
           className="
             group
-            mt-3
+            mt-4
             w-full
             rounded-2xl
             border
@@ -382,8 +333,8 @@ export function RechargeView({
               justify-between
               gap-2
               px-4
-              py-2.5
-              text-xs
+              py-3
+              text-sm
               font-semibold
               text-ink
               [&::-webkit-details-marker]:hidden
@@ -421,7 +372,6 @@ export function RechargeView({
         </details>
 
       </div>
-
     </div>
   );
 }

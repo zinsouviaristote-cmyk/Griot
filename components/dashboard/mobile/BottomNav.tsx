@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Compass, Home, History, Plus, UserRound, type LucideIcon } from "lucide-react";
+import { Compass, Home, History, Plus, UserRound, ShieldCheck, type LucideIcon } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { useUserProfile } from "@/lib/hooks/useUserProfile";
 
 interface TabItem {
   labelKey: string;
@@ -11,8 +12,15 @@ interface TabItem {
   icon: LucideIcon;
 }
 
-const LEFT_TABS: TabItem[] = [
-  { labelKey: "dashboard.bottomNav.home", href: "/tableau-de-bord", icon: Home },
+const ADMIN_EMAIL = "zinsouviaristote@gmail.com";
+
+// Les tabs de gauche avec lien dynamique pour l'accueil
+const getLeftTabs = (isAdmin: boolean): TabItem[] => [
+  { 
+    labelKey: "dashboard.bottomNav.home", 
+    href: isAdmin ? "/admin" : "/tableau-de-bord", 
+    icon: isAdmin ? ShieldCheck : Home 
+  },
   { labelKey: "dashboard.bottomNav.explore", href: "/explorer", icon: Compass },
 ];
 
@@ -54,6 +62,13 @@ function TabLink({ item, isActive }: { item: TabItem; isActive: boolean }) {
 export function BottomNav() {
   const { t } = useLanguage();
   const pathname = usePathname();
+  const { profile } = useUserProfile();
+  
+  // Vérifier si l'utilisateur est admin
+  const isAdmin = profile?.email?.trim().toLowerCase() === ADMIN_EMAIL;
+  
+  // Récupérer les tabs de gauche dynamiques
+  const LEFT_TABS = getLeftTabs(isAdmin);
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-30 lg:hidden">

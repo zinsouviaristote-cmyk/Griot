@@ -2,14 +2,42 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Check, ChevronLeft, ChevronRight, CircleHelp, Globe, LogOut, Music, Settings, SunMedium } from "lucide-react";
+import { 
+  Check, 
+  ChevronLeft, 
+  ChevronRight, 
+  CircleHelp, 
+  Globe, 
+  LogOut, 
+  Music, 
+  Settings, 
+  SunMedium, 
+  ShieldCheck,
+  BarChart3,
+  Users,
+  FileMusic,
+  CreditCard,
+  Megaphone
+} from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { LogoutConfirmModal } from "@/components/auth/LogoutConfirmModal";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { useTheme, type Theme } from "@/lib/i18n/ThemeContext";
 import type { Locale } from "@/lib/i18n/locale";
+import { usePathname } from "next/navigation";
 
-type Panel = "root" | "langue" | "theme";
+type Panel = "root" | "langue" | "theme" | "admin";
+
+const ADMIN_EMAIL = "zinsouviaristote@gmail.com";
+
+// Tous les liens admin - COMPLETS
+const ADMIN_ITEMS = [
+  { label: "Tableau de bord", href: "/admin", icon: BarChart3 },
+  { label: "Utilisateurs", href: "/admin/utilisateurs", icon: Users },
+  { label: "Chansons", href: "/admin/chansons", icon: FileMusic },
+  { label: "Paiements", href: "/admin/paiements", icon: CreditCard },
+  { label: "Publications", href: "/admin/publications", icon: Megaphone },
+];
 
 export function AvatarMenu({
   initials,
@@ -24,9 +52,12 @@ export function AvatarMenu({
 }) {
   const { t, locale, setLocale } = useLanguage();
   const { theme, setTheme } = useTheme();
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [panel, setPanel] = useState<Panel>("root");
+
+  const isAdmin = email.trim().toLowerCase() === ADMIN_EMAIL;
 
   function close() {
     setIsOpen(false);
@@ -61,6 +92,24 @@ export function AvatarMenu({
                   <p className="truncate text-xs text-ink-muted">{email}</p>
                 </div>
                 <nav className="py-1.5">
+                  {/* Administration - avec sous-menu */}
+                  {isAdmin && (
+                    <button
+                      type="button"
+                      onClick={() => setPanel("admin")}
+                      className="group flex w-full min-h-[44px] items-center justify-between gap-3 border-b border-brand/20 px-4 text-sm font-semibold text-brand transition-colors hover:bg-brand-soft"
+                    >
+                      <span className="flex items-center gap-3">
+                        <ShieldCheck className="h-4 w-4 text-brand transition-transform duration-150 ease-magnetic group-hover:translate-x-0.5" strokeWidth={1.5} aria-hidden="true" />
+                        Administration
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="rounded-full bg-brand-soft px-2 py-0.5 text-[10px] text-brand">Admin</span>
+                        <ChevronRight className="h-4 w-4 text-brand/60" strokeWidth={1.5} aria-hidden="true" />
+                      </div>
+                    </button>
+                  )}
+
                   <Link
                     href="/parametres"
                     onClick={close}
@@ -69,14 +118,7 @@ export function AvatarMenu({
                     <Settings className="h-4 w-4 text-ink-muted transition-transform duration-150 ease-magnetic group-hover:translate-x-0.5" strokeWidth={1.5} aria-hidden="true" />
                     {t("accountMenu.settings")}
                   </Link>
-                  <Link
-                    href="/historiques"
-                    onClick={close}
-                    className="group flex min-h-[44px] items-center gap-3 px-4 text-sm text-ink transition-colors hover:bg-brand-soft"
-                  >
-                    <Music className="h-4 w-4 text-ink-muted transition-transform duration-150 ease-magnetic group-hover:translate-x-0.5" strokeWidth={1.5} aria-hidden="true" />
-                    {t("accountMenu.mySongs")}
-                  </Link>
+
                   <button
                     type="button"
                     onClick={() => setPanel("langue")}
@@ -122,7 +164,41 @@ export function AvatarMenu({
                   </button>
                 </div>
               </>
+            ) : panel === "admin" ? (
+              // SOUS-MENU ADMIN - TOUS LES LIENS
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setPanel("root")}
+                  className="flex min-h-[44px] w-full items-center gap-2 border-b border-border px-3 text-sm font-medium text-brand transition-colors hover:bg-brand-soft"
+                >
+                  <ChevronLeft className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+                  <ShieldCheck className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+                  Administration
+                </button>
+                <div className="py-1.5">
+                  {ADMIN_ITEMS.map((item) => {
+                    const isActive = pathname === item.href || pathname?.startsWith(`${item.href}/`);
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={close}
+                        className={`flex min-h-[44px] items-center gap-3 px-4 text-sm transition-colors ${
+                          isActive
+                            ? "bg-brand-soft text-brand font-semibold"
+                            : "text-ink hover:bg-brand-soft"
+                        }`}
+                      >
+                        <item.icon className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+                        {item.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
             ) : (
+              // Panneau Langue ou Thème
               <div>
                 <button
                   type="button"
