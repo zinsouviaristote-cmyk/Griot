@@ -31,18 +31,20 @@ export function ProfileMenu({
   name,
   email,
   creditBalance,
+  avatarUrl,
 }: {
   initials: string;
   name: string;
   email: string;
   creditBalance: number;
+  avatarUrl?: string | null;
 }) {
   const { t } = useLanguage();
   const [logoutOpen, setLogoutOpen] = useState(false);
   return (
     <div>
       <div className="flex items-center gap-3">
-        <Avatar initials={initials} size="lg" />
+        <Avatar initials={initials} avatarUrl={avatarUrl} size="lg" />
         <div className="min-w-0">
           <p className="truncate font-display text-lg font-semibold text-ink">{name}</p>
           <p className="truncate text-sm text-ink-muted">{email}</p>

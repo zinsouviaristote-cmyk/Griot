@@ -22,6 +22,7 @@ export function ProfilPageBody() {
           name={user.firstName}
           email={user.email}
           creditBalance={liveCreditBalance}
+          avatarUrl={user.photoUrl}
         />
       </div>
     </div>
