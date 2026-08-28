@@ -12,7 +12,7 @@ import { useCreditsBalance } from "@/lib/hooks/useCreditsBalance";
 import { useDashboardUser } from "@/lib/auth/DashboardUserContext";
 
 export function DashboardShell({
-  creditBalance,
+  creditBalance, 
   userInitials,
   userName,
   userEmail,

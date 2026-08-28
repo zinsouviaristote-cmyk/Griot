@@ -7,7 +7,6 @@ import { TunnelShell } from "@/components/tunnel/TunnelShell";
 import { StudioCompactForm } from "@/components/studio/StudioCompactForm";
 import { occasionCatalog } from "@/lib/songCatalog";
 import { fetchServerUserProfile } from "@/lib/supabase/serverDataAdapters";
-import { createClient } from "@/lib/supabase/server";
 import { type TunnelStep } from "@/lib/tunnel/types";
 import type { Occasion } from "@/lib/types";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
@@ -59,18 +58,6 @@ export default async function CreerPage({
   const creditBalance =
     params.credits !== undefined ? Number(params.credits) || 0 : (userProfile?.creditBalance ?? 0);
 
-  // 🔍 VÉRIFICATION DE L'HISTORIQUE DE GÉNÉRATION
-  let hasGenerations = false;
-  if (userProfile?.id) {
-    const supabase = await createClient();
-    const { count } = await supabase
-      .from("songs")
-      .select("*", { count: "exact", head: true })
-      .eq("user_id", userProfile.id);
-
-    hasGenerations = (count ?? 0) > 0;
-  }
-
   const authParam = params.auth;
 
   const resumeAuth: AuthResumeResult | null =
@@ -84,21 +71,20 @@ export default async function CreerPage({
         }
       : null;
 
-  // 🟢 SI L'UTILISATEUR A DÉJÀ AU MOINS UNE GÉNÉRATION
-  if (hasGenerations) {
-    const initials = userProfile?.initials ?? "UT";
-    const name = userProfile?.firstName ?? "Utilisateur";
-    const email = userProfile?.email ?? "utilisateur@email.com";
+  // 🟢 SI L'UTILISATEUR EST CONNECTÉ -> MODE STUDIO COMPACT
+  if (userProfile) {
+    const initials = userProfile.initials ?? "UT";
+    const name = userProfile.firstName ?? "Utilisateur";
+    const email = userProfile.email ?? "utilisateur@email.com";
 
-    // Objet complet conforme au type DashboardUser
     const dashboardUser = {
-      id: userProfile?.id ?? "",
+      id: userProfile.id,
       firstName: name,
       email: email,
       initials: initials,
       creditBalance: creditBalance,
-      phone: userProfile?.phone ?? null,
-      photoUrl: userProfile?.photoUrl ?? null,
+      phone: userProfile.phone ?? null,
+      photoUrl: userProfile.photoUrl ?? null,
     };
 
     return (
@@ -125,7 +111,7 @@ export default async function CreerPage({
     );
   }
 
-  // 🔴 SINON ON GARDE LE TUNNEL PAS-À-PAS INITIAL
+  // 🔴 SI L'UTILISATEUR N'EST PAS CONNECTÉ -> TUNNEL PAS-À-PAS
   return (
     <TunnelProvider
       initialStep={initialStep}
