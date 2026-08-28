@@ -84,9 +84,10 @@ export function StudioCompactForm({ creditBalance }: StudioCompactFormProps) {
       }
 
       router.push(`/mes-creations?attemptId=${resData.attemptId}`);
-    } catch (err: any) {
+    }catch (err: unknown) {
       console.error('Erreur de génération:', err);
-      setErrorMessage(err.message || 'Une erreur est survenue lors de la génération.');
+      const message = err instanceof Error ? err.message : 'Une erreur est survenue lors de la génération.';
+      setErrorMessage(message);
       setIsGenerating(false);
     }
   };
@@ -108,7 +109,7 @@ export function StudioCompactForm({ creditBalance }: StudioCompactFormProps) {
             }`}
           >
             Créer
-          </button>
+          </button> 
           <button
             onClick={() => {
               setActiveTab('generations');
@@ -189,7 +190,7 @@ export function StudioCompactForm({ creditBalance }: StudioCompactFormProps) {
               <User className="w-3.5 h-3.5 text-ink-muted" />
               <select
                 value={voiceType ?? ''}
-                onChange={(e) => setVoiceType((e.target.value as any) || null)}
+                onChange={(e) => setVoiceType((e.target.value as 'homme' | 'femme') || null)}
                 className="bg-transparent border-none text-xs text-ink font-medium focus:outline-none cursor-pointer [&>option]:bg-surface [&>option]:text-ink"
               >
                 <option value="">Voix : Auto</option>

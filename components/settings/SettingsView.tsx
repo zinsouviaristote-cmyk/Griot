@@ -13,7 +13,7 @@ import { signOutUser } from "@/lib/auth/session";
 import { useToast } from "@/components/ui/Toast";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { updateUserProfile } from "@/lib/supabase/dataAdapters";
-import { useUserProfile } from "@/lib/hooks/useUserProfile";
+import { useUserProfile } from "@/lib/hooks/useUserProfile"; 
 import type { DashboardUser } from "@/lib/types";
 
 interface NotificationRow {
@@ -105,28 +105,28 @@ export function SettingsView({
     }
   }
 
-  async function handleDeleteAccount() {
-  try {
-    // 1. Appel de la route API de suppression définitive
-    const response = await fetch("/api/user/delete", {
-      method: "DELETE",
-    });
+async function handleDeleteAccount() {
+    try {
+      // 1. Appel de la route API de suppression définitive
+      const response = await fetch("/api/user/delete", {
+        method: "DELETE",
+      });
 
-    if (!response.ok) {
-      throw new Error("Échec de la suppression du compte");
+      if (!response.ok) {
+        throw new Error("Échec de la suppression du compte");
+      }
+
+      // 2. Déconnexion locale
+      await signOutUser();
+      showToast(t("settings.accountDeletedToast"), "success");
+      setDeleteOpen(false);
+
+      // 3. Redirection
+      router.push("/login");
+    } catch {
+      showToast(t("settings.accountDeleteFailed"), "danger");
     }
-
-    // 2. Déconnexion locale
-    await signOutUser();
-    showToast(t("settings.accountDeletedToast"), "success");
-    setDeleteOpen(false);
-
-    // 3. Redirection
-    router.push("/login");
-  } catch (error) {
-    showToast(t("settings.accountDeleteFailed"), "danger");
   }
-}
   return (
     <div className="space-y-5">
       <SectionCard icon={UserIcon} title={t("settings.myProfile")}>

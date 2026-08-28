@@ -123,12 +123,12 @@ export function GenerationStep() {
     t("tunnel.generation.statusMixing"),
   ];
 
-  useEffect(() => {
+useEffect(() => {
     const interval = window.setInterval(() => {
       setMessageIndex((i) => (i + 1) % statusMessages.length);
     }, 2000);
     return () => window.clearInterval(interval);
-  }, []);
+  }, [statusMessages.length]);
 
   useEffect(() => {
     if (!data.authEmail) return;
@@ -162,8 +162,7 @@ export function GenerationStep() {
     return () => {
       cancelled = true;
     };
-  }, [data.authEmail, retryToken]);
-
+  }, [data, retryToken, goNext, setNotesBalance, t, update]);
   if (error) {
     return (
       <div className="flex flex-col items-center py-6 text-center">
