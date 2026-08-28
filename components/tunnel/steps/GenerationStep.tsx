@@ -19,18 +19,10 @@ import { Button } from "@/components/ui/Button";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import type { TunnelData, SongAttempt } from "@/lib/tunnel/types";
 
-// Filet de sécurité uniquement : le suivi principal se fait par Realtime
-// (voir subscribeToGenerationAttempt), déjà résynchronisé à la reconnexion —
-// cet intervalle ne rattrape que le cas résiduel d'un événement Postgres
-// manqué sans que le canal ne signale d'erreur.
 const SAFETY_POLL_INTERVAL_MS = 10000;
 
 type RunResult = { status: "ok"; attempt: SongAttempt; newSongId: string | null } | { status: "error"; message: string };
 
-// Attend la résolution (terminée ou échouée) d'un essai déjà créé en base,
-// par abonnement Realtime sur sa ligne — avec sondage de secours en complément
-// pour ne jamais rester bloqué si un événement était manqué. Se nettoie
-// entièrement (canal + intervalle) dès que le résultat final arrive.
 function waitForGenerationResult(attemptId: string): Promise<GenerationAttemptStatus> {
   return new Promise((resolve) => {
     let settled = false;
@@ -46,9 +38,7 @@ function waitForGenerationResult(attemptId: string): Promise<GenerationAttemptSt
     const unsubscribe = subscribeToGenerationAttempt(attemptId, settle);
 
     const safetyTimer = window.setInterval(() => {
-      fetchGenerationAttemptStatus(attemptId).then(settle).catch(() => {
-        // Coupure réseau : le canal Realtime se resynchronisera de son côté.
-      });
+      fetchGenerationAttemptStatus(attemptId).then(settle).catch(() => {});
     }, SAFETY_POLL_INTERVAL_MS);
 
     function cleanup() {
@@ -58,10 +48,6 @@ function waitForGenerationResult(attemptId: string): Promise<GenerationAttemptSt
   });
 }
 
-// Toute erreur possible ici ne descend pas forcément d'`Error` (une erreur
-// Postgrest/Functions peut arriver comme simple objet `{ message }`) — sans
-// cette extraction tolérante, un message réel et utile se retrouvait
-// silencieusement remplacé par le texte générique de secours.
 function getErrorMessage(err: unknown): string {
   if (err instanceof Error && err.message) return err.message;
   if (typeof err === "object" && err !== null && "message" in err && typeof (err as { message: unknown }).message === "string") {
@@ -71,12 +57,6 @@ function getErrorMessage(err: unknown): string {
   return "";
 }
 
-// Effectue tout le travail réel (brouillon, paroles, génération, sondage du
-// résultat) exactement une fois par `runId`, quel que soit le nombre
-// d'invocations de l'effet qui le déclenchent — le mode strict de React
-// exécute chaque effet deux fois en développement (montage → nettoyage →
-// remontage) ; sans ce partage, la première invocation crée le brouillon puis
-// s'interrompt au nettoyage, et la seconde ne redémarre jamais rien.
 async function performGeneration(
   data: TunnelData,
   onSongIdKnown: (id: string) => void,
@@ -91,14 +71,12 @@ async function performGeneration(
         style: data.style ?? "afrobeat",
         contactId: data.contactId,
         storyPrompt: data.story,
+        durationSeconds: data.duration ?? 120,
       });
       songId = draft.id;
       onSongIdKnown(songId);
     }
 
-    // Reprise : un essai était déjà en cours côté serveur avant que ce
-    // composant ne (re)monte (retour d'onglet, reconnexion) — on ne relance
-    // jamais une seconde génération, on se rebranche simplement dessus.
     let attemptId = data.pendingAttemptId;
     let isFree = data.pendingAttemptIsFree;
     if (!attemptId) {
@@ -131,19 +109,6 @@ async function performGeneration(
   }
 }
 
-// La génération elle-même ne dépend jamais de la redirection ci-dessous : ce
-// tunnel entier revit à l'identique au retour (voir TunnelContext), donc même
-// si la personne part se connecter à Google en cours de route, la génération
-// reprend son cours sans double déclenchement.
-//
-// Un essai = un passage ici. Les paroles sont déjà figées (verrouillées à
-// l'écran précédent) : seule la prise audio change d'un essai à l'autre —
-// "Réessayer" ne repasse jamais par l'écriture.
-//
-// La génération réelle exige un compte (RLS Supabase : aucune ligne `songs`
-// ne peut exister sans `auth.uid()`) — contrairement à l'ancienne maquette,
-// la connexion n'est plus facultative ici, seulement retardée jusqu'à ce
-// qu'elle ait lieu.
 export function GenerationStep() {
   const { t } = useLanguage();
   const { data, update, goNext, setNotesBalance } = useTunnel();
@@ -163,14 +128,10 @@ export function GenerationStep() {
       setMessageIndex((i) => (i + 1) % statusMessages.length);
     }, 2000);
     return () => window.clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (!data.authEmail) return;
-    // `retryToken` fait partie de la clé : un nouvel essai après échec doit
-    // relancer exactement cette même séquence, sans attendre un remontage
-    // complet du composant.
     const runId = `${data.authEmail}:${retryToken}`;
     if (!runRef.current || runRef.current.runId !== runId) {
       setError(null);
@@ -201,7 +162,6 @@ export function GenerationStep() {
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.authEmail, retryToken]);
 
   if (error) {
@@ -229,9 +189,6 @@ export function GenerationStep() {
         {statusMessages[messageIndex]}
       </p>
 
-      {/* La friction arrive avant la récompense, jamais après : la connexion
-          est désormais nécessaire pour générer (voir RLS Supabase), donc
-          affichée sans détour dès cet écran plutôt qu'en option tardive. */}
       <div className="mt-10 w-full max-w-sm rounded-card border border-border bg-surface p-5 text-left shadow-card">
         {data.authEmail ? (
           <div className="flex items-center gap-3">

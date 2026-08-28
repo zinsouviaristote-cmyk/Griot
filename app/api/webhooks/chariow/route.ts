@@ -65,7 +65,7 @@ export async function POST(req: Request) {
 
         if (error) {
           console.error("[CHARIOW WEBHOOK] Échec de la RPC process_payment_webhook", error);
-          return NextResponse.json({ error: error.message }, { status: 500 });
+          return NextResponse.json({ error: "Erreur de traitement du paiement" }, { status: 500 });
         }
 
         console.log(`[CHARIOW WEBHOOK] Paiement traité pour ${userId} (Delivery ID: ${deliveryId})`, data);

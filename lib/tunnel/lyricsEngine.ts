@@ -9,7 +9,7 @@ import type { Locale } from "@/lib/i18n/locale";
 // incompréhensibles ne sont jamais rattrapées par le moteur musical, qui
 // chante exactement ce qu'on lui donne — le texte est ce qui porte l'émotion.
 //
-// Méthode en deux temps, toujours dans cet ordre :
+// Méthode en deux temps , toujours dans cet ordre :
 //   1. extractAnchors  — identifie les éléments concrets réellement présents
 //      dans l'histoire (jamais inventés, jamais complétés par du vide).
 //   2. buildRaconteAttempt — transforme chacun en vers imagé. Le texte brut de

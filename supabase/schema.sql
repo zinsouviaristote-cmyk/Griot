@@ -529,6 +529,116 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+-- 10.4 RPC: Finalisation d'une génération réussie (Edge Function generate-song,
+-- appelée avec la clé service_role après upload des fichiers audio)
+CREATE OR REPLACE FUNCTION public.finalize_song_generation(
+  p_attempt_id UUID,
+  p_audio_path TEXT,
+  p_preview_audio_path TEXT,
+  p_duration_seconds INT,
+  p_processing_ms INT,
+  p_elevenlabs_song_id TEXT,
+  p_provider TEXT,
+  p_model_id TEXT,
+  p_style TEXT,
+  p_voice_type TEXT,
+  p_text_length INT,
+  p_requested_duration_ms INT
+)
+RETURNS JSONB
+LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public', 'pg_temp'
+AS $$
+DECLARE
+  v_attempt RECORD;
+  v_song RECORD;
+  v_balance INT;
+  v_new_balance INT := NULL;
+BEGIN
+  SELECT * INTO v_attempt FROM public.generation_attempts WHERE id = p_attempt_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'ESSAI_INTROUVABLE';
+  END IF;
+
+  -- Idempotence : un retry de l'Edge Function ne double pas la déduction de Notes
+  IF v_attempt.status = 'completed' THEN
+    RETURN jsonb_build_object('success', true, 'already_processed', true);
+  END IF;
+
+  SELECT * INTO v_song FROM public.songs WHERE id = v_attempt.song_id;
+
+  IF NOT v_attempt.is_free THEN
+    SELECT credit_balance INTO v_balance FROM public.profiles WHERE id = v_attempt.user_id FOR UPDATE;
+    v_new_balance := v_balance - 1;
+    UPDATE public.profiles SET credit_balance = v_new_balance WHERE id = v_attempt.user_id;
+
+    INSERT INTO public.credit_transactions (user_id, motif, label_key, label_params, delta, balance_after, reference_id)
+    VALUES (v_attempt.user_id, 'essai', 'recharge.history.transactions.essay_paid', jsonb_build_object('recipient', v_song.recipient_first_name), -1, v_new_balance, v_song.id::text);
+  END IF;
+
+  UPDATE public.generation_attempts SET
+    status = 'completed',
+    audio_path = p_audio_path,
+    preview_audio_path = p_preview_audio_path,
+    processing_ms = p_processing_ms,
+    elevenlabs_song_id = p_elevenlabs_song_id,
+    provider = p_provider,
+    model_id = p_model_id,
+    style = p_style,
+    voice_type = p_voice_type,
+    text_length = p_text_length,
+    requested_duration_ms = p_requested_duration_ms
+  WHERE id = p_attempt_id;
+
+  UPDATE public.songs SET
+    status = 'preview_ready',
+    audio_path = p_audio_path,
+    preview_audio_path = p_preview_audio_path,
+    duration_seconds = p_duration_seconds
+  WHERE id = v_attempt.song_id;
+
+  RETURN jsonb_build_object('success', true, 'already_processed', false, 'new_balance', v_new_balance);
+END;
+$$;
+
+-- 10.5 RPC: Échec d'une génération (Edge Function generate-song, filet de
+-- sécurité beforeunload, et job pg_cron reconcile-stuck-generation-attempts)
+CREATE OR REPLACE FUNCTION public.fail_song_generation(
+  p_attempt_id UUID,
+  p_error_code TEXT,
+  p_error_message TEXT,
+  p_provider TEXT DEFAULT NULL,
+  p_model_id TEXT DEFAULT NULL
+)
+RETURNS JSONB
+LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public', 'pg_temp'
+AS $$
+DECLARE
+  v_attempt RECORD;
+BEGIN
+  SELECT * INTO v_attempt FROM public.generation_attempts WHERE id = p_attempt_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'ESSAI_INTROUVABLE';
+  END IF;
+
+  -- Idempotence : n'écrase pas un essai déjà terminé (succès ou échec)
+  IF v_attempt.status IN ('completed', 'failed') THEN
+    RETURN jsonb_build_object('success', true, 'already_processed', true);
+  END IF;
+
+  UPDATE public.generation_attempts SET
+    status = 'failed',
+    error_code = p_error_code,
+    error_message = p_error_message,
+    provider = COALESCE(p_provider, provider),
+    model_id = COALESCE(p_model_id, model_id)
+  WHERE id = p_attempt_id;
+
+  UPDATE public.songs SET status = 'failed' WHERE id = v_attempt.song_id;
+
+  RETURN jsonb_build_object('success', true, 'already_processed', false);
+END;
+$$;
+
 -- ------------------------------------------
 -- 11. ESPACE ADMINISTRATEUR (GRIOT ADMIN)
 -- ------------------------------------------
@@ -648,6 +758,41 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION public.get_admin_overview_data() TO authenticated;
+
+-- ------------------------------------------
+-- 12. TABLE MUSIC_STYLE_PROMPTS (Configuration des styles pour l'Edge Function)
+-- ------------------------------------------
+-- Traduit chaque style catalogue (`songs.style`) en tags positifs/négatifs pour
+-- le fournisseur de génération musicale. Lue uniquement par l'Edge Function
+-- generate-song via le client service_role : RLS activé, aucune politique, donc
+-- inaccessible aux clients authentifiés/anon (deny-by-default).
+CREATE TABLE IF NOT EXISTS public.music_style_prompts (
+  style TEXT PRIMARY KEY,
+  positive_styles TEXT[] NOT NULL DEFAULT '{}',
+  negative_styles TEXT[] NOT NULL DEFAULT '{}',
+  prompt_template TEXT,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.music_style_prompts ENABLE ROW LEVEL SECURITY;
+
+-- ------------------------------------------
+-- 13. STORAGE : BUCKETS AUDIO (song-masters / song-previews)
+-- ------------------------------------------
+-- Créés et peuplés par l'Edge Function generate-song (client service_role, qui
+-- contourne RLS). Documentés ici pour référence — la création des buckets et
+-- leurs politiques se fait via le Dashboard/CLI Supabase, pas par ce script.
+--
+-- song-masters  (privé) : fichier maître complet de chaque chanson, à l'adresse
+--   `{user_id}/{song_id}/{attempt_id}.mp3`. Aucune politique storage.objects :
+--   accessible uniquement via le client service_role (ex. génération d'URL
+--   signée au moment de la livraison post-paiement).
+--
+-- song-previews (public) : extrait tronqué à PREVIEW_CLIP_MS, à l'adresse
+--   `{song_id}/{attempt_id}-preview.mp3`, servant la promesse « Écoutez votre
+--   chanson avant de payer ». Politique storage.objects :
+--     CREATE POLICY "Lecture publique des extraits" ON storage.objects
+--       FOR SELECT USING (bucket_id = 'song-previews');
 
 -- ==========================================
 -- REALTIME

@@ -92,7 +92,8 @@ export function HistoryView({
 
   return (
     <div>
-      <label className="group relative flex items-center">
+      {/* Barre de recherche */}
+      <label className="group relative z-10 flex items-center">
         <Search
           className="pointer-events-none absolute left-3.5 h-4 w-4 text-ink-muted transition-colors duration-200 group-focus-within:text-brand"
           strokeWidth={1.5}
@@ -108,7 +109,8 @@ export function HistoryView({
         />
       </label>
 
-      <div className="mt-3 flex flex-wrap items-center gap-2">
+      {/* Barre de filtres et tris : relative z-20 pour passer AU-DESSUS des cartes de chansons */}
+      <div className="relative z-20 mt-3 flex flex-wrap items-center gap-2">
         <HistoryFiltersPanel active={statusFilters} onChange={setStatusFilters} />
 
         <select
@@ -143,8 +145,9 @@ export function HistoryView({
         ))}
       </div>
 
+      {/* Liste de cartes (z-0 par défaut) */}
       {hasResults ? (
-        <div className="mt-5 flex flex-col gap-3">
+        <div className="relative z-0 mt-5 flex flex-col gap-3">
           {filtered.map((song, index) => (
             <SongListItem
               key={song.id}
@@ -158,7 +161,7 @@ export function HistoryView({
           ))}
         </div>
       ) : (
-        <div className="mt-6 flex flex-col items-center gap-3 rounded-card border border-dashed border-border bg-surface px-6 py-12 text-center">
+        <div className="relative z-0 mt-6 flex flex-col items-center gap-3 rounded-card border border-dashed border-border bg-surface px-6 py-12 text-center">
           <p className="text-sm text-ink-muted">{t("history.noResults.message")}</p>
           {isFiltering && (
             <button

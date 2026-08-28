@@ -82,8 +82,8 @@ export function RechargeView({
         },
         body: JSON.stringify({
           productId,
-          userId: user?.id || "guest_user",
-          email: user?.email || "client@griot.com",
+          // L'identité du payeur est dérivée côté serveur de la session
+          // authentifiée — inutile (et pas fiable) de l'envoyer ici.
           firstName: user?.name || "Utilisateur",
           phone: user?.phone || "",
           packId: pack.id,

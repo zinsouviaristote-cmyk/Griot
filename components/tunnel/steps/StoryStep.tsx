@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Maximize2, Minimize2, Redo2, Undo2 } from "lucide-react";
+import { Clock, Maximize2, Minimize2, Redo2, Undo2 } from "lucide-react";
 import { useTunnel } from "@/lib/tunnel/TunnelContext";
 import {
   LYRICS_MAX_LENGTH,
@@ -18,11 +18,15 @@ import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 type UiMode = "simple" | "avance";
 
-// "raconte" est le seul mode de l'onglet Simple ; les deux autres partagent
-// l'onglet Avancé (voir setUiMode) — la bascule n'a donc que ces deux états,
-// jamais trois, quel que soit le contenu déjà tapé.
 function uiModeFor(storyMode: StoryMode): UiMode {
   return storyMode === "raconte" ? "simple" : "avance";
+}
+
+// Helper pour formater les secondes en MM:SS (ex: 90s -> 1:30)
+function formatDuration(seconds: number): string {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
 }
 
 export function StoryStep() {
@@ -33,9 +37,9 @@ export function StoryStep() {
   const [fullscreen, setFullscreen] = useState(false);
   const playerBarVisible = useMobilePlayerBarVisible();
 
-  // Historique d'annulation propre au champ Avancé — jamais partagé avec
-  // Simple, jamais persisté : un simple filet local pour "annuler / rétablir"
-  // une frappe, pas une vraie gestion de versions.
+  // Durée en secondes (30s min, 120s / 2min max). Valeur par défaut: 120s ou data.duration
+  const duration = data.duration ?? 120;
+
   const [past, setPast] = useState<string[]>([]);
   const [future, setFuture] = useState<string[]>([]);
   const lastEditRef = useRef(0);
@@ -44,10 +48,6 @@ export function StoryStep() {
   const length = data.story.trim().length;
   const remaining = STORY_MIN_LENGTH - length;
   const lengthOk = length >= STORY_MIN_LENGTH;
-  // Le minimum de caractères est la seule exigence pour continuer — un filtre
-  // sur la présence de détails "concrets" bloquait trop de personnes qui
-  // avaient pourtant de quoi composer une chanson (voir lyricsEngine.ts,
-  // qui dégrade proprement avec peu d'ancrages plutôt que d'échouer).
   const canContinue = lengthOk;
 
   function commitStory(nextValue: string) {
@@ -58,6 +58,10 @@ export function StoryStep() {
       const detected = detectStoryMode(story);
       update({ story, storyMode: detected === "paroles_structurees" ? "paroles_structurees" : "paroles_libres" });
     }
+  }
+
+  function handleDurationChange(newDuration: number) {
+    update({ duration: newDuration });
   }
 
   function setUiMode(next: UiMode) {
@@ -72,12 +76,6 @@ export function StoryStep() {
 
   function handleAdvancedChange(value: string) {
     const now = Date.now();
-    // Un nouveau point d'annulation seulement après une pause dans la frappe —
-    // sinon chaque caractère deviendrait son propre cran d'"annuler", inutile
-    // à quiconque. Décidé ICI, avant de toucher la ref : le correcteur de
-    // `setPast` ne s'exécute qu'au rendu suivant, une fois `lastEditRef.current`
-    // déjà réécrit plus bas — le lire depuis l'intérieur du correcteur aurait
-    // toujours comparé `now` à lui-même.
     const isNewCheckpoint = now - lastEditRef.current > 500;
     lastEditRef.current = now;
     if (isNewCheckpoint) {
@@ -129,14 +127,62 @@ export function StoryStep() {
     </div>
   );
 
+  const durationSelector = (
+    <div className="mt-6 rounded-card border border-border bg-surface p-4 shadow-card">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Clock className="h-4 w-4 text-brand" strokeWidth={1.5} aria-hidden="true" />
+          <span className="text-sm font-semibold text-ink">Durée de la chanson</span>
+        </div>
+        <span className="font-mono text-base font-bold text-brand">
+          {formatDuration(duration)}
+        </span>
+      </div>
+
+      {/* Barre de défilement / Curseur */}
+      <div className="mt-3">
+        <input
+          type="range"
+          min={30}
+          max={120}
+          step={15}
+          value={duration}
+          onChange={(e) => handleDurationChange(Number(e.target.value))}
+          className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-page accent-brand focus:outline-none"
+        />
+        <div className="mt-1.5 flex justify-between text-xs text-ink-muted">
+          <span>0:30</span>
+          <span>1:00</span>
+          <span>1:30</span>
+          <span>2:00</span>
+        </div>
+      </div>
+
+      {/* Raccourcis rapides */}
+      <div className="mt-3 flex gap-2">
+        {[60, 90, 120].map((presetSec) => (
+          <button
+            key={presetSec}
+            type="button"
+            onClick={() => handleDurationChange(presetSec)}
+            className={`flex-1 rounded-control border py-1 text-xs font-medium transition-colors ${
+              duration === presetSec
+                ? "border-brand bg-brand/10 text-brand"
+                : "border-border bg-page text-ink-muted hover:text-ink"
+            }`}
+          >
+            {formatDuration(presetSec)}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
   const continueButton = (
     <Button onClick={goNext} disabled={!canContinue} className="w-full sm:w-auto">
       {t("tunnel.story.continue")}
     </Button>
   );
 
-  // Barre d'outils propre au champ Avancé — annuler, rétablir, plein écran.
-  // Jamais sur Simple : un récit court n'a pas besoin de cet appareillage.
   const toolbar = (
     <div className="flex items-center justify-between rounded-t-card border border-b-0 border-border bg-page px-2 py-1.5">
       <div className="flex items-center gap-1">
@@ -188,12 +234,6 @@ export function StoryStep() {
     />
   );
 
-  // Le plein écran est rendu via un portail, directement sous <body> : la
-  // pile d'écrans du tunnel (TunnelShell) anime son conteneur avec un
-  // `transform` (animate-reveal-up), et un ancêtre transformé redéfinit le
-  // référentiel de tout `position: fixed` descendant — sans portail, ce
-  // "plein écran" resterait coincé dans la boîte de cet ancêtre au lieu de
-  // couvrir le vrai viewport.
   if (fullscreen && typeof document !== "undefined") {
     return createPortal(
       <div className="fixed inset-0 z-50 flex flex-col bg-page p-4 sm:p-6">
@@ -219,9 +259,6 @@ export function StoryStep() {
       </SectionTitle>
       <p className="mt-2 text-body-md text-ink-muted">{subtitle}</p>
 
-      {/* Reprend le principe des onglets Simple / Avancé : un seul bouton
-          discret sépare les deux, jamais une décision qui ferait perdre ce qui
-          est déjà écrit (voir setUiMode — le texte survit à la bascule). */}
       <div
         role="tablist"
         aria-label={t("tunnel.story.modeTabsLabel")}
@@ -281,11 +318,9 @@ export function StoryStep() {
         </div>
       )}
 
-      {/* Sticky plutôt que dans le flux : sur 360px avec le clavier virtuel
-          ouvert (et un champ Avancé bien plus haut que l'ancien), le bouton de
-          validation doit rester atteignable sans le faire disparaître derrière
-          le clavier — même traitement que LyricsStep, décalé au-dessus de la
-          barre compacte du lecteur quand elle est affichée. */}
+      {/* Bloc d'ajustement de la durée de la chanson */}
+      {durationSelector}
+
       <div
         className={`sticky z-10 -mx-4 mt-6 border-t border-border bg-page/95 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:static sm:mx-0 sm:mt-8 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:pb-0 ${
           playerBarVisible ? "bottom-16" : "bottom-0"

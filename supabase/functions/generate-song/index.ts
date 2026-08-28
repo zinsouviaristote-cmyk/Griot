@@ -20,21 +20,38 @@ import type { MusicGenerationRequest, MusicGenerationResult, MusicProvider } fro
 import { GenerationError, toGenerationError } from "./errors.ts";
 import { analyzeMp3, clipMp3ToDuration } from "./mp3Clip.ts";
 
-const CORS_HEADERS: Record<string, string> = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+// Cette fonction n'est jamais appelee que depuis l'app Griot (avec un JWT
+// utilisateur) : pas de raison qu'un autre site puisse la requeter depuis un
+// navigateur. ALLOWED_ORIGINS liste les origines de l'app (prod + previews +
+// dev local) ; tout le reste n'obtient pas d'en-tete CORS et le navigateur
+// bloque la reponse.
+const ALLOWED_ORIGINS = (Deno.env.get("ALLOWED_ORIGINS") ?? "http://localhost:3000")
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+function corsHeaders(req: Request): Record<string, string> {
+  const origin = req.headers.get("Origin") ?? "";
+  const headers: Record<string, string> = {
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    Vary: "Origin",
+  };
+  if (ALLOWED_ORIGINS.includes(origin)) {
+    headers["Access-Control-Allow-Origin"] = origin;
+  }
+  return headers;
+}
 
 const PREVIEW_CLIP_MS = Number(Deno.env.get("PREVIEW_CLIP_MS") ?? 25_000);
 const MIN_REQUESTED_DURATION_MS = 30_000;
 const MAX_REQUESTED_DURATION_MS = 120_000;
 const MS_PER_LYRICS_LINE = 3_500;
 
-function jsonResponse(status: number, body: unknown): Response {
+function jsonResponse(status: number, body: unknown, headers: Record<string, string>): Response {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+    headers: { ...headers, "Content-Type": "application/json" },
   });
 }
 
@@ -143,9 +160,10 @@ interface GenerationContext {
 async function processGeneration(adminClient: SupabaseClient, ctx: GenerationContext): Promise<void> {
   const provider = createMusicProvider();
 
+  // 1. Selection incluant duration_seconds
   const { data: song, error: songError } = await adminClient
     .from("songs")
-    .select("id, user_id, style, lyrics, story_prompt")
+    .select("id, user_id, style, lyrics, story_prompt, duration_seconds")
     .eq("id", ctx.songId)
     .single();
 
@@ -169,11 +187,22 @@ async function processGeneration(adminClient: SupabaseClient, ctx: GenerationCon
   const positiveStyles = styleConfig?.positive_styles ?? [song.style];
   const negativeStyles = styleConfig?.negative_styles ?? [];
 
-  const lineCount = lyricsSource.split(/\r?\n/).filter((l: string) => l.trim().length > 0).length;
-  const requestedDurationMs = Math.min(
-    MAX_REQUESTED_DURATION_MS,
-    Math.max(MIN_REQUESTED_DURATION_MS, lineCount * MS_PER_LYRICS_LINE),
-  );
+  // 2. Calcul de la duree demandee :
+  // Priorite a song.duration_seconds si disponible et valide, sinon calcul par nombre de lignes.
+  let requestedDurationMs: number;
+
+  if (typeof song.duration_seconds === "number" && song.duration_seconds > 0) {
+    requestedDurationMs = Math.min(
+      MAX_REQUESTED_DURATION_MS,
+      Math.max(MIN_REQUESTED_DURATION_MS, song.duration_seconds * 1000),
+    );
+  } else {
+    const lineCount = lyricsSource.split(/\r?\n/).filter((l: string) => l.trim().length > 0).length;
+    requestedDurationMs = Math.min(
+      MAX_REQUESTED_DURATION_MS,
+      Math.max(MIN_REQUESTED_DURATION_MS, lineCount * MS_PER_LYRICS_LINE),
+    );
+  }
 
   let result: MusicGenerationResult;
   try {
@@ -239,28 +268,30 @@ async function processGeneration(adminClient: SupabaseClient, ctx: GenerationCon
 }
 
 Deno.serve(async (req: Request) => {
+  const cors = corsHeaders(req);
+
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: CORS_HEADERS });
+    return new Response(null, { headers: cors });
   }
   if (req.method !== "POST") {
-    return jsonResponse(405, { error: "method_not_allowed" });
+    return jsonResponse(405, { error: "method_not_allowed" }, cors);
   }
 
   const authHeader = req.headers.get("Authorization");
   if (!authHeader) {
-    return jsonResponse(401, { error: "missing_authorization" });
+    return jsonResponse(401, { error: "missing_authorization" }, cors);
   }
 
   let payload: { songId?: unknown; voiceType?: unknown };
   try {
     payload = await req.json();
   } catch {
-    return jsonResponse(400, { error: "invalid_json" });
+    return jsonResponse(400, { error: "invalid_json" }, cors);
   }
 
   const songId = payload.songId;
   if (typeof songId !== "string" || songId.length === 0) {
-    return jsonResponse(400, { error: "missing_song_id" });
+    return jsonResponse(400, { error: "missing_song_id" }, cors);
   }
   const voiceType = payload.voiceType === "homme" || payload.voiceType === "femme" ? payload.voiceType : null;
 
@@ -280,13 +311,13 @@ Deno.serve(async (req: Request) => {
 
   if (rpcError) {
     const mapped = mapRequestRpcError(rpcError.message);
-    return jsonResponse(mapped.status, { error: mapped.code, message: mapped.userMessage });
+    return jsonResponse(mapped.status, { error: mapped.code, message: mapped.userMessage }, cors);
   }
 
   const attemptId = rpcData.attempt_id as string;
   const isFree = rpcData.is_free as boolean;
 
-  const response = jsonResponse(202, { attemptId, status: "generating", isFree });
+  const response = jsonResponse(202, { attemptId, status: "generating", isFree }, cors);
 
   inFlightAttempts.add(attemptId);
   EdgeRuntime.waitUntil(

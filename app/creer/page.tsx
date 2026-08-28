@@ -4,12 +4,14 @@ import {
   type AuthResumeResult,
 } from "@/lib/tunnel/TunnelContext";
 import { TunnelShell } from "@/components/tunnel/TunnelShell";
+import { StudioCompactForm } from "@/components/studio/StudioCompactForm";
 import { occasionCatalog } from "@/lib/songCatalog";
 import { fetchServerUserProfile } from "@/lib/supabase/serverDataAdapters";
-import {
-  type TunnelStep,
-} from "@/lib/tunnel/types";
+import { createClient } from "@/lib/supabase/server";
+import { type TunnelStep } from "@/lib/tunnel/types";
 import type { Occasion } from "@/lib/types";
+import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { DashboardUserProvider } from "@/lib/auth/DashboardUserContext";
 
 export const metadata: Metadata = {
   title: "Créer une chanson : Griot",
@@ -30,22 +32,17 @@ export default async function CreerPage({
     name?: string;
   }>;
 }) {
-  // 🟢 AJOUT OBLIGATOIRE DE AWAIT
   const params = await searchParams;
 
   const prenom = params.prenom?.trim() ?? "";
   const occasionParam = params.occasion;
 
-  const validOccasion = occasionCatalog.some(
-    (o) => o.id === occasionParam
-  )
+  const validOccasion = occasionCatalog.some((o) => o.id === occasionParam)
     ? (occasionParam as Occasion)
     : null;
 
   const customOccasion =
-    validOccasion === "autre"
-      ? params.customOccasion?.trim() ?? ""
-      : "";
+    validOccasion === "autre" ? params.customOccasion?.trim() ?? "" : "";
 
   let initialStep: TunnelStep = "occasion";
 
@@ -58,9 +55,21 @@ export default async function CreerPage({
     initialStep = "recipient";
   }
 
-  const user = params.credits === undefined ? await fetchServerUserProfile() : null;
+  const userProfile = params.credits === undefined ? await fetchServerUserProfile() : null;
   const creditBalance =
-    params.credits !== undefined ? Number(params.credits) || 0 : (user?.creditBalance ?? 0);
+    params.credits !== undefined ? Number(params.credits) || 0 : (userProfile?.creditBalance ?? 0);
+
+  // 🔍 VÉRIFICATION DE L'HISTORIQUE DE GÉNÉRATION
+  let hasGenerations = false;
+  if (userProfile?.id) {
+    const supabase = await createClient();
+    const { count } = await supabase
+      .from("songs")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userProfile.id);
+
+    hasGenerations = (count ?? 0) > 0;
+  }
 
   const authParam = params.auth;
 
@@ -71,13 +80,52 @@ export default async function CreerPage({
       ? {
           result: authParam,
           email: params.email,
-          provider:
-            params.provider === "email"
-              ? "email"
-              : "google",
+          provider: params.provider === "email" ? "email" : "google",
         }
       : null;
 
+  // 🟢 SI L'UTILISATEUR A DÉJÀ AU MOINS UNE GÉNÉRATION
+  if (hasGenerations) {
+    const initials = userProfile?.initials ?? "UT";
+    const name = userProfile?.firstName ?? "Utilisateur";
+    const email = userProfile?.email ?? "utilisateur@email.com";
+
+    // Objet complet conforme au type DashboardUser
+    const dashboardUser = {
+      id: userProfile?.id ?? "",
+      firstName: name,
+      email: email,
+      initials: initials,
+      creditBalance: creditBalance,
+      phone: userProfile?.phone ?? null,
+      photoUrl: userProfile?.photoUrl ?? null,
+    };
+
+    return (
+      <DashboardUserProvider user={dashboardUser}>
+        <DashboardShell
+          creditBalance={creditBalance}
+          userInitials={initials}
+          userName={name}
+          userEmail={email}
+        >
+          <div className="space-y-6">
+            <div>
+              <h1 className="font-display text-headline-md font-bold text-ink">
+                Créer une chanson
+              </h1>
+              <p className="mt-1 text-sm text-ink-muted">
+                Décrivez votre chanson, choisissez un style et générez-la en quelques instants.
+              </p>
+            </div>
+            <StudioCompactForm creditBalance={creditBalance} />
+          </div>
+        </DashboardShell>
+      </DashboardUserProvider>
+    );
+  }
+
+  // 🔴 SINON ON GARDE LE TUNNEL PAS-À-PAS INITIAL
   return (
     <TunnelProvider
       initialStep={initialStep}

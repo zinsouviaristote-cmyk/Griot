@@ -383,6 +383,7 @@ export async function createSongDraft(song: {
   style: string;
   contactId?: string | null;
   storyPrompt?: string;
+  durationSeconds?: number; // <--- Ajouté
 }): Promise<Song> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -396,13 +397,12 @@ export async function createSongDraft(song: {
     .insert({
       user_id: user.id,
       recipient_first_name: song.recipientFirstName,
-      // Colonne encore NOT NULL en base mais retirée de Song — le produit ne
-      // la collecte plus, voir lib/types.ts.
       relationship: "",
       occasion: song.occasion,
       style: song.style,
       contact_id: song.contactId || null,
       story_prompt: song.storyPrompt || null,
+      duration_seconds: song.durationSeconds ?? 120, // <--- Ajouté (ex: 120 secondes par défaut)
       status: "draft",
     })
     .select()
@@ -411,7 +411,6 @@ export async function createSongDraft(song: {
   if (error) throw error;
   return mapDbSong(data as unknown as DBSong);
 }
-
 // ==========================================
 // ADAPTATEURS EXPLORER & PUBLICATIONS
 // ==========================================

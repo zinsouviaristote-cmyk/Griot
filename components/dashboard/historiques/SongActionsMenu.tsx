@@ -58,7 +58,7 @@ export function SongActionsMenu({
             }}
             className="fixed inset-0 z-40 cursor-default"
           />
-          <div className="absolute right-0 top-full z-50 mt-1 w-56 origin-top-right animate-pop-in overflow-hidden rounded-card border border-border bg-surface py-1.5 shadow-card-hover">
+          <div className="absolute right-0 top-full z-50 mt-1 max-h-80 w-56 origin-top-right animate-pop-in overflow-y-auto rounded-card border border-border bg-surface py-1.5 shadow-card-hover">
             <button
               type="button"
               onClick={(event) => {

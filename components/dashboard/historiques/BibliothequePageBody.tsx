@@ -21,7 +21,7 @@ export function BibliothequePageBody({
 }) {
   const { t } = useLanguage();
   return (
-    <div>
+    <div className="relative z-10">
       <div>
         <SectionTitle as="h1" size="lg">
           {t("history.pageTitle")}
@@ -29,7 +29,7 @@ export function BibliothequePageBody({
         <p className="mt-1.5 max-w-xl text-sm text-ink-muted">{t("history.pageSubtitle")}</p>
       </div>
 
-      <Reveal delayMs={80} className="mt-5">
+      <Reveal delayMs={80} className="mt-5 relative z-20 overflow-visible">
         <HistoryView
           songs={songs}
           publishedSongs={publishedSongs}

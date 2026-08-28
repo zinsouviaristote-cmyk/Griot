@@ -212,6 +212,7 @@ export interface TunnelData {
   // Rempli uniquement lorsque l'utilisateur choisit "Autre occasion".
   // Pour les occasions prédéfinies, cette valeur reste vide.
   customOccasion: string;
+  duration?: number;
 
   recipientFirstName: string;
 

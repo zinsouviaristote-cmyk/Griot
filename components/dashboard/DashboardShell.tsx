@@ -24,21 +24,15 @@ export function DashboardShell({
   userEmail: string;
   children: ReactNode;
 }) {
-  // Photo de profil : source UNIQUE, jamais reçue en prop — c'est exactement
-  // ce qui manquait avant (chaque page devait penser à la transmettre, et
-  // aucune ne se mettait à jour après un changement dans Paramètres).
   const { profile } = useUserProfile();
   const userPhotoUrl = profile?.photoUrl ?? null;
 
-  // Solde de Notes en direct : un seul abonnement Realtime pour tout le
-  // tableau de bord (voir useCreditsBalance), qui alimente à la fois la
-  // pastille du haut et la carte de la sidebar — jamais deux valeurs qui
-  // pourraient diverger le temps d'un rechargement.
   const { id: userId } = useDashboardUser();
   const liveCreditBalance = useCreditsBalance(userId, creditBalance);
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    /* 🛠️ CORRECTION : Remplacement de overflow-hidden par min-h-screen relative */
+    <div className="relative min-h-screen">
       <DashboardMusicBackdrop />
       <Sidebar
         creditBalance={liveCreditBalance}

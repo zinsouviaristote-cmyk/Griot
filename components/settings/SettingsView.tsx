@@ -1,12 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Bell, LogOut, Trash2, User as UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Toggle } from "@/components/ui/Toggle";
 import { Modal } from "@/components/ui/Modal";
-import { Logo } from "@/components/ui/Logo";
 import { GoogleMark } from "@/components/auth/GoogleMark";
 import { LogoutConfirmModal } from "@/components/auth/LogoutConfirmModal";
 import { ProfilePhotoField } from "@/components/settings/ProfilePhotoField";
@@ -47,9 +46,6 @@ function SectionCard({
   );
 }
 
-// Réduite au strict nécessaire : trois blocs, une colonne, pas d'onglets — tout
-// ce qui n'a pas d'effet visible immédiat (sécurité/appareils, export de
-// données) a été retiré. Tient en deux écrans sur mobile.
 export function SettingsView({
   user,
   songCount,
@@ -59,11 +55,9 @@ export function SettingsView({
   songCount: number;
   publishedCount: number;
 }) {
+  const router = useRouter();
   const { t, tn } = useLanguage();
   const showToast = useToast();
-  // refresh() propage tout changement de profil (photo, nom...) à la
-  // Sidebar/TopBar partout dans l'app, sans recharger la page — voir
-  // useUserProfile.ts pour le magasin partagé derrière ce hook.
   const { refresh } = useUserProfile();
 
   const [firstName, setFirstName] = useState(user.firstName);
@@ -81,7 +75,6 @@ export function SettingsView({
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [confirmText, setConfirmText] = useState("");
-  const [deleted, setDeleted] = useState(false);
 
   async function handleSaveProfile(event: React.FormEvent) {
     event.preventDefault();
@@ -92,10 +85,6 @@ export function SettingsView({
         photoFile,
         photoUrl: photoChanged ? photoUrl : undefined,
       });
-      // Nouvelle photo/nom potentiellement modifiés : on rafraîchit le cache
-      // partagé pour que Sidebar/TopBar/AvatarMenu se mettent à jour
-      // immédiatement, sur cette page comme sur toutes les autres déjà
-      // montées (voir DashboardShell, qui lit ce même hook).
       await refresh();
       setPhotoFile(null);
       setPhotoChanged(false);
@@ -117,29 +106,27 @@ export function SettingsView({
   }
 
   async function handleDeleteAccount() {
-    try {
-      await signOutUser();
-      showToast(t("settings.accountDeletedToast"), "success");
-      setDeleted(true);
-      setDeleteOpen(false);
-    } catch {
-      showToast(t("settings.accountDeleteFailed"), "danger");
+  try {
+    // 1. Appel de la route API de suppression définitive
+    const response = await fetch("/api/user/delete", {
+      method: "DELETE",
+    });
+
+    if (!response.ok) {
+      throw new Error("Échec de la suppression du compte");
     }
-  }
 
-  if (deleted) {
-    return (
-      <div className="mx-auto flex max-w-md flex-col items-center py-16 text-center">
-        <Logo withWordmark={false} />
-        <p className="mt-6 font-display text-headline-md text-ink">{t("settings.accountDeletedTitle")}</p>
-        <p className="mt-2 text-body-md text-ink-muted">{t("settings.accountDeletedBody")}</p>
-        <Link href="/" className="mt-8 text-sm font-medium text-brand hover:underline">
-          {t("settings.backToHome")}
-        </Link>
-      </div>
-    );
-  }
+    // 2. Déconnexion locale
+    await signOutUser();
+    showToast(t("settings.accountDeletedToast"), "success");
+    setDeleteOpen(false);
 
+    // 3. Redirection
+    router.push("/login");
+  } catch (error) {
+    showToast(t("settings.accountDeleteFailed"), "danger");
+  }
+}
   return (
     <div className="space-y-5">
       <SectionCard icon={UserIcon} title={t("settings.myProfile")}>

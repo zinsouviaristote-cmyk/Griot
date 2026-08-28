@@ -13,12 +13,6 @@ const STATUS_OPTIONS: { status: SongStatus; labelKey: string }[] = [
   { status: "failed", labelKey: "history.status.failed" },
 ];
 
-/**
- * Panneau de filtres par état — multi-sélection, contrairement aux puces à
- * choix unique d'avant. Le bouton affiche le nombre de filtres actifs plutôt
- * que leurs noms : à plus de deux ou trois cochés, les lister rendrait le
- * bouton plus large que ce qu'il déclenche.
- */
 export function HistoryFiltersPanel({
   active,
   onChange,
@@ -37,7 +31,7 @@ export function HistoryFiltersPanel({
   }
 
   return (
-    <div className="relative">
+    <div className="relative inline-block z-30">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -54,15 +48,18 @@ export function HistoryFiltersPanel({
 
       {open && (
         <>
-          <button
-            type="button"
-            aria-label={t("history.filters.close")}
+          {/* Fond transparent pour fermer au clic dehors */}
+          <div
             onClick={() => setOpen(false)}
             className="fixed inset-0 z-40 cursor-default"
           />
-          <div className="absolute left-0 top-full z-50 mt-2 w-64 animate-pop-in rounded-card border border-border bg-surface p-3 shadow-card-hover sm:left-auto sm:right-0">
-            <div className="flex items-center justify-between px-1">
-              <p className="text-label-sm font-medium uppercase tracking-wide text-ink-muted">{t("history.filters.stateLabel")}</p>
+
+          {/* Menu déroulant avec défilement interne (max-h-60 + overflow-y-auto) */}
+          <div className="absolute left-0 top-full z-50 mt-2 w-64 max-h-60 overflow-y-auto animate-pop-in rounded-card border border-border bg-surface p-3 shadow-xl">
+            <div className="flex items-center justify-between px-1 sticky top-0 bg-surface pb-2 z-10 border-b border-border/50">
+              <p className="text-label-sm font-medium uppercase tracking-wide text-ink-muted">
+                {t("history.filters.stateLabel")}
+              </p>
               {active.size > 0 && (
                 <button
                   type="button"
@@ -74,6 +71,7 @@ export function HistoryFiltersPanel({
                 </button>
               )}
             </div>
+
             <div className="mt-2 flex flex-col">
               {STATUS_OPTIONS.map(({ status, labelKey }) => (
                 <label

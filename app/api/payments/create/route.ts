@@ -1,11 +1,26 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { productId, userId, email, firstName, lastName, phone, packId, notesAmount, songId, redirectPath } = body;
+    // L'identité du payeur vient TOUJOURS de la session authentifiée, jamais
+    // du corps de la requête — sinon n'importe qui peut créditer le compte
+    // de quelqu'un d'autre en lui passant son userId.
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    if (!productId || !userId || !email) {
+    if (!user) {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { productId, firstName, lastName, phone, packId, notesAmount, songId, redirectPath } = body;
+    const userId = user.id;
+    const email = user.email;
+
+    if (!productId || !email) {
       return NextResponse.json(
         { error: "Informations de paiement incomplètes" },
         { status: 400 }
@@ -61,7 +76,7 @@ export async function POST(request: Request) {
     if (!response.ok) {
       console.error("Erreur Chariow API:", data);
       return NextResponse.json(
-        { error: data.message || "Impossible de créer la session de paiement" },
+        { error: "Impossible de créer la session de paiement" },
         { status: response.status }
       );
     }

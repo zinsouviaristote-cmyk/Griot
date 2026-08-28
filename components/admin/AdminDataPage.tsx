@@ -18,14 +18,42 @@ const TITLES: Record<Section, string> = {
   publications: "Publications",
 };
 
+// Fonction pour rendre les dates et valeurs plus lisibles
+function formatCellValue(key: string, value: unknown): string | React.ReactNode {
+  if (value === null || value === undefined) return "-";
+  
+  const valStr = String(value);
+  const normalizedKey = key.toLowerCase();
+
+  // 1. Troncature propre de l'ID (UUID)
+  if (normalizedKey === "id" && valStr.length > 12) {
+    return (
+      <span title={valStr} className="font-mono text-xs cursor-pointer hover:text-brand">
+        {valStr.slice(0, 8)}…
+      </span>
+    );
+  }
+
+  // 2. Formatage de la date
+  const isDateKey = normalizedKey.includes("date") || normalizedKey.includes("created") || normalizedKey.includes("at");
+  const isIsoString = typeof value === "string" && !isNaN(Date.parse(value)) && (value.includes("T") || value.includes("-"));
+
+  if ((isDateKey || isIsoString) && !isNaN(Date.parse(valStr))) {
+    return new Intl.DateTimeFormat("fr-FR", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date(valStr));
+  }
+
+  return valStr;
+}
+
 export function AdminDataPage({ section }: { section: Section }) {
   const { t } = useLanguage();
   const searchParams = useSearchParams();
-  // Profil (nom, initiales, email, crédits, photo) désormais lu depuis le
-  // magasin partagé — DashboardShell lit ce même hook pour la photo, donc
-  // plus besoin de la transmettre ici : fini le risque d'oublier un champ
-  // ou de rester bloqué sur des initiales par défaut, comme ce fichier le
-  // faisait avant avec son propre useState local.
   const { profile } = useUserProfile();
   const [overview, setOverview] = useState<AdminOverview | null>(null);
   const [allowed, setAllowed] = useState<boolean | null>(null);
@@ -77,12 +105,20 @@ export function AdminDataPage({ section }: { section: Section }) {
           <div className="overflow-x-auto rounded-card border border-border bg-surface shadow-card">
             <table className="w-full min-w-[620px] text-left text-sm">
               <thead className="border-b border-border bg-page text-xs uppercase tracking-wide text-ink-muted">
-                <tr>{Object.keys(rows[0] ?? { information: "" }).map((key) => <th key={key} className="px-4 py-3 font-medium">{key}</th>)}</tr>
+                <tr>
+                  {Object.keys(rows[0] ?? { information: "" }).map((key) => (
+                    <th key={key} className="px-4 py-3 font-medium">{key}</th>
+                  ))}
+                </tr>
               </thead>
               <tbody>
                 {rows.map((row, index) => (
                   <tr key={String((row as { id?: string }).id ?? index)} className="border-b border-border last:border-0">
-                    {Object.entries(row).map(([key, value]) => <td key={key} className="px-4 py-3 text-ink-muted">{key.toLowerCase().includes("date") ? String(value).slice(0, 10) : String(value)}</td>)}
+                    {Object.entries(row).map(([key, value]) => (
+                      <td key={key} className="px-4 py-3 text-ink-muted">
+                        {formatCellValue(key, value)}
+                      </td>
+                    ))}
                   </tr>
                 ))}
               </tbody>
