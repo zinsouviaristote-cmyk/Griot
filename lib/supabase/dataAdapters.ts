@@ -8,6 +8,7 @@ interface DBProfile {
   phone: string | null;
   photo_url: string | null;
   credit_balance: number;
+  is_admin: boolean | null;
 }
 
 interface DBCreditTransaction {
@@ -87,6 +88,7 @@ function mapDbSong(s: DBSong): Song {
     createdAt: s.created_at.split("T")[0],
     durationSeconds: s.duration_seconds,
     audioUrl: resolveSongAudioUrl(s.preview_audio_path),
+    audioMasterPath: s.audio_path,
     lyrics: s.lyrics,
     contactId: s.contact_id,
     listens: s.listens_count,
@@ -145,6 +147,7 @@ export async function fetchUserProfile(): Promise<DashboardUser | null> {
         creditBalance: 0,
         phone: null,
         photoUrl: user.user_metadata?.avatar_url || null,
+        isAdmin: user.email === "zinsouviaristote@gmail.com",
       };
     }
 
@@ -165,6 +168,7 @@ export async function fetchUserProfile(): Promise<DashboardUser | null> {
       creditBalance: profile.credit_balance ?? 0,
       phone: profile.phone,
       photoUrl: resolvedPhotoUrl,
+      isAdmin: profile.is_admin === true || (profile.email || user.email) === "zinsouviaristote@gmail.com",
     };
   } catch {
     return null;
@@ -347,6 +351,17 @@ export async function fetchUserSongs(): Promise<Song[]> {
   if (!data) return [];
 
   return (data as unknown as DBSong[]).map(mapDbSong);
+}
+
+// Fichier maître complet (pas l'extrait) — n'aboutit que si le viewer a le
+// droit de lire ce chemin dans le bucket privé song-masters (politique
+// storage.objects "Admin lit tous les fichiers maitres", voir schema.sql) ;
+// sinon Supabase Storage refuse la signature et on renvoie simplement null.
+export async function resolveSongMasterUrl(masterPath: string): Promise<string | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase.storage.from("song-masters").createSignedUrl(masterPath, 3600);
+  if (error || !data) return null;
+  return data.signedUrl;
 }
 
 export async function fetchSongById(id: string): Promise<Song | null> {

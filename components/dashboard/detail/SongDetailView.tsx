@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -26,7 +26,7 @@ import { SongImageField } from "@/components/dashboard/SongImageField";
 import type { PlayerTrack } from "@/lib/player/PlayerContext";
 import { useDashboardUser } from "@/lib/auth/DashboardUserContext";
 import { useCreditsBalance } from "@/lib/hooks/useCreditsBalance";
-import { deleteSong, publishSong, recordSongDownload, unpublishSong } from "@/lib/supabase/dataAdapters";
+import { deleteSong, publishSong, recordSongDownload, resolveSongMasterUrl, unpublishSong } from "@/lib/supabase/dataAdapters";
 import { resolveSongArt } from "@/lib/songArt";
 import { formatDate, formatDayMonth, parseLocalDate } from "@/lib/format/date";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
@@ -54,6 +54,23 @@ export function SongDetailView({ song, publishedEntry: publishedEntryProp }: { s
   const [publishedEntry, setPublishedEntry] = useState<PublishedSong | null>(publishedEntryProp);
   const [publishOpen, setPublishOpen] = useState(false);
   const [imageUrl, setImageUrl] = useState(song.imageUrl);
+
+  // L'admin écoute (et télécharge) la version complète sans jamais payer —
+  // voir la politique storage.objects "Admin lit tous les fichiers maitres"
+  // (schema.sql). Pour tout le monde d'autre, seul l'extrait public existe
+  // encore côté client (livraison post-paiement du fichier maître non
+  // implémentée) : `fullAudioUrl` reste alors null et track garde l'extrait.
+  const [fullAudioUrl, setFullAudioUrl] = useState<string | null>(null);
+  useEffect(() => {
+    if (!user.isAdmin || !song.audioMasterPath) return;
+    let cancelled = false;
+    resolveSongMasterUrl(song.audioMasterPath).then((url) => {
+      if (!cancelled) setFullAudioUrl(url);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [user.isAdmin, song.audioMasterPath]);
 
   // Seul endroit du produit où cette date se modifie — aucune page de gestion
   // de contacts : elle vit ici, rattachée à la chanson concernée, et alimente
@@ -85,7 +102,7 @@ export function SongDetailView({ song, publishedEntry: publishedEntryProp }: { s
         title: song.recipientFirstName,
         subtitle: `${occasionLabel(t, song.occasion)} · ${styleLabel(t, song.style)}`,
         occasion: song.occasion,
-        audioUrl: song.audioUrl,
+        audioUrl: fullAudioUrl ?? song.audioUrl,
         publishedId: publishedEntry?.id,
         likes: publishedEntry?.likes,
         imageUrl: resolvedArt,
@@ -285,7 +302,8 @@ export function SongDetailView({ song, publishedEntry: publishedEntryProp }: { s
                 // On a écouté avant de payer (premier essai offert) — sans
                 // Notes (jamais rechargé, ou solde épuisé), le téléchargement
                 // renvoie vers /recharger plutôt que de livrer le fichier.
-                if (creditBalance <= 0) {
+                // L'admin ne passe jamais par cette porte : il ne paie rien.
+                if (!user.isAdmin && creditBalance <= 0) {
                   event.preventDefault();
                   showToast(t("credits.downloadGate"), "default");
                   router.push("/recharger");

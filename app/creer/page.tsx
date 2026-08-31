@@ -85,6 +85,7 @@ export default async function CreerPage({
       creditBalance: creditBalance,
       phone: userProfile.phone ?? null,
       photoUrl: userProfile.photoUrl ?? null,
+      isAdmin: userProfile.isAdmin,
     };
 
     return (

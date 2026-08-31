@@ -98,6 +98,7 @@ export async function fetchAdminRecentSongs(): Promise<Song[]> {
     audioUrl: song.preview_audio_path
       ? supabase.storage.from("song-previews").getPublicUrl(song.preview_audio_path).data.publicUrl
       : null,
+    audioMasterPath: song.audio_path,
     lyrics: song.lyrics,
     contactId: song.contact_id,
     listens: song.listens_count,

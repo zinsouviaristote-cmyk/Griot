@@ -50,6 +50,13 @@ export interface Song {
   // Non nul dès l'extrait généré (preview_ready et au-delà) ;
   // les paroles ne le sont qu'après paiement (paid/delivered).
   audioUrl: string | null;
+
+  // Chemin brut (pas une URL) du fichier maître complet dans le bucket privé
+  // song-masters — jamais utilisable tel quel, seulement pour générer une URL
+  // signée (voir resolveSongMasterUrl). Réservé à l'admin pour l'instant :
+  // aucune politique storage.objects ne permet encore à un client payant d'y
+  // accéder (livraison post-paiement non implémentée).
+  audioMasterPath: string | null;
   lyrics: string | null;
 
   // Lien vers Mes proches quand la chanson a été créée pour un contact enregistré.
@@ -94,6 +101,11 @@ export interface DashboardUser {
 
   // Photo de profil.
   photoUrl: string | null;
+
+  // Génère gratuitement (voir request_song_generation) et écoute la version
+  // complète de ses chansons sans payer (voir la fiche chanson) — jamais
+  // affiché ni exploité ailleurs que dans ces deux parcours.
+  isAdmin: boolean;
 }
 
 // Une chanson publiée dans Explorer.

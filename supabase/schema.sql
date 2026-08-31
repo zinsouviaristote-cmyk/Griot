@@ -798,9 +798,17 @@ ALTER TABLE public.music_style_prompts ENABLE ROW LEVEL SECURITY;
 -- leurs politiques se fait via le Dashboard/CLI Supabase, pas par ce script.
 --
 -- song-masters  (privé) : fichier maître complet de chaque chanson, à l'adresse
---   `{user_id}/{song_id}/{attempt_id}.mp3`. Aucune politique storage.objects :
---   accessible uniquement via le client service_role (ex. génération d'URL
---   signée au moment de la livraison post-paiement).
+--   `{user_id}/{song_id}/{attempt_id}.mp3`. Accessible via le client
+--   service_role (ex. génération d'URL signée au moment de la livraison
+--   post-paiement — pas encore implémenté), et via une politique dédiée pour
+--   l'administrateur (voir migration `admin_read_song_masters`) qui lui
+--   permet d'écouter la version complète de ses générations gratuites sans
+--   jamais payer :
+--     CREATE POLICY "Admin lit tous les fichiers maitres" ON storage.objects
+--       FOR SELECT TO authenticated USING (
+--         bucket_id = 'song-masters'
+--         AND EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = TRUE)
+--       );
 --
 -- song-previews (public) : extrait tronqué à PREVIEW_CLIP_MS, à l'adresse
 --   `{song_id}/{attempt_id}-preview.mp3`, servant la promesse « Écoutez votre

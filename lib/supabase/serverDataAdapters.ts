@@ -7,6 +7,7 @@ interface DBProfile {
   phone: string | null;
   photo_url: string | null;
   credit_balance: number | null;
+  is_admin: boolean | null;
 }
 
 function getInitials(name: string, email: string): string {
@@ -45,6 +46,7 @@ export async function fetchServerUserProfile(): Promise<DashboardUser | null> {
       creditBalance: profile?.credit_balance ?? 0,
       phone: profile?.phone ?? null,
       photoUrl: profile?.photo_url ?? user.user_metadata?.avatar_url ?? null,
+      isAdmin: profile?.is_admin === true || email === "zinsouviaristote@gmail.com",
     };
   } catch {
     return null;
