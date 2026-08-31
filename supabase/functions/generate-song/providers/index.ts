@@ -7,7 +7,7 @@ import { GenerationError } from "../errors.ts";
 // d'environnement MUSIC_PROVIDER change. "fake" reste toujours disponible
 // pour developper sans consommer de credits payants.
 export function createMusicProvider(): MusicProvider {
-  const providerName = Deno.env.get("MUSIC_PROVIDER") ?? "fake";
+  const providerName = (Deno.env.get("MUSIC_PROVIDER") ?? "fake").trim();
 
   if (providerName === "fake") {
     return new FakeMusicProvider();

@@ -410,6 +410,7 @@ export const fr = {
         purchase_pack: "Achat : {{notes}} Notes",
         essay_free: "Essai offert pour {{recipient}}",
         essay_paid: "Essai pour {{recipient}}",
+        essay_admin: "Génération admin pour {{recipient}}",
       },
     },
   },

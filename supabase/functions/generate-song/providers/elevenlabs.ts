@@ -160,7 +160,12 @@ export class ElevenLabsMusicProvider implements MusicProvider {
     timeoutMs?: number;
   }) {
     this.apiKey = env.apiKey;
-    this.modelId = env.modelId ?? "music_v2";
+    // La forme `composition_plan` construite ici (sections/section_name/
+    // positive_local_styles) correspond au schema MusicPrompt d'ElevenLabs,
+    // reserve au modele music_v1 -- l'envoyer avec music_v2 (qui attend un
+    // schema CompositionPlan a base de chunks) renvoie systematiquement une
+    // 422 "Invalid type of composition_plan used for model music_v2".
+    this.modelId = env.modelId ?? "music_v1";
     this.strategy = env.strategy === "prompt" ? "prompt" : "composition_plan";
     this.timeoutMs = env.timeoutMs ?? 120_000;
   }

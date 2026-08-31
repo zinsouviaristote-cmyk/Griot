@@ -3,22 +3,25 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { 
-  Clock, 
-  User, 
-  Music2, 
-  Coins, 
-  Loader2, 
-  X
+import {
+  Clock,
+  User,
+  Music2,
+  Coins,
+  Loader2,
+  X,
+  PartyPopper
 } from 'lucide-react';
 import { styleCatalog } from '@/lib/tunnel/types';
-import { styleLabel } from '@/lib/i18n/catalog';
+import { occasionCatalog } from '@/lib/songCatalog';
+import { styleLabel, occasionLabel } from '@/lib/i18n/catalog';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
-import type { MusicStyle } from '@/lib/types';
+import { buildLyricsForMode, hasEnoughStoryMaterial } from '@/lib/tunnel/lyricsEngine';
+import type { MusicStyle, Occasion } from '@/lib/types';
 import { useUserProfile } from '@/lib/hooks/useUserProfile';
 
 export function CreateSongHero() {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const router = useRouter();
   const supabase = createClient();
   const { profile } = useUserProfile();
@@ -27,14 +30,31 @@ export function CreateSongHero() {
   const [activeTab, setActiveTab] = useState<'marche' | 'generations' | 'enregistre'>('marche');
   const [prompt, setPrompt] = useState('');
   const [selectedStyle, setSelectedStyle] = useState<MusicStyle | null>(null);
+  const [selectedOccasion, setSelectedOccasion] = useState<Occasion | null>(null);
+  const [customOccasion, setCustomOccasion] = useState('');
   const [durationSeconds, setDurationSeconds] = useState<number>(60);
   const [voiceType, setVoiceType] = useState<'homme' | 'femme' | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const needsCustomOccasion = selectedOccasion === 'autre';
+  const occasionReady = !!selectedOccasion && (!needsCustomOccasion || customOccasion.trim().length > 0);
+
   const handleGenerate = async () => {
-    if (!prompt.trim() || !selectedStyle) return;
+    if (!prompt.trim() || !selectedStyle || !occasionReady) return;
+
+    // Cette histoire libre n'est pas envoyée telle quelle au fournisseur de
+    // musique : elle doit d'abord passer par le même moteur de paroles que le
+    // tunnel /creer (voir lyricsEngine.ts), pour devenir de vraies paroles
+    // structurées plutôt qu'un paragraphe de description chanté mot pour mot.
+    // hasEnoughStoryMaterial bloque en amont plutôt que de livrer des vers
+    // creux — avant toute dépense de Notes.
+    if (!hasEnoughStoryMaterial(prompt, locale)) {
+      setErrorMessage("Ajoute un peu plus de détails à ton histoire (un souvenir précis, un lieu, une habitude) pour qu'on puisse en faire de vraies paroles.");
+      return;
+    }
+
     setIsGenerating(true);
     setErrorMessage(null);
 
@@ -42,15 +62,29 @@ export function CreateSongHero() {
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError || !user) throw new Error("Veuillez vous connecter pour générer une chanson.");
 
+      // Pas de colonne dédiée pour un texte libre : quand "Autre" est choisi,
+      // le texte tapé par la personne devient directement la valeur stockée
+      // dans `occasion` (colonne TEXT libre côté base) plutôt que de perdre
+      // l'information derrière le seul identifiant générique "autre".
+      const occasionValue = needsCustomOccasion ? customOccasion.trim() : (selectedOccasion as string);
+
+      const lyrics = buildLyricsForMode(
+        'raconte',
+        { story: prompt, recipientFirstName: 'toi', relationship: 'autre', occasion: selectedOccasion as Occasion },
+        0,
+        locale,
+      );
+
       const { data: song, error: songError } = await supabase
         .from('songs')
         .insert({
           user_id: user.id,
           style: selectedStyle,
           story_prompt: prompt,
+          lyrics,
           duration_seconds: durationSeconds,
           status: 'generating',
-          occasion: 'autre',
+          occasion: occasionValue,
           recipient_first_name: 'toi',
           relationship: 'autre',
         })
@@ -82,7 +116,7 @@ export function CreateSongHero() {
         throw new Error(resData.message || resData.error || "Une erreur est survenue.");
       }
 
-      router.push(`/mes-creations?attemptId=${resData.attemptId}`);
+      router.push(`/historiques/${song.id}`);
     } catch (err: unknown) {
       console.error('Erreur de génération:', err);
       const message = err instanceof Error ? err.message : 'Une erreur est survenue lors de la génération.';
@@ -165,9 +199,42 @@ export function CreateSongHero() {
           />
         </div>
 
+        {/* Occasion "Autre" : précision libre */}
+        {needsCustomOccasion && (
+          <input
+            type="text"
+            value={customOccasion}
+            onChange={(e) => setCustomOccasion(e.target.value)}
+            placeholder="Précisez l'occasion (ex : Départ en retraite, Promotion...)"
+            className="w-full rounded-xl border border-border bg-page px-3 py-2 text-xs text-ink placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-brand"
+            autoFocus
+          />
+        )}
+
         {/* Contrôles */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-3 border-t border-border gap-3 sm:gap-0">
           <div className="flex items-center gap-2 text-xs text-ink-muted flex-wrap">
+            {/* Occasion */}
+            <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-page border border-border">
+              <PartyPopper className="w-3.5 h-3.5 text-ink-muted" />
+              <select
+                value={selectedOccasion ?? ''}
+                onChange={(e) => {
+                  const value = (e.target.value || null) as Occasion | null;
+                  setSelectedOccasion(value);
+                  if (value !== 'autre') setCustomOccasion('');
+                }}
+                className="bg-transparent border-none text-xs text-ink font-medium focus:outline-none cursor-pointer [&>option]:bg-surface [&>option]:text-ink"
+              >
+                <option value="">Occasion : choisir</option>
+                {occasionCatalog.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {occasionLabel(t, item.id)}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* Durée */}
             <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-page border border-border">
               <Clock className="w-3.5 h-3.5 text-ink-muted" />
@@ -208,7 +275,7 @@ export function CreateSongHero() {
             {/* Bouton Générer */}
             <button
               onClick={handleGenerate}
-              disabled={isGenerating || !prompt.trim() || !selectedStyle}
+              disabled={isGenerating || !prompt.trim() || !selectedStyle || !occasionReady}
               className="flex items-center gap-2 bg-brand hover:bg-brand-dark text-white px-5 py-2 rounded-xl text-xs font-semibold disabled:opacity-40 transition shadow-card flex-1 sm:flex-none justify-center"
             >
               {isGenerating ? (

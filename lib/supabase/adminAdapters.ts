@@ -92,7 +92,12 @@ export async function fetchAdminRecentSongs(): Promise<Song[]> {
     status: song.status as Song["status"],
     createdAt: song.created_at.split("T")[0],
     durationSeconds: song.duration_seconds,
-    audioUrl: song.audio_path || song.preview_audio_path || null,
+    // Meme resolution que dataAdapters.ts::mapDbSong : audio_path (bucket
+    // prive song-masters) n'a pas d'URL publique exploitable cote client,
+    // seul l'extrait public (song-previews) est effectivement lisible.
+    audioUrl: song.preview_audio_path
+      ? supabase.storage.from("song-previews").getPublicUrl(song.preview_audio_path).data.publicUrl
+      : null,
     lyrics: song.lyrics,
     contactId: song.contact_id,
     listens: song.listens_count,

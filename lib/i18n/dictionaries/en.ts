@@ -404,6 +404,7 @@ export const en: DeepDictionary<typeof fr> = {
         purchase_pack: "Purchase: {{notes}} Notes",
         essay_free: "Free attempt for {{recipient}}",
         essay_paid: "Attempt for {{recipient}}",
+        essay_admin: "Admin generation for {{recipient}}",
       },
     },
   },

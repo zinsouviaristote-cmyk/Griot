@@ -393,12 +393,17 @@ CREATE OR REPLACE FUNCTION public.request_song_generation(
   p_song_id UUID,
   p_prompt TEXT
 )
-RETURNS JSONB AS $$
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'public', 'pg_temp'
+AS $$
 DECLARE
   v_user_id UUID;
   v_song RECORD;
   v_balance INT;
   v_is_free BOOLEAN := FALSE;
+  v_is_admin BOOLEAN := FALSE;
   v_attempt_count INT;
   v_attempt_id UUID;
   v_new_balance INT;
@@ -413,14 +418,23 @@ BEGIN
     RAISE EXCEPTION 'CHANSON_INTROUVABLE';
   END IF;
 
-  SELECT credit_balance INTO v_balance FROM public.profiles WHERE id = v_user_id FOR UPDATE;
+  SELECT credit_balance, COALESCE(is_admin, FALSE) INTO v_balance, v_is_admin FROM public.profiles WHERE id = v_user_id FOR UPDATE;
 
-  -- Vérifie si 1er essai offert
-  IF v_song.first_attempt_used = FALSE THEN
+  -- L'administrateur ne paie jamais ses générations : pas de décompte de
+  -- Notes, pas de dépendance au premier essai offert.
+  IF v_is_admin THEN
     v_is_free := TRUE;
     v_new_balance := v_balance;
     UPDATE public.songs SET first_attempt_used = TRUE, status = 'generating', story_prompt = COALESCE(p_prompt, story_prompt) WHERE id = p_song_id;
-    
+
+    INSERT INTO public.credit_transactions (user_id, motif, label_key, label_params, delta, balance_after, reference_id)
+    VALUES (v_user_id, 'essai', 'recharge.history.transactions.essay_admin', jsonb_build_object('recipient', v_song.recipient_first_name), 0, v_balance, p_song_id::text);
+  -- Vérifie si 1er essai offert
+  ELSIF v_song.first_attempt_used = FALSE THEN
+    v_is_free := TRUE;
+    v_new_balance := v_balance;
+    UPDATE public.songs SET first_attempt_used = TRUE, status = 'generating', story_prompt = COALESCE(p_prompt, story_prompt) WHERE id = p_song_id;
+
     INSERT INTO public.credit_transactions (user_id, motif, label_key, label_params, delta, balance_after, reference_id)
     VALUES (v_user_id, 'essai', 'recharge.history.transactions.essay_free', jsonb_build_object('recipient', v_song.recipient_first_name), 0, v_balance, p_song_id::text);
   ELSE
@@ -449,7 +463,7 @@ BEGIN
     'status', 'generating'
   );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 -- 10.2 RPC: Webhook de paiement idempotent
 CREATE OR REPLACE FUNCTION public.process_payment_webhook(

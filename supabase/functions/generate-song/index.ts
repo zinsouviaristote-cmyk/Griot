@@ -158,7 +158,14 @@ interface GenerationContext {
 }
 
 async function processGeneration(adminClient: SupabaseClient, ctx: GenerationContext): Promise<void> {
-  const provider = createMusicProvider();
+  let provider: MusicProvider;
+  try {
+    provider = createMusicProvider();
+  } catch (err) {
+    const genErr = err instanceof GenerationError ? err : toGenerationError(err);
+    await failAttempt(adminClient, ctx.attemptId, genErr.code, genErr.userMessage);
+    return;
+  }
 
   // 1. Selection incluant duration_seconds
   const { data: song, error: songError } = await adminClient
@@ -216,6 +223,7 @@ async function processGeneration(adminClient: SupabaseClient, ctx: GenerationCon
     });
   } catch (err) {
     const genErr = err instanceof GenerationError ? err : toGenerationError(err);
+    console.error(`generation fournisseur echouee (${genErr.code})`, genErr.message);
     await failAttempt(adminClient, ctx.attemptId, genErr.code, genErr.userMessage, provider.name);
     return;
   }
@@ -264,6 +272,13 @@ async function processGeneration(adminClient: SupabaseClient, ctx: GenerationCon
 
   if (finalizeError) {
     console.error("finalize_song_generation a echoue", finalizeError);
+    await failAttempt(
+      adminClient,
+      ctx.attemptId,
+      "internal_error",
+      "Impossible d'enregistrer la chanson generee.",
+      provider.name,
+    );
   }
 }
 

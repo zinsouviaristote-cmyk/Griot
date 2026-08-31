@@ -63,6 +63,20 @@ interface DBPublishedSong {
   author_photo_url: string | null;
 }
 
+// `audio_path` (fichier maître) vit dans le bucket privé song-masters, sans
+// URL publique exploitable côté client (voir schema.sql) : l'utiliser tel
+// quel comme <audio src> pointait vers un chemin relatif inexistant, d'où un
+// 404 silencieux et une durée qui ne se chargeait jamais (loadedmetadata
+// jamais déclenché). Seul l'extrait public (song-previews) est effectivement
+// lisible ici — cohérent avec la promesse "Écoutez avant de payer" — même
+// résolution que resolvePreviewAudioUrl (generationAdapters.ts), utilisée
+// juste après la génération.
+function resolveSongAudioUrl(previewPath: string | null): string | null {
+  if (!previewPath) return null;
+  const supabase = createClient();
+  return supabase.storage.from("song-previews").getPublicUrl(previewPath).data.publicUrl;
+}
+
 function mapDbSong(s: DBSong): Song {
   return {
     id: s.id,
@@ -72,7 +86,7 @@ function mapDbSong(s: DBSong): Song {
     status: s.status as SongStatus,
     createdAt: s.created_at.split("T")[0],
     durationSeconds: s.duration_seconds,
-    audioUrl: s.audio_path || s.preview_audio_path || null,
+    audioUrl: resolveSongAudioUrl(s.preview_audio_path),
     lyrics: s.lyrics,
     contactId: s.contact_id,
     listens: s.listens_count,
